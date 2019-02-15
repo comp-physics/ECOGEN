@@ -1,0 +1,17 @@
+doc/*
+/Run-2CPU/
+/Run-3CPU/
+/Run-4CPU/
+/Run-7CPU/
+/Run-12CPU/
+/Run-14CPU/
+/Run-24CPU/
+/Run-36CPU/
+/D-2CPU/
+/Release/
+/Debug/
+*.opensdf
+*.sdf
+*.v12.suo
+*.o
+/.vs/
