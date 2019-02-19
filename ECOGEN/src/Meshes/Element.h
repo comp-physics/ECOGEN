@@ -104,8 +104,8 @@ public:
   virtual void finalizeElementsChildren() { Errors::errorMessage("finalizeElementsChildren not available for requested element"); };
 
   //For parallel load balancing
-  virtual void setKey(const decomposition::Key<3> &key) { Errors::errorMessage("setKey not available for requested element"); };
-  virtual decomposition::Key<3> getKey() { Errors::errorMessage("getKey not available for requested element"); return 0; };
+  virtual void setKey(const decomposition::Key<3> &key);
+  virtual decomposition::Key<3> getKey()const;
 
 protected:
 

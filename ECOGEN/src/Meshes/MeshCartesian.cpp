@@ -162,11 +162,12 @@ int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMes
   this->meshStretching();
   if (Ncpu == 1)
   {
-    this->initializeGeometrieMonoCpu(cells, cellInterfaces, ordreCalcul);
+    //this->initializeGeometrieMonoCpu(cells, cellInterfaces, ordreCalcul);
+    this->initializeGeometrieParallele2(cells, cellInterfaces, ordreCalcul);
   }
   else
   {
-    this->initializeGeometrieParallele(cells, cellInterfaces, ordreCalcul);
+    this->initializeGeometrieParallele2(cells, cellInterfaces, ordreCalcul);
   }
   return m_geometrie;
 }
@@ -1090,9 +1091,7 @@ void MeshCartesian::initializeGeometrieParallele2(TypeMeshContainer<Cell *> &cel
 
   //Geometrical data settings for computational cells
   //-------------------------------------------------
-  Coord tangent, normal, binormal;
-  double surface(1.), volume(0.);
-  double posX, posY, posZ;
+  double volume(0.);
   for(unsigned int i = 0; i < keys.size(); ++i)
   {
     auto coord = keys[i].coordinate();
@@ -1115,136 +1114,291 @@ void MeshCartesian::initializeGeometrieParallele2(TypeMeshContainer<Cell *> &cel
   //Faces and ghost cells
   //---------------------
 
-  createNeighbours(cells, ordreCalcul);
+  m_numberCellsCalcul = cells.size(); //KS//BD// Update this after balancing
+  createNeighbours(cells,cellInterfaces,ordreCalcul,&decomp);
 
-
-
-
-
-
-  // //Faces selon X
-  // tangent.setXYZ(0., 1., 0.); normal.setXYZ(1., 0., 0.); binormal.setXYZ(0., 0., 1.);
-  // for (ix = 0; ix < m_numberCellsX - 1; ix++)
-  // {
-  //   for (iy = 0; iy < m_numberCellsY; iy++)
-  //   {
-  //     for (iz = 0; iz < m_numberCellsZ; iz++)
-  //     {
-  //       if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-  //       else { cellInterfaces.push_back(new CellInterfaceO2); }
-  //       m_faces.push_back(new FaceCartesian());
-  //       cellInterfaces[iFace]->setFace(m_faces[iFace]);
-  //       this->construitIGlobal(ix, iy, iz, iMailleG);
-  //       this->construitIGlobal(ix + 1, iy, iz, iMailleD);
-  //       cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-  //       cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-  //       cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
-  //       surface = m_dYj[m_offsetY + iy] * m_dZk[m_offsetZ + iz];
-  //       m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
-  //       m_faces[iFace]->setSize(0., m_dYj[m_offsetY + iy], m_dZk[m_offsetZ + iz]);
-  //       posX = m_posXi[m_offsetX + ix] + 0.5*m_dXi[m_offsetX + ix];
-  //       posY = m_posYj[m_offsetY + iy];
-  //       posZ = m_posZk[m_offsetZ + iz];
-  //       m_faces[iFace]->setPos(posX, posY, posZ);
-  //       iFace++;
-  //     }
-  //   }
-  // }
-  //   //X=0 boundary
-  //   ix = 0;
-  //   binormal.setXYZ(0., 0., 1.);
-  //   for (iy = 0; iy < m_numberCellsY; iy++)
-  //   {
-  //     for (iz = 0; iz < m_numberCellsZ; iz++)
-  //     {
-  //       //A) CPU neighbour limits treatment
-  //       //---------------------------------
-  //       if (m_numberCpuX > 1 && m_CpuCoordX > 0) {
-  //         tangent.setXYZ(0., 1., 0.); normal.setXYZ(1., 0., 0.); //Inversion for neighbour CPU matching
-  //         //right and Left cells catching
-  //         this->construitIGlobal(ix, iy, iz, iMailleD);
-  //         iMailleG = compteMaillesParallele++; //Ghost cell number taken in order
-  //         //setting ghost cell geometry
-  //         cells[iMailleG]->getElement()->setPos(cells[iMailleD]->getElement()->getPosition());
-  //         cells[iMailleG]->getElement()->setPosX(m_posXi[m_offsetX - 1]);
-  //         cells[iMailleG]->getElement()->setSize(m_dXi[m_offsetX -1], m_dYj[m_offsetY + iy], m_dZk[m_offsetZ + iz]);
-  //         cells[iMailleG]->getElement()->setVolume(m_dXi[m_offsetX - 1] * m_dYj[m_offsetY + iy] * m_dZk[m_offsetZ + iz]);
-  //         double lCFL(1.e10);
-  //         if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[m_offsetX - 1]); }
-  //         if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[m_offsetY + iy]); }
-  //         if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[m_offsetZ + iz]); }
-  //         if (m_geometrie > 1) lCFL *= 0.6;
-  //         cells[iMailleG]->getElement()->setLCFL(lCFL);
-  //         //setting boundary
-  //         if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-  //         else { cellInterfaces.push_back(new CellInterfaceO2); }     
-  //         cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
-  //       }
-  //       //B) Physical boundary condition treatment
-  //       //----------------------------------------
-  //       else {
-  //         tangent.setXYZ(0., -1., 0.); normal.setXYZ(-1., 0., 0.); 
-  //         //right and Left cells equals
-  //         this->construitIGlobal(ix, iy, iz, iMailleG);
-  //         iMailleD = iMailleG;
-  //         //setting boundary
-  //         m_limXm->creeLimite(cellInterfaces);
-  //       }
-  //       //Common settings
-  //       cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-  //       m_faces.push_back(new FaceCartesian());
-  //       cellInterfaces[iFace]->setFace(m_faces[iFace]);
-  //       cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-  //       m_faces[iFace]->initializeAutres(m_dYj[m_offsetY + iy] * m_dZk[m_offsetZ + iz], normal, tangent, binormal);
-  //       m_faces[iFace]->setSize(0., m_dYj[m_offsetY + iy], m_dZk[m_offsetZ + iz]);
-  //       posX = m_posXi[m_offsetX + ix] - 0.5*m_dXi[m_offsetX + ix];
-  //       posY = m_posYj[m_offsetY + iy];
-  //       posZ = m_posZk[m_offsetZ + iz];
-  //       m_faces[iFace]->setPos(posX, posY, posZ);
-  //       iFace++;
-  //     }
-  //   }
-
+  m_numberCellsTotal = cells.size(); //KS//BD// Update this after ghost cells and after balancing
+  m_numberFacesTotal = cellInterfaces.size(); //KS//BD// To update in general and after balancing
+  std::cout
+    << "numberCellsCalcul "<<m_numberCellsCalcul<<" "
+    << "m_numberCellsTotal "<<m_numberCellsTotal<<" "
+    << "m_numberFacesTotal "<<m_numberFacesTotal<<" "
+    <<std::endl;
 }
 
 //***********************************************************************
 
-void MeshCartesian::createNeighbours(TypeMeshContainer<Cell *> &cells, std::string ordreCalcul)
+void MeshCartesian::createNeighbours(TypeMeshContainer<Cell *> &cells, 
+                                     TypeMeshContainer<CellInterface*>& cellInterfaces,
+                                     std::string ordreCalcul,
+                                     decomposition::Decomposition* _decomp)
 {
-  // Cell* dummy ;
-  // if (ordreCalcul == "FIRSTORDER") { dummy = new Cell; }
-  // else { dummy = new CellO2; }
+   Cell* dummy ;
+   if (ordreCalcul == "FIRSTORDER") { dummy = new Cell; }
+   else { dummy = new CellO2; }
 
-  // for(unsigned int i = 0; i < cells.size(); ++i)
-  // {
+   using coordinate_type =decomposition::Key<3>::coordinate_type;
+   std::array<decomposition::Key<3>::coordinate_type,6> offsets;
+   std::fill(offsets.begin(), offsets.end(), coordinate_type(0));
 
-  //   std::array<decomposition::Key<3>,6> neighbours;
-  //   for(int d = 0; d < 3; d++)
-  //   {
-  //    neighbours[2*d]   = decomposition::Key<3>(cells[i]->getElement()->getKey().coordinate()[d]-1, base_level);
-  //    neighbours[2*d+1] = decomposition::Key<3>(cells[i]->getElement()->getKey().coordinate()[d]+1, base_level);
-  //    //check if noughbour is out of physical bound => create boundary face
-  //   }
+   double posX=0,posY=0.,posZ=0.;
 
-  //   for(auto& e : neighbours) //Do this loop just over the keys within the bound
-  //   {
-  //         dummy->getElement()->setKey(e);
-  //         auto it = std::lower_bound(cells.begin(), cells.end(), &dummy, 
-  //                                   [](const auto& _k0, const auto& _k1){ return _k0->getElement()->getKey() < _k1->getElement()->getKey(); });
-  //         if(it != cells.end())
-  //         {
-  //           //create face //internal face
-  //         }
-  //         else
-  //         {
-  //           //create ghost cell and face
+   for(int d = 0; d < 3; d++)
+   {
+       offsets[2*d][d] =-1;
+       offsets[2*d+1][d] =+1;
+   }
 
-  //         }
-  //   }
+   const auto size=cells.size();
+   for(unsigned int i = 0; i < size; ++i)
+   {
+       const auto coord = cells[i]->getElement()->getKey().coordinate();
+       const auto ix = coord.x(), iy = coord.y(), iz = coord.z();
+       for(auto& offset : offsets) 
+       {
+
+           posX = m_posXi[ix] + 0.5*m_dXi[ix]*offset[0];
+           posY = m_posYj[iy] + 0.5*m_dYj[iy]*offset[1];
+           posZ = m_posZk[iz] + 0.5*m_dZk[iz]*offset[2];
+
+           Coord normal, tangent,binormal;
+           normal.setXYZ(static_cast<double>(offset[0]), 
+                   static_cast<double>(offset[1]), 
+                   static_cast<double>(offset[2])); 
+
+           //Xdir
+           if(offset[0]==1) 
+           {
+               tangent.setXYZ( 0.,1.,0.); 
+               binormal.setXYZ(0.,0.,1.); 
+           }
+           if(offset[0]==-1)
+           {
+               tangent.setXYZ( 0.,-1.,0.); 
+               binormal.setXYZ(0.,0.,1.); 
+           }
+
+           //Ydir
+           if(offset[1]==1)
+           {
+               tangent.setXYZ( -1.,0.,0.); 
+               binormal.setXYZ(0.,0.,1.); 
+           }
+           if(offset[1]==-1)
+           {
+               tangent.setXYZ( 1.,0.,0.); 
+               binormal.setXYZ(0.,0.,1.); 
+           }
+
+           //Zdir
+           if(offset[2]==1) 
+           {
+               tangent.setXYZ( 1.,0.,0.); 
+               binormal.setXYZ(0.,1.,0.); 
+           }
+           if(offset[2]==-1)
+           {
+               tangent.setXYZ(-1.,0.,0.); 
+               binormal.setXYZ(0.,1.,0.); 
+           }
+
+           auto neighbor_c = cells[i]->getElement()->getKey().coordinate()+offset;
+           if(!_decomp->is_inside(neighbor_c)) //boundary
+           {
+               //create boundary face
+               if(offset[0]==1) //xDir=N
+                   m_limXp->creeLimite(cellInterfaces);
+               if(offset[0]==-1) //xDir=0
+                   m_limXm->creeLimite(cellInterfaces);
+               if(offset[1]==1) //yDir=N
+                   m_limYp->creeLimite(cellInterfaces);
+               if(offset[1]==-1) //yDir=0
+                   m_limYm->creeLimite(cellInterfaces);
+               if(offset[2]==1) //zDir=N
+                   m_limZp->creeLimite(cellInterfaces);
+               if(offset[2]==-1) //zDir=0
+                   m_limZm->creeLimite(cellInterfaces);
+
+               cellInterfaces.back()->initialize(cells[i], nullptr);
+
+               cells[i]->addCellInterface(cellInterfaces.back());
+               m_faces.push_back(new FaceCartesian());
+               cellInterfaces.back()->setFace(m_faces.back());
+
+               if(offset[0])
+               {
+                   m_faces.back()->setSize(0.0, m_dYj[iy], m_dZk[iz]);
+                   m_faces.back()->initializeAutres(m_dYj[iy] * m_dZk[iz], normal, tangent, binormal);
+               }
+               if(offset[1])
+               {
+                   m_faces.back()->setSize(m_dXi[ix], 0.0, m_dZk[iz]);
+                   m_faces.back()->initializeAutres(m_dXi[ix] * m_dZk[iz], normal, tangent, binormal);
+               }
+               if(offset[2])
+               {
+                   m_faces.back()->setSize(m_dXi[ix], m_dYj[iy], 0.0);
+                   m_faces.back()->initializeAutres(m_dYj[iy] * m_dXi[ix], normal, tangent, binormal);
+               }
+               m_faces.back()->setPos(posX, posY, posZ);
+
+           }
+           else //Internal cells
+           {
+               if(offset[0]>0|| offset[1]>0||offset[2]>0)
+               {
+
+                   if (ordreCalcul == "FIRSTORDER") { 
+                       cellInterfaces.push_back(new CellInterface); }
+                   else { cellInterfaces.push_back(new CellInterfaceO2); }     
+
+                   m_faces.push_back(new FaceCartesian());
+                   cellInterfaces.back()->setFace(m_faces.back());
+
+                   if(offset[0])
+                   {
+                       m_faces.back()->setSize(0.0, m_dYj[iy], m_dZk[iz]);
+                       m_faces.back()->initializeAutres(m_dYj[iy] * m_dZk[iz], normal, tangent, binormal);
+                   }
+                   if(offset[1])
+                   {
+                       m_faces.back()->setSize(m_dXi[ix], 0.0, m_dZk[iz]);
+                       m_faces.back()->initializeAutres(m_dXi[ix] * m_dZk[iz], normal, tangent, binormal);
+                   }
+                   if(offset[2])
+                   {
+                       m_faces.back()->setSize(m_dXi[ix], m_dYj[iy], 0.0);
+                       m_faces.back()->initializeAutres(m_dYj[iy] * m_dXi[ix], normal, tangent, binormal);
+                   }
+                   m_faces.back()->setPos(posX, posY, posZ);
 
 
-  // }
+                   //Get neighbor key
+                   auto nKey = cells[i]->getElement()->getKey().neighbor(offset);
 
+                   //Find the neighbor cell with nKey:
+                   dummy->getElement()->setKey(nKey);
+                   auto it = std::lower_bound(cells.begin(), cells.end(), dummy, 
+                           [](Cell* _k0, Cell* _k1){ 
+                           return _k0->getElement()->getKey() < 
+                           _k1->getElement()->getKey(); });
+
+                   if(it != cells.end())
+                   {
+                       //create face //internal face
+                       //create boundary face
+                       cellInterfaces.back()->initialize(cells[i],*it );
+                       cells[i]->addCellInterface(cellInterfaces.back());
+                       (*it)->addCellInterface(cellInterfaces.back());
+                   }
+                   else
+                   {
+
+                       //create ghost cell and face
+                       if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+                       else { cells.push_back(new CellO2Ghost); }
+                       m_elements.push_back(new ElementCartesian());
+                       m_elements.back()->setKey(nKey);
+                       cells.back()->setElement(m_elements.back(), cells.size()-1);
+
+                       const auto coord = nKey.coordinate();
+                       const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
+
+                       const double volume = m_dXi[nix] * m_dYj[niy] * m_dZk[niz];
+                       cells.back()->getElement()->setVolume(volume);
+
+                       //CFL lenght
+                       double lCFL(1.e10);
+                       if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[nix]); }
+                       if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[niy]); }
+                       if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[niz]); }
+                       if (m_geometrie > 1) lCFL *= 0.6;
+
+                       cells.back()->getElement()->setLCFL(lCFL);
+                       cells.back()->getElement()->setPos(m_posXi[nix], m_posYj[niy], m_posZk[niz]);
+                       cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
+
+                       cellInterfaces.back()->initialize(cells[i],cells.back() );
+                       cells[i]->addCellInterface(cellInterfaces.back());
+                       cells.back()->addCellInterface(cellInterfaces.back());
+
+                   }
+
+               }
+               else //negtive offset
+               {
+                   //Get neighbor key
+                   auto nKey = cells[i]->getElement()->getKey().neighbor(offset);
+
+                   //Find the neighbor cell with nKey:
+                   dummy->getElement()->setKey(nKey);
+                   auto it = std::lower_bound(cells.begin(), cells.end(), dummy, 
+                           [](Cell* _k0, Cell* _k1){ 
+                           return _k0->getElement()->getKey() < 
+                           _k1->getElement()->getKey(); });
+
+                   if(it==cells.end())
+                   {
+
+                       //create ghost cell and face
+                       if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+                       else { cells.push_back(new CellO2Ghost); }
+                       m_elements.push_back(new ElementCartesian());
+                       m_elements.back()->setKey(nKey);
+                       cells.back()->setElement(m_elements.back(), cells.size()-1);
+
+                       const auto coord = nKey.coordinate();
+                       const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
+
+                       const double volume = m_dXi[nix] * m_dYj[niy] * m_dZk[niz];
+                       cells.back()->getElement()->setVolume(volume);
+
+                       //CFL lenght
+                       double lCFL(1.e10);
+                       if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[nix]); }
+                       if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[niy]); }
+                       if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[niz]); }
+                       if (m_geometrie > 1) lCFL *= 0.6;
+
+                       cells.back()->getElement()->setLCFL(lCFL);
+                       cells.back()->getElement()->setPos(m_posXi[nix], m_posYj[niy], m_posZk[niz]);
+                       cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
+
+
+                       //Create face related to the ghost cell
+                       if (ordreCalcul == "FIRSTORDER") { 
+                           cellInterfaces.push_back(new CellInterface); }
+                       else { cellInterfaces.push_back(new CellInterfaceO2); }     
+
+                       m_faces.push_back(new FaceCartesian());
+                       cellInterfaces.back()->setFace(m_faces.back());
+
+                       if(offset[0])
+                       {
+                           m_faces.back()->setSize(0.0, m_dYj[iy], m_dZk[iz]);
+                           m_faces.back()->initializeAutres(m_dYj[iy] * m_dZk[iz], normal, tangent, binormal);
+                       }
+                       if(offset[1])
+                       {
+                           m_faces.back()->setSize(m_dXi[ix], 0.0, m_dZk[iz]);
+                           m_faces.back()->initializeAutres(m_dXi[ix] * m_dZk[iz], normal, tangent, binormal);
+                       }
+                       if(offset[2])
+                       {
+                           m_faces.back()->setSize(m_dXi[ix], m_dYj[iy], 0.0);
+                           m_faces.back()->initializeAutres(m_dYj[iy] * m_dXi[ix], normal, tangent, binormal);
+                       }
+                       m_faces.back()->setPos(posX, posY, posZ);
+
+                       cellInterfaces.back()->initialize(cells[i],cells.back() );
+                       cells[i]->addCellInterface(cellInterfaces.back());
+                       cells.back()->addCellInterface(cellInterfaces.back());
+
+                   }
+               } //negative
+           } //internal cells
+       } //offset
+   } //cells
 }
 
 //***********************************************************************

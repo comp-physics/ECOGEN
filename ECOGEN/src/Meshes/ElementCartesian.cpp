@@ -165,19 +165,3 @@ void ElementCartesian::finalizeElementsChildren()
   }
   m_elementsChildren.clear();
 }
-
-//****************************************************************************
-//*********************** Parallel load balancing ****************************
-//****************************************************************************
-
-void ElementCartesian::setKey(const decomposition::Key<3> &key)
-{
-  m_key = key;
-}
-
-//****************************************************************************
-
-decomposition::Key<3> ElementCartesian::getKey()
-{
-  return m_key;
-}

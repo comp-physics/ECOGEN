@@ -64,8 +64,8 @@ public:
   virtual void finalizeElementsChildren();
 
   //For parallel load balancing
-  virtual void setKey(const decomposition::Key<3> &key);
-  virtual decomposition::Key<3> getKey();
+  //virtual void setKey(const decomposition::Key<3> &key);
+  //virtual decomposition::Key<3> getKey() const;
 
 protected:
 

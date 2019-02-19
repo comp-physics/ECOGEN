@@ -67,7 +67,10 @@ public:
   virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const;
 
   //For parallel load balancing
-  void createNeighbours(TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
+void createNeighbours(TypeMeshContainer<Cell *> &cells, 
+                      TypeMeshContainer<CellInterface*>& cellInterfaces,
+                      std::string ordreCalcul,
+                      decomposition::Decomposition* _decomp);
 
 protected:
   TypeMeshContainer<Element *> m_elements; //!<Vector of element objects: Contains geometrical attributes

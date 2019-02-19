@@ -135,6 +135,21 @@ public: //Ctors
         return 1<< (_k.level()-base_level_);
     }
 
+    
+    int& base_level()noexcept{return base_level_;}
+    const int& base_level()const noexcept{return base_level_;}
+
+    template<class Coord>
+    bool is_inside(const Coord& _coord)
+    {
+       for(int d=0;d<Dim;++d)
+       {
+           if( _coord[d]<0 || _coord[d]>= nCells_[d])
+               return false;
+       }
+       return true;
+    }
+
 
 private:
     int base_level_=-1;
