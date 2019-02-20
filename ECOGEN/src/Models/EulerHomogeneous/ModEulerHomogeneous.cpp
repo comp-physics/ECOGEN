@@ -103,13 +103,13 @@ void ModEulerHomogeneous::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, co
   //Davies
   sL = std::min(uL - cL, uR - cR);
   sR = std::max(uR + cR, uL + cL);
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
-  if (abs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / abs(sR));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
+  if (std::fabs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / std::fabs(sR));
 
   //compute left and right mass flow rates and sM
   double mL(rhoL*(sL - uL)), mR(rhoR*(sR - uR));
   double sM((pR - pL + mL*uL - mR*uR) / (mL - mR));
-  if (abs(sM)<1.e-8) sM = 0.;
+  if (std::fabs(sM)<1.e-8) sM = 0.;
 
   if (sL > 0.){
     fluxBufferEulerHomogeneous.m_masse = rhoL*uL;
@@ -127,7 +127,7 @@ void ModEulerHomogeneous::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, co
   }
 
   ////1) Option HLL
-  //else if (abs(sR - sL)>1.e-3)
+  //else if (std::fabs(sR - sL)>1.e-3)
   //{
   //  fluxBufferEulerHomogeneous.m_masse = (rhoR*uR*sL - rhoL*uL*sR + sL*sR*(rhoL - rhoR)) / (sL - sR);
   //  fluxBufferEulerHomogeneous.m_qdm.setX(((rhoR*uR*uR + pR)*sL - (rhoL*uL*uL + pL)*sR + sL*sR*(rhoL*uL - rhoR*uR)) / (sL - sR));

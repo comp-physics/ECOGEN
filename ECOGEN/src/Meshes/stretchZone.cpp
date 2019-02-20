@@ -55,7 +55,7 @@ stretchZone::~stretchZone() {}
 int stretchZone::stretching(std::vector<double> &dX, std::vector<double> &posX)
 {
   double dX0((m_endAt - m_startAt) / m_numberCells);
-  if (abs(m_factor - 1.) < 1e-6) {
+  if (std::fabs(m_factor - 1.) < 1e-6) {
     for (int i = 0; i < m_numberCells; i++) {
       dX.push_back(dX0);
       posX.push_back(m_startAt + (i + 0.5)*dX0);

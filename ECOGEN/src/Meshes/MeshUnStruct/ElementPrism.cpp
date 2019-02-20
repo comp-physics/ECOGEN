@@ -56,11 +56,11 @@ void ElementPrism::computeVolume(const Coord *noeuds)
   //On va computeer le volume des 3 tetraedres inclus dans le prisme
   Coord v1, v2, v3;
   v1.setFromSubtractedVectors(noeuds[0], noeuds[1]); v2.setFromSubtractedVectors(noeuds[0], noeuds[2]); v3.setFromSubtractedVectors(noeuds[0], noeuds[3]);
-  double volumeT1 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT1 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[3], noeuds[4]); v2.setFromSubtractedVectors(noeuds[3], noeuds[5]); v3.setFromSubtractedVectors(noeuds[3], noeuds[2]);
-  double volumeT2 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT2 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[3], noeuds[4]); v2.setFromSubtractedVectors(noeuds[3], noeuds[2]); v3.setFromSubtractedVectors(noeuds[3], noeuds[1]);
-  double volumeT3 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT3 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   m_volume = volumeT1 + volumeT2 + volumeT3; //volume du prisme
 }
 

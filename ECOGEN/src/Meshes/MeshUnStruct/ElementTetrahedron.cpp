@@ -54,7 +54,7 @@ ElementTetrahedron::~ElementTetrahedron(){}
 void ElementTetrahedron::computeVolume(const Coord *noeuds)
 {
   Coord v1(noeuds[1] - noeuds[0]), v2(noeuds[2] - noeuds[0]), v3(noeuds[3] - noeuds[0]);
-  m_volume = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  m_volume = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
 }
 
 //***********************************************************************

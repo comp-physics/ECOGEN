@@ -111,13 +111,13 @@ void ModEuler::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, const int &nu
   sL = std::min(uL - cL, uR - cR);
   sR = std::max(uR + cR, uL + cL);
 
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
-  if (abs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / abs(sR));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
+  if (std::fabs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / std::fabs(sR));
 
   //compute left and right mass flow rates and sM
   double mL(rhoL*(sL - uL)), mR(rhoR*(sR - uR));
   double sM((pR - pL + mL*uL - mR*uR) / (mL - mR));
-  if (abs(sM)<1.e-8) sM = 0.;
+  if (std::fabs(sM)<1.e-8) sM = 0.;
 
   if (sL > 0.){
     fluxBufferEuler.m_masse = rhoL*uL;
@@ -135,7 +135,7 @@ void ModEuler::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, const int &nu
   }
 
   ////1) Option HLL
-  //else if (abs(sR - sL)>1.e-3)
+  //else if (std::fabs(sR - sL)>1.e-3)
   //{
   //  fluxBufferEuler.m_masse = (rhoR*uR*sL - rhoL*uL*sR + sL*sR*(rhoL - rhoR)) / (sL - sR);
   //  fluxBufferEuler.m_qdm.setX(((rhoR*uR*uR + pR)*sL - (rhoL*uL*uL + pL)*sR + sL*sR*(rhoL*uL - rhoR*uR)) / (sL - sR));
@@ -192,7 +192,7 @@ void ModEuler::solveRiemannWall(Cell &cellLeft, const int &numberPhases, const d
   cL = phaseGauche->getSoundSpeed();
 
   sL = std::min(uL - cL, -uL - cL);
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
 
   pStar = rhoL*uL*(uL - sL) + pL;
 
@@ -231,7 +231,7 @@ void ModEuler::solveRiemannInflow(Cell &cellLeft, const int &numberPhases, const
   zL = rhoL*cL;
 
   sL = uL - cL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
 
   u0 = m0 / rhok0[0];
   H0 = eos->computeTotalEnthalpy(rhok0[0], pk0[0], u0);
@@ -263,7 +263,7 @@ void ModEuler::solveRiemannInflow(Cell &cellLeft, const int &numberPhases, const
     f -= v;
     df -= dv;
 
-  } while (abs(f)>1e-10);
+  } while (std::fabs(f)>1e-10);
   uStar = u;
   pStar = p;
   rhoStar = m0 / uStar;
@@ -325,10 +325,10 @@ void ModEuler::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const d
   v = 1./eos->computeDensityIsentropic(pL, rhoL, pStar); 
   //v = 1. / eos->computeDensityHugoniot(pL, rhoL, pStar); //Other possibility
   vmv0 = v - 1. / rhoL;
-  if (abs(vmv0) > 1e-10) { mL = sqrt((pL - p0) / vmv0); }
+  if (std::fabs(vmv0) > 1e-10) { mL = sqrt((pL - p0) / vmv0); }
   else { mL = zL; }
   sL = uL - mL / rhoL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   u = uL + mL*vmv0;
 
   //Pathologic cases
@@ -381,7 +381,7 @@ void ModEuler::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const d
       //v = 1.0 / eos->computeDensityHugoniot(pL, rhoL, p, &drho); //Other possibility
       dv = - v*v*drho;
       vmv0 = v - 1. / rhoL;
-      if (abs(vmv0) > 1e-10) {
+      if (std::fabs(vmv0) > 1e-10) {
         mL = sqrt((pL - p) / vmv0);
         dmL = 0.5*(-vmv0 + (p - pL)*dv) / (vmv0*vmv0) / mL;
       }
@@ -390,7 +390,7 @@ void ModEuler::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const d
         dmL = 0.;
       }
       sL = uL - mL / rhoL;
-      if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+      if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
       uStarL = uL + mL*vmv0;
       duStarL = dmL*vmv0 + mL*dv;
 
@@ -398,7 +398,7 @@ void ModEuler::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const d
       f = uStarR - uStarL;
       df = duStarR - duStarL;
 
-    } while (abs(f)>1e-3);
+    } while (std::fabs(f)>1e-3);
 
     pStar = p;
     uStar = 0.5*(uStarL + uStarR);
@@ -438,7 +438,7 @@ void ModEuler::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, cons
   zL = rhoL*cL;
 
   sL = uL - cL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
 
   pStar = p0;
   //rhoStar = TB->eos[0]->computeDensityIsentropic(pL, rhoL, pStar);

@@ -50,7 +50,7 @@ void RelaxationPT::stiffRelaxation(Cell *cell, const int &numberPhases, Prim typ
   //If alpha = 0 is activated, a test is done to know if the relaxation procedure is necessary or not
   //Else, i.e. alpha = 0 is desactivated (alpha != 0), the relaxation procedure is always done (relax = true)
   bool relax(true);
-  if (epsilon > 1.e-20) { // alpha = 0 is activated
+  if (epsilonAlphaNull > 1.e-20) { // alpha = 0 is activated
     for (int k = 0; k < numberPhases; k++) {
       if (cell->getPhase(k, type)->getAlpha() >(1. - 1.e-5)) relax = false;
     }

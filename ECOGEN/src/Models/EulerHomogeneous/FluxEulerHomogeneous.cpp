@@ -129,9 +129,9 @@ void FluxEulerHomogeneous::buildPrim(Phase **phases, Mixture *mixture, const int
   //Simple extractions
   mixture->setVelocity(m_qdm / m_masse);
   //Erasing small velocity variations
-  if (abs(mixture->getU()) < 1.e-8) mixture->setU(0.);
-  if (abs(mixture->getV()) < 1.e-8) mixture->setV(0.);
-  if (abs(mixture->getW()) < 1.e-8) mixture->setW(0.);
+  if (std::fabs(mixture->getU()) < 1.e-8) mixture->setU(0.);
+  if (std::fabs(mixture->getV()) < 1.e-8) mixture->setV(0.);
+  if (std::fabs(mixture->getW()) < 1.e-8) mixture->setW(0.);
   internalEnergy = m_energ / m_masse - 0.5*mixture->getVelocity().squaredNorm();
   
   //Pressure determination

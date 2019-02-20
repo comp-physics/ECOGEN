@@ -110,7 +110,7 @@ void OutputProbeGNU::locateProbeInMesh(const TypeMeshContainer<Cell *> &cells, c
     if (Ncpu != 1) {
       double minimumAllCPU(minimumDistance);
       MPI_Allreduce(&minimumDistance, &minimumAllCPU, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
-      if (abs(minimumAllCPU - minimumDistance) > 1.e-10) { m_possessesProbe = false; }
+      if (std::fabs(minimumAllCPU - minimumDistance) > 1.e-10) { m_possessesProbe = false; }
     }
   }
 }

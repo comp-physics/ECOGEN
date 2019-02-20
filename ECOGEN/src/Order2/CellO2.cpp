@@ -129,13 +129,13 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
       else {
 				if (!m_cellInterfaces[b]->getSplit()) {
 				//Produit scalar des normals avec celle de reference
-					coeff = abs(m_cellInterfaces[b]->getFace()->getNormal().scalar(cellInterfaceRef.getFace()->getNormal()));
+					coeff = std::fabs(m_cellInterfaces[b]->getFace()->getNormal().scalar(cellInterfaceRef.getFace()->getNormal()));
 					if (coeff > 1.e-6) {
 						//Face majoritement selon X
-						if (abs(cellInterfaceRef.getFace()->getNormal().getX()) > 0.5) {
+						if (std::fabs(cellInterfaceRef.getFace()->getNormal().getX()) > 0.5) {
 							posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getX();
 							//Cote cellInterfaceRef
-							if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getX()) <= abs(posCellInterfaceRef - m_element->getPosition().getX())) {
+							if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getX()) <= std::fabs(posCellInterfaceRef - m_element->getPosition().getX())) {
 								for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
 								slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
 								for (int k = 0; k < numberTransports; k++) { slopesTransportLocal1[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -155,10 +155,10 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
 							}
 						}
 						//Face majoritement selon Y
-						else if (abs(cellInterfaceRef.getFace()->getNormal().getY()) > 0.5) {
+						else if (std::fabs(cellInterfaceRef.getFace()->getNormal().getY()) > 0.5) {
 							posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getY();
 							//Cote cellInterfaceRef
-							if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getY()) <= abs(posCellInterfaceRef - m_element->getPosition().getY())) {
+							if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getY()) <= std::fabs(posCellInterfaceRef - m_element->getPosition().getY())) {
 								for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
 								slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
 								for (int k = 0; k < numberTransports; k++) { slopesTransportLocal1[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -181,7 +181,7 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
 						else {
 							posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getZ();
 							//Cote cellInterfaceRef
-							if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getZ()) <= abs(posCellInterfaceRef - m_element->getPosition().getZ())) {
+							if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getZ()) <= std::fabs(posCellInterfaceRef - m_element->getPosition().getZ())) {
 								for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
 								slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
 								for (int k = 0; k < numberTransports; k++) { slopesTransportLocal1[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -278,13 +278,13 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
       if (m_cellInterfaces[b] != &cellInterfaceRef) {
         if (!m_cellInterfaces[b]->getSplit()) {
           //Produit scalar des normals avec celle de reference
-          coeff = abs(m_cellInterfaces[b]->getFace()->getNormal().scalar(cellInterfaceRef.getFace()->getNormal()));
+          coeff = std::fabs(m_cellInterfaces[b]->getFace()->getNormal().scalar(cellInterfaceRef.getFace()->getNormal()));
           if (coeff > 1.e-6) {
             //Face majoritement selon X
-            if (abs(cellInterfaceRef.getFace()->getNormal().getX()) > 0.5) {
+            if (std::fabs(cellInterfaceRef.getFace()->getNormal().getX()) > 0.5) {
               posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getX();
               //Autre cote
-              if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getX()) >= abs(posCellInterfaceRef - m_element->getPosition().getX())) {
+              if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getX()) >= std::fabs(posCellInterfaceRef - m_element->getPosition().getX())) {
                 for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal2[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
                 slopesMixtureLocal2->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
                 for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -292,10 +292,10 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
               }
             }
             //Face majoritement selon Y
-            else if (abs(cellInterfaceRef.getFace()->getNormal().getY()) > 0.5) {
+            else if (std::fabs(cellInterfaceRef.getFace()->getNormal().getY()) > 0.5) {
               posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getY();
               //Autre cote
-              if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getY()) >= abs(posCellInterfaceRef - m_element->getPosition().getY())) {
+              if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getY()) >= std::fabs(posCellInterfaceRef - m_element->getPosition().getY())) {
                 for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal2[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
                 slopesMixtureLocal2->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
                 for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -306,7 +306,7 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
             else {
               posCellInterfaceRef = cellInterfaceRef.getFace()->getPos().getZ();
               //Autre cote
-              if (abs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getZ()) >= abs(posCellInterfaceRef - m_element->getPosition().getZ())) {
+              if (std::fabs(posCellInterfaceRef - m_cellInterfaces[b]->getFace()->getPos().getZ()) >= std::fabs(posCellInterfaceRef - m_element->getPosition().getZ())) {
                 for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal2[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), coeff); }
                 slopesMixtureLocal2->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), coeff);
                 for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] += coeff*(m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
@@ -640,7 +640,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, std::string whichCpu
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
     if (!m_cellInterfaces[b]->getSplit()) {
       //Normal of the face in the x-direction
-      if (abs(m_cellInterfaces[b]->getFace()->getNormal().getX()) > 0.99) {
+      if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getX()) > 0.99) {
         //I am left CPU, I send the average slope of the left side of the right cells
         if (whichCpuAmIForNeighbour == "LEFT") {
           if ((m_cellInterfaces[b]->getFace()->getPos().getX() + epsilon) < m_element->getPosition().getX()) {
@@ -671,7 +671,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, std::string whichCpu
         }
       }
       //Normal of the face in the y-direction
-      else if (abs(m_cellInterfaces[b]->getFace()->getNormal().getY()) > 0.99) {
+      else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getY()) > 0.99) {
         //I am bottom CPU, I send the average slope of the bottom side of the top cells
         if (whichCpuAmIForNeighbour == "BOTTOM") {
           if ((m_cellInterfaces[b]->getFace()->getPos().getY() + epsilon) < m_element->getPosition().getY()) {
@@ -702,7 +702,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, std::string whichCpu
         }
       }
       //Normal of the face in the z-direction
-      else if (abs(m_cellInterfaces[b]->getFace()->getNormal().getZ()) > 0.99) {
+      else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()) > 0.99) {
         //I am back CPU, I send the average slope of the back side of the front cells
         if (whichCpuAmIForNeighbour == "BACK") {
           if ((m_cellInterfaces[b]->getFace()->getPos().getZ() + epsilon) < m_element->getPosition().getZ()) {
@@ -779,7 +779,7 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, s
 		for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
       if (!m_cellInterfaces[b]->getSplit()) {
         //Normal of the face in the x-direction
-        if (abs(m_cellInterfaces[b]->getFace()->getNormal().getX()) > 0.99) {
+        if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getX()) > 0.99) {
           //I am left CPU, I send the average slope of the left side of the right cells
           if (whichCpuAmIForNeighbour == "LEFT") {
             if ((m_cellInterfaces[b]->getFace()->getPos().getX() + epsilon) < m_element->getPosition().getX()) {
@@ -810,7 +810,7 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, s
           }
         }
         //Normal of the face in the y-direction
-        else if (abs(m_cellInterfaces[b]->getFace()->getNormal().getY()) > 0.99) {
+        else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getY()) > 0.99) {
           //I am bottom CPU, I send the average slope of the bottom side of the top cells
           if (whichCpuAmIForNeighbour == "BOTTOM") {
             if ((m_cellInterfaces[b]->getFace()->getPos().getY() + epsilon) < m_element->getPosition().getY()) {
@@ -841,7 +841,7 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, s
           }
         }
         //Normal of the face in the z-direction
-        else if (abs(m_cellInterfaces[b]->getFace()->getNormal().getZ()) > 0.99) {
+        else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()) > 0.99) {
           //I am back CPU, I send the average slope of the back side of the front cells
           if (whichCpuAmIForNeighbour == "BACK") {
             if ((m_cellInterfaces[b]->getFace()->getPos().getZ() + epsilon) < m_element->getPosition().getZ()) {

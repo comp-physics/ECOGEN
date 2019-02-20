@@ -62,11 +62,13 @@ class FluxMultiP : public Flux
     virtual void setToZeroBufferFlux(const int &numberPhases);
     virtual void addNonCons(double coefA, const Cell *cell, const int &numberPhases);
     virtual void subtractNonCons(double coefA, const Cell *cell, const int &numberPhases);
+    virtual void correctionEnergy(Cell *cell, const int &numberPhases, Prim type = vecPhases) const {};
     virtual void schemeCorrection(Cell *cell, const int &numberPhases, Prim type = vecPhases) const;
 
     virtual void addSymmetricTerms(Phase **phases, Mixture *mixture, const int &numberPhases, const double &r, const double &v, const double &dt);
     virtual void integrateSourceTermsGravity(Cell *cell, const double &dt, const int &numberPhases, const int &axe, const int &direction, const Coord &g);
     virtual void integrateSourceTermsHeating(Cell *cell, const double &dt, const int &numberPhases, const double &q);
+    virtual void integrateSourceTermsMRF(Cell *cell, const double &dt, const int &numberPhases, const Coord &omega);
 
     // Accessors
     //----------

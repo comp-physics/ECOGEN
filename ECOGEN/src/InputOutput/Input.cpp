@@ -493,6 +493,8 @@ void Input::entreeModel(std::string casTest)
       error = element->QueryIntAttribute("numberPhases", &m_run->m_numberPhases);
       m_run->m_model = new ModMultiP(m_run->m_numberTransports, m_run->m_numberPhases);
       if (error != XML_NO_ERROR) throw ErrorXMLAttribut("numberPhases", fileName.str(), __FILE__, __LINE__);
+      error = element->QueryBoolAttribute("alphaNull", &alphaNull);
+      if (error != XML_NO_ERROR) throw ErrorXMLAttribut("alphaNull", fileName.str(), __FILE__, __LINE__);
     }
     else if (model == "THERMALEQ")
     {
@@ -612,7 +614,7 @@ void Input::entreeModel(std::string casTest)
       Tools::uppercase(typeRelax);
       //switch sur le type de relaxation
       if (typeRelax == "PTMU") { m_run->m_model->getRelaxations()->push_back(new RelaxationPTMu(element, fileName.str())); }
-	  else if (typeRelax == "PT") {m_run->m_model->getRelaxations()->push_back(new RelaxationPT()); }
+	    else if (typeRelax == "PT") {m_run->m_model->getRelaxations()->push_back(new RelaxationPT()); }
       else if (typeRelax == "P") { m_run->m_model->getRelaxations()->push_back(new RelaxationP()); }
       else { throw ErrorXMLDev(fileName.str(), __FILE__, __LINE__); }
       element = element->NextSiblingElement("relaxation");

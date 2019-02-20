@@ -485,7 +485,7 @@ void Run::solveRelaxations(int &lvl) const
   //Optional energy corrections and other relaxations
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
     if (!m_cellsLvl[lvl][i]->getSplit()) {
-      m_cellsLvl[lvl][i]->correctionEnergy(m_numberPhases);             //Correction des energies
+      m_cellsLvl[lvl][i]->correctionEnergy(m_numberPhases);               //Correction des energies
       //if (m_evaporation) m_cellsLvl[lvl][i]->relaxPTMu(m_numberPhases); //Relaxation des pressures, temperatures et potentiels chimiques
     }
   }

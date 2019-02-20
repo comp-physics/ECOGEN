@@ -106,7 +106,7 @@ void PhaseMultiP::extendedCalculusPhase(const Coord &velocity)
 
 void PhaseMultiP::computeMassFraction(const double &density)
 {
-  m_Y = m_alpha*m_density / density;
+  m_Y = m_alpha*m_density / std::max(density, epsilonAlphaNull);
 }
 
 //****************************************************************************
@@ -275,19 +275,33 @@ void PhaseMultiP::getBufferSlopes(double *buffer, int &counter)
 
 void PhaseMultiP::verifyPhase(const std::string &message) const
 {
-  if (m_alpha <= 1e-10) errors.push_back(Errors(message + "too small alpha in verifyPhase"));
-  if (m_alpha >= 1. - 1e-10) errors.push_back(Errors(message + "too big alpha in verifyPhase"));
-  if (m_density <= 1.e-10) errors.push_back(Errors(message + "too small density in verifyPhase"));
-  m_eos->verifyPressure(m_pressure, message);
+  if (epsilonAlphaNull > 1.e-20) { // alpha = 0 is activated
+    if (m_alpha < 0.) errors.push_back(Errors(message + "too small alpha in verifyPhase"));
+    if (m_alpha > 1.) errors.push_back(Errors(message + "too big alpha in verifyPhase"));
+    if (m_density < 0.) errors.push_back(Errors(message + "too small density in verifyPhase"));
+    m_eos->verifyPressure(m_pressure, message);
+  }
+  else { // alpha = 0 is desactivated (alpha != 0)
+    if (m_alpha <= 1e-15) errors.push_back(Errors(message + "too small alpha in verifyPhase"));
+    if (m_alpha >= 1. - 1e-15) errors.push_back(Errors(message + "too big alpha in verifyPhase"));
+    if (m_density <= 1.e-15) errors.push_back(Errors(message + "too small density in verifyPhase"));
+  }
 }
 
 //***************************************************************************
 
 void PhaseMultiP::verifyAndCorrectPhase()
 {
-  if (m_alpha < 1e-10) m_alpha = 1e-9;
-  if (m_alpha > 1. - 1e-10) m_alpha = 1. - 1e-9;
-  if (m_density < 1.e-10) m_density = 1.e-9;
+  if (epsilonAlphaNull > 1.e-20) { // alpha = 0 is activated
+    if (m_alpha < 0.) m_alpha = 0.;
+    if (m_alpha > 1.) m_alpha = 1.;
+    if (m_density <= 1.e-15) m_density = 1.e-15;
+  }
+  else { // alpha = 0 is desactivated (alpha != 0)
+    if (m_alpha < 1e-15) m_alpha = 1e-14;
+    if (m_alpha > 1. - 1e-15) m_alpha = 1. - 1e-14;
+    if (m_density < 1.e-15) m_density = 1.e-14;
+  }
   m_eos->verifyAndModifyPressure(m_pressure);
 }
 

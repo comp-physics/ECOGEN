@@ -1352,17 +1352,17 @@ void MeshCartesian::decoupageParallele()
     double tempNumberCpuX(static_cast<double>(m_numberCpuX)); //Non-optimal number of processors in the x-direction
     double tempNumberCpuY(static_cast<double>(m_numberCpuY)); //Non-optimal number of processors in the y-direction
     double CpuFactorizationMin;                               //Processor factorization (fct) minimization parameter
-    CpuFactorizationMin = 10.*abs(static_cast<double>(m_numberCellsXGlobal) / tempNumberCpuX - static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY);
+    CpuFactorizationMin = 10.*std::fabs(static_cast<double>(m_numberCellsXGlobal) / tempNumberCpuX - static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY);
 
     //Optimization of the initial processor topology
     for (int i = 1; i <= Ncpu; i++) {
       if ((Ncpu % i == 0) && (m_numberCellsXGlobal / i >= minCellNumberOneDirection)) {
         tempNumberCpuX = i;
         tempNumberCpuY = Ncpu / i;
-        if (CpuFactorizationMin >= abs(m_numberCellsXGlobal / tempNumberCpuX -m_numberCellsYGlobal / tempNumberCpuY) && m_numberCellsYGlobal / tempNumberCpuY >= minCellNumberOneDirection) {
+        if (CpuFactorizationMin >= std::fabs(m_numberCellsXGlobal / tempNumberCpuX -m_numberCellsYGlobal / tempNumberCpuY) && m_numberCellsYGlobal / tempNumberCpuY >= minCellNumberOneDirection) {
           m_numberCpuX = i;
           m_numberCpuY = Ncpu / i;
-          CpuFactorizationMin = abs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY);
+          CpuFactorizationMin = std::fabs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY);
           error = 0;
         }
       }
@@ -1545,8 +1545,8 @@ void MeshCartesian::decoupageParallele()
     double tempNumberCpuY(static_cast<double>(m_numberCpuY)); //Non-optimal number of processors in the y-direction
     double tempNumberCpuZ(static_cast<double>(m_numberCpuZ)); //Non-optimal number of processors in the z-direction
     double CpuFactorizationMin;                               //Processor factorization (fct) minimization parameter
-    CpuFactorizationMin = 10.*abs(static_cast<double>(m_numberCellsXGlobal) / tempNumberCpuX - static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY)
-      + 10.*abs(static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY - static_cast<double>(m_numberCellsZGlobal) / tempNumberCpuZ);
+    CpuFactorizationMin = 10.*std::fabs(static_cast<double>(m_numberCellsXGlobal) / tempNumberCpuX - static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY)
+      + 10.*std::fabs(static_cast<double>(m_numberCellsYGlobal) / tempNumberCpuY - static_cast<double>(m_numberCellsZGlobal) / tempNumberCpuZ);
 
     //Optimization of the initial processor topology
     for (int i = 1; i <= Ncpu; i++) {
@@ -1556,12 +1556,12 @@ void MeshCartesian::decoupageParallele()
             tempNumberCpuX = i;
             tempNumberCpuY = j;
             tempNumberCpuZ = Ncpu / (i*j);
-            if (CpuFactorizationMin >= abs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY) + abs(m_numberCellsYGlobal / tempNumberCpuY - m_numberCellsZGlobal / tempNumberCpuZ)
+            if (CpuFactorizationMin >= std::fabs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY) + std::fabs(m_numberCellsYGlobal / tempNumberCpuY - m_numberCellsZGlobal / tempNumberCpuZ)
               && m_numberCellsZGlobal / tempNumberCpuZ >= minCellNumberOneDirection) {
               m_numberCpuX = i;
               m_numberCpuY = j;
               m_numberCpuZ = Ncpu / (i*j);
-              CpuFactorizationMin = abs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY) + abs(m_numberCellsYGlobal / tempNumberCpuY - m_numberCellsZGlobal / tempNumberCpuZ);
+              CpuFactorizationMin = std::fabs(m_numberCellsXGlobal / tempNumberCpuX - m_numberCellsYGlobal / tempNumberCpuY) + std::fabs(m_numberCellsYGlobal / tempNumberCpuY - m_numberCellsZGlobal / tempNumberCpuZ);
               error = 0;
             }
           }

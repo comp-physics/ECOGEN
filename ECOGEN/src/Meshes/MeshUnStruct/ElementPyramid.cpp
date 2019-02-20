@@ -81,7 +81,7 @@ void ElementPyramid::computeVolume(const Coord *noeuds)
   //v1v2 = Coord::crossProduct(v1, v2);
   //v1v2 = v1v2 / v1v2.norm();
   //Coord vh(noeuds[4] - noeuds[0]);
-  //double hauteur = abs(vh.scalar(v1v2));
+  //double hauteur = std::fabs(vh.scalar(v1v2));
 
   ////Volume de la pyramide a base quadrangle
   ////---------------------------------------
@@ -90,9 +90,9 @@ void ElementPyramid::computeVolume(const Coord *noeuds)
   //On va computeer le volume des 2 tetraedres inclus dans la pyramide
   Coord v1, v2, v3;
   v1.setFromSubtractedVectors(noeuds[4], noeuds[1]); v2.setFromSubtractedVectors(noeuds[4], noeuds[0]); v3.setFromSubtractedVectors(noeuds[4], noeuds[2]);
-  double volumeT1 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT1 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[4], noeuds[2]); v2.setFromSubtractedVectors(noeuds[4], noeuds[3]); v3.setFromSubtractedVectors(noeuds[4], noeuds[0]);
-  double volumeT2 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT2 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   m_volume = volumeT1 + volumeT2; //volume de la pyramide
   
 }

@@ -50,7 +50,7 @@ double LimiterTHINC::limiteSlope(const double& slope1, const double& slope2)
   double zero(1e-9);
   double slope(0.), produit(slope1*slope2);
   if (produit > zero) {
-    slope = std::min(abs(slope1), abs(slope2));
+    slope = std::min(std::fabs(slope1), std::fabs(slope2));
     if (slope1 < 0) { slope = -slope; }
   }
   return slope;
