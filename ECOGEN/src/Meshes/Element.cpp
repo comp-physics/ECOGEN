@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      Element.cpp
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
 //! \version   1.0
-//! \date      December 20 2017
+//! \date      February 19 2019
 
 #include "Element.h"
 
@@ -185,16 +185,16 @@ bool Element::traverseObjet(const GeometricObject &objet) const
 
 //***********************************************************************
 
-//****************************************************************************
-//*********************** Parallel load balancing ****************************
-//****************************************************************************
+//***********************************************************************
+//*********************** Parallel load balancing ***********************
+//***********************************************************************
 
 void Element::setKey(const decomposition::Key<3> &key)
 {
   m_key = key;
 }
 
-//****************************************************************************
+//***********************************************************************
 
 decomposition::Key<3> Element::getKey() const 
 {
