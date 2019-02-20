@@ -31,9 +31,9 @@
 #define MESHCARTESIANAMR_H
 
 //! \file      MeshCartesian.h
-//! \author    K. Schmidmayer, F. Petitpas
+//! \author    K. Schmidmayer, F. Petitpas, B. Dorschner
 //! \version   1.0
-//! \date      February 13 2019
+//! \date      February 19 2019
 
 #include "MeshCartesian.h"
 
@@ -46,6 +46,9 @@ public:
     bool varAlpha = false, double xiSplit = 1., double xiJoin = 1.);
   virtual ~MeshCartesianAMR();
 
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
+  void initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
+  void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul, decomposition::Decomposition* _decomp);
 	virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
 		std::vector<CellInterface *> **cellInterfacesLvl);
   virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl,

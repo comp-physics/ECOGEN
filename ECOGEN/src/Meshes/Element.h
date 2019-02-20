@@ -33,7 +33,7 @@
 //! \file      Element.h
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
 //! \version   1.0
-//! \date      February 15 2019
+//! \date      February 19 2019
 
 #include <fstream>
 #include <sstream>
@@ -104,8 +104,8 @@ public:
   virtual void finalizeElementsChildren() { Errors::errorMessage("finalizeElementsChildren not available for requested element"); };
 
   //For parallel load balancing
-  virtual void setKey(const decomposition::Key<3> &key) { Errors::errorMessage("setKey not available for requested element"); };
-  virtual decomposition::Key<3> getKey() { Errors::errorMessage("getKey not available for requested element"); return 0; };
+  virtual void setKey(const decomposition::Key<3> &key);
+  virtual decomposition::Key<3> getKey()const;
 
 protected:
 

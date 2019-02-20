@@ -33,7 +33,7 @@
 //! \file      ElementCartesian.h
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
 //! \version   1.0
-//! \date      February 15 2019
+//! \date      February 19 2019
 
 #include "Element.h"
 
@@ -62,10 +62,6 @@ public:
   virtual void creerElementChild();
   virtual Element* getElementChild(const int &numberChild);
   virtual void finalizeElementsChildren();
-
-  //For parallel load balancing
-  virtual void setKey(const decomposition::Key<3> &key);
-  virtual decomposition::Key<3> getKey();
 
 protected:
 

@@ -33,7 +33,7 @@
 //! \file      MeshCartesian.h
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
 //! \version   1.0
-//! \date      February 15 2019
+//! \date      February 19 2019
 
 #include "Mesh.h"
 #include "ElementCartesian.h"
@@ -55,7 +55,6 @@ public:
   void meshStretching();
   void initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
-  void initializeGeometrieParallele2(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   virtual void effetsMesh(CellInterface **face, const int &numberPhases) const {};
   void decoupageParallele();
   virtual std::string whoAmI() const;
@@ -65,9 +64,6 @@ public:
   virtual void recupereCoord(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Axe axe) const;
   virtual void recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
   virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const;
-
-  //For parallel load balancing
-  void createNeighbours(TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
 
 protected:
   TypeMeshContainer<Element *> m_elements; //!<Vector of element objects: Contains geometrical attributes

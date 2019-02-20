@@ -136,8 +136,12 @@ public: // static
 
     static bool representable(const coordinate_type& _x, level_type _level)
     {
+
+        if(_x.x() <0|| _x.y()<0 || _x.z() <0)
+          return false;
         scalar_coordinate_type m=std::max(std::max(_x.x(),_x.y()),_x.z());
         scalar_coordinate_type mini=std::min(std::min(_x.x(),_x.y()),_x.z());
+
 
         if(m<=bitmask_t::max_coord_arr[_level]-1 && mini>=0)
             return true;
@@ -341,7 +345,6 @@ public: // queries
         {
             return Key( cc, level() );
         } else{
-            //std::cout<<"non-representable"<<std::endl;
             return end(l);
         }
     }
@@ -466,7 +469,8 @@ public: // print
         << " ("  << std::setw(11) << std::left << std::setprecision(9) << t.coordinate_1().x()
         << ", "  << std::setw(11) << std::left << std::setprecision(9) << t.coordinate_1().y()
         << ", "  << std::setw(11) << std::left << std::setprecision(9) << t.coordinate_1().z()
-        << ") }" << std::left << std::defaultfloat;
+        << ") }" << std::left;
+        //<< std::defaultfloat;
         return os;
     }
 
