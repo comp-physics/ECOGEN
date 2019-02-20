@@ -120,7 +120,7 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
     << "numberCellsCalcul "<<m_numberCellsCalcul<<" "
     << "m_numberCellsTotal "<<m_numberCellsTotal<<" "
     << "m_numberFacesTotal "<<m_numberFacesTotal<<" "
-    <<std::endl;
+    <<std::endl; //KS//BD// Erase 3D faces for 1D and 2D simulations
 }
 
 //***********************************************************************
@@ -145,6 +145,8 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
        offsets[2*d+1][d] =+1;
    }
 
+   std::vector<int> elements_rec;
+   std::vector<int> elements_snd;
    const auto sizeNonGhostCells=cells.size();
    for(unsigned int i = 0; i < sizeNonGhostCells; ++i)
    {
@@ -293,6 +295,8 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
                        m_elements.push_back(new ElementCartesian());
                        m_elements.back()->setKey(nKey);
                        cells.back()->setElement(m_elements.back(), cells.size()-1);
+                       //elements_rec.push_back(); // index of ghost
+                       //elements_snd.push_back(); // index of non-ghost
 
                        const auto coord = nKey.coordinate();
                        const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
