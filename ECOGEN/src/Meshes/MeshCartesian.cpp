@@ -286,6 +286,9 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
 
   //Initialization des faces internes
   //*********************************
+//Variables for the inner boundary faces
+  double yThreshold(30.e-6), slope(1.732);
+
   int iMailleG, iMailleD, iFace(0), iTemp;
   Cell *BGM=0, *BGP=0, *BDM=0, *BDP=0;
   //Faces selon X
@@ -296,15 +299,27 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
     {
       for (iz = 0; iz < m_numberCellsZ; iz++)
       {
-        if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        m_faces.push_back(new FaceCartesian());
-        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix + 1, iy, iz, iMailleD);
-        cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-        cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-        cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        m_faces.push_back(new FaceCartesian());
+        if ((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+            (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() + m_dXi[0] <= 0.)) {
+          //Inner boundary faces taken as wall
+          m_limYm->creeLimite(cellInterfaces);
+          cellInterfaces[iFace]->setFace(m_faces[iFace]);
+          iMailleD = iMailleG;
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+        }
+        else {
+          //Normal inner faces
+          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+          else { cellInterfaces.push_back(new CellInterfaceO2); }
+          cellInterfaces[iFace]->setFace(m_faces[iFace]);
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
         surface = m_dYj[iy] * m_dZk[iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(0., m_dYj[iy], m_dZk[iz]);
@@ -330,15 +345,27 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
     {
       for (iz = 0; iz < m_numberCellsZ; iz++)
       {
-        if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        m_faces.push_back(new FaceCartesian());
-        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix, iy + 1, iz, iMailleD);
-        cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-        cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-        cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        m_faces.push_back(new FaceCartesian());
+        if ((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+            (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) {
+          //Inner boundary faces taken as wall
+          m_limYm->creeLimite(cellInterfaces);
+          cellInterfaces[iFace]->setFace(m_faces[iFace]);
+          iMailleG = iMailleD;
+          cellInterfaces[iFace]->initialize(cells[iMailleD], cells[iMailleG]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
+        else {
+          //Normal inner faces
+          if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+          else { cellInterfaces.push_back(new CellInterfaceO2); }
+          cellInterfaces[iFace]->setFace(m_faces[iFace]);
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
         surface = m_dXi[ix] * m_dZk[iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(m_dXi[ix], 0., m_dZk[iz]);
