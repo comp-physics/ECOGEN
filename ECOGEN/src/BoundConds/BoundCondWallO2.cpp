@@ -101,19 +101,19 @@ void BoundCondWallO2::computeSlopes(const int &numberPhases, const int &numberTr
   distanceX = m_cellLeft->getElement()->distanceX(m_face);
   distanceY = m_cellLeft->getElement()->distanceY(m_face);
   distanceZ = m_cellLeft->getElement()->distanceZ(m_face);
-  if (abs(distanceX) > 1.e-8) {
+  if (std::fabs(distanceX) > 1.e-8) {
     for (int k = 0; k < numberPhases; k++) {
       m_vecPhasesSlopes[k]->setU(m_cellLeft->getPhase(k, type)->getVelocity().getX() / distanceX);
     }
     m_mixtureSlopes->setU(m_cellLeft->getMixture(type)->getVelocity().getX() / distanceX);
   }
-  if (abs(distanceY) > 1.e-8) {
+  if (std::fabs(distanceY) > 1.e-8) {
     for (int k = 0; k < numberPhases; k++) {
       m_vecPhasesSlopes[k]->setV(m_cellLeft->getPhase(k, type)->getVelocity().getY() / distanceY);
     }
     m_mixtureSlopes->setV(m_cellLeft->getMixture(type)->getVelocity().getY() / distanceY);
   }
-  if (abs(distanceZ) > 1.e-8) {
+  if (std::fabs(distanceZ) > 1.e-8) {
     for (int k = 0; k < numberPhases; k++) {
       m_vecPhasesSlopes[k]->setW(m_cellLeft->getPhase(k, type)->getVelocity().getZ() / distanceZ);
     }

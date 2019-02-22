@@ -158,7 +158,7 @@ void MixMultiP::computeMixtureVariables(Phase **vecPhase, const int &numberPhase
   for (int k = 0; k < numberPhases; k++) {
     m_energie += vecPhase[k]->getY() * vecPhase[k]->getEnergy();
     m_frozenSoundSpeed += vecPhase[k]->getY() * vecPhase[k]->getSoundSpeed()*vecPhase[k]->getSoundSpeed();
-    m_woodSoundSpeed += vecPhase[k]->getAlpha() / (vecPhase[k]->getDensity()*vecPhase[k]->getSoundSpeed()*vecPhase[k]->getSoundSpeed());
+    m_woodSoundSpeed += vecPhase[k]->getAlpha() / std::max((vecPhase[k]->getDensity()*vecPhase[k]->getSoundSpeed()*vecPhase[k]->getSoundSpeed()), epsilonAlphaNull);                                  
   }
   m_frozenSoundSpeed = sqrt(m_frozenSoundSpeed);
   m_woodSoundSpeed = 1. / sqrt(m_density*m_woodSoundSpeed);

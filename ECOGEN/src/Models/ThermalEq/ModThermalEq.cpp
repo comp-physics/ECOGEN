@@ -107,13 +107,13 @@ void ModThermalEq::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, const int
   sL = std::min(uL - cL, uR - cR);
   sR = std::max(uR + cR, uL + cL);
 
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
-  if (abs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / abs(sR));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
+  if (std::fabs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / std::fabs(sR));
 
   //compute left and right mass flow rates and sM
   double mL(rhoL*(sL - uL)), mR(rhoR*(sR - uR)), mkL, mkR;
   double sM((pR - pL + mL*uL - mR*uR) / (mL - mR));
-  if (abs(sM)<1.e-8) sM = 0.;
+  if (std::fabs(sM)<1.e-8) sM = 0.;
 
   //Solution sampling
   if (sL >= 0.){
@@ -201,7 +201,7 @@ void ModThermalEq::solveRiemannWall(Cell &cellLeft, const int &numberPhases, con
   double uL = cellLeft.getMixture()->getVelocity().getX(), cL = cellLeft.getMixture()->getMixSoundSpeed(), pL = cellLeft.getMixture()->getPressure(), rhoL = cellLeft.getMixture()->getDensity();
 
   sL = std::min(uL - cL, -uL - cL);
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
 
   pStar = rhoL*(uL - sL)*uL + pL;
 
@@ -238,10 +238,10 @@ void ModThermalEq::solveRiemannTank(Cell &cellLeft, const int &numberPhases, con
   pStar = p0;
   vStar = cellLeft.getMixture()->computeVolumeIsentrope(TB->Yk, pL, TL, pStar, numberPhases);
   vmv0 = vStar - 1. / rhoL;
-  if (abs(vmv0) > 1e-10) { mL = sqrt((pL - pStar) / vmv0); }
+  if (std::fabs(vmv0) > 1e-10) { mL = sqrt((pL - pStar) / vmv0); }
   else { mL = zL; }
   sL = uL - mL / rhoL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   sM = uL + mL * vmv0;
 
   //2) Check for pathologic cases
@@ -305,7 +305,7 @@ void ModThermalEq::solveRiemannTank(Cell &cellLeft, const int &numberPhases, con
       TStarL = cellLeft.getMixture()->computeTemperatureIsentrope(TB->Yk, pL, TL, p, numberPhases, &dTStarL);
       vStarL = cellLeft.getMixture()->computeVolumeIsentrope(TB->Yk, pL, TL, p, numberPhases, &dvStarL);
       vmv0 = vStarL - 1. / rhoL;
-      if (abs(vmv0) > 1e-10) {
+      if (std::fabs(vmv0) > 1e-10) {
         mL = sqrt((pL - p) / vmv0);
         dmL = 0.5*(-vmv0 + (p - pL)*dvStarL) / (vmv0*vmv0) / mL;
       }
@@ -314,13 +314,13 @@ void ModThermalEq::solveRiemannTank(Cell &cellLeft, const int &numberPhases, con
         dmL = 0.;
       }
       sL = uL - mL / rhoL;
-      if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+      if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
       uStarL = uL + mL*vmv0;
       duStarL = dmL*vmv0 + mL* dvStarL;
       //solved function
       f = uStarR - uStarL;
       df = duStarR - duStarL;
-    } while (abs(f)>1e-3); //End iterative loop
+    } while (std::fabs(f)>1e-3); //End iterative loop
     pStar = p;
     uStar = 0.5*(uStarL + uStarR);
     rhoStar = 0.;
@@ -368,14 +368,14 @@ void ModThermalEq::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, 
   double rhoStar(0.), vmv0, mL, uStar;
   rhoStar = 1./cellLeft.getMixture()->computeVolumeIsentrope(TB->Yk, pL, TL, p0, numberPhases);
   vmv0 = 1./ rhoStar - 1. / rhoL;
-  if (abs(vmv0) > 1e-10) {
+  if (std::fabs(vmv0) > 1e-10) {
     mL = sqrt((pL - p0) / vmv0);
   }
   else {
     mL = zL;
   }
   sL = uL - mL / rhoL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   uStar = uL + mL*vmv0;
 
   //Pathologic case sL>0            //FP//Q// Look for special case u<0

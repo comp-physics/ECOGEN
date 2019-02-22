@@ -140,7 +140,7 @@ void RelaxationPTMu::stiffRelaxation(Cell *cell, const int &numberPhases, Prim t
 		df -= (daLSat*rhoeLSat + aLSat * drhoeLSat + daVSat * rhoeVSat + aVSat * drhoeVSat);
 		f /= rhoe;
 		df /= rhoe;
-	} while (abs(f) > 1e-10);
+	} while (std::fabs(f) > 1e-10);
 
 	//Cell update
 	phase = cell->getPhase(m_liq);

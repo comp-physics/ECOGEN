@@ -153,7 +153,7 @@ double MixEulerHomogeneous::computePressure(double masse, const double &internal
     rhoeLiq = phases[liq]->getEos()->computeDensityEnergySaturation(pressure, rhoLiq, drhoLiq, &drhoeLiq);
     f = masse*internalEnergy - alphaVap*(rhoeVap - rhoeLiq) - rhoeLiq;
     df = -dalphaVap*(rhoeVap - rhoeLiq) - alphaVap*(drhoeVap - drhoeLiq) - drhoeLiq;
-  } while (abs(f / (masse*internalEnergy)) > 1e-10);
+  } while (std::fabs(f / (masse*internalEnergy)) > 1e-10);
 
   return pressure;
 }

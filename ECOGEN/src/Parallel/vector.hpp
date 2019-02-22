@@ -285,8 +285,8 @@ template<typename U, std::size_t N>
 U norm_inf(const math::vector<U,N>& v) 
 {
 	using namespace std;
-	auto m = abs(v[0]);
-	for (unsigned int i=1; i<N; ++i) m = max(m,abs(v[i]));
+	auto m = std::fabs(v[0]);
+	for (unsigned int i=1; i<N; ++i) m = max(m,std::fabs(v[i]));
 	return m; 
 }
 

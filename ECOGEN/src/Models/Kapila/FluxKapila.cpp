@@ -140,7 +140,7 @@ void FluxKapila::buildPrim(Phase **phases, Mixture *mixture, const int &numberPh
 
   //Verification and correction if needed (alpha and mass for order 2)
   double un(0.);
-  if (epsilon > 1.e-20) { // alpha = 0 is activated
+  if (epsilonAlphaNull > 1.e-20) { // alpha = 0 is activated
     for (int k = 0; k < numberPhases; k++) {
       if (m_alpha[k] < 0.) m_alpha[k] = 0.;
       if (m_alpha[k] > 1.) m_alpha[k] = 1.;
@@ -160,18 +160,18 @@ void FluxKapila::buildPrim(Phase **phases, Mixture *mixture, const int &numberPh
   for (int k = 0; k < numberPhases; k++) {
       rhoMel = rhoMel + m_masse[k];
       phases[k]->setAlpha(m_alpha[k]);
-      phases[k]->setDensity(m_masse[k] / std::max(m_alpha[k], epsilon));
+      phases[k]->setDensity(m_masse[k] / std::max(m_alpha[k], epsilonAlphaNull));
       //Calcul Pressure
-      energieInterne = m_energ[k] / std::max(m_masse[k], epsilon);
+      energieInterne = m_energ[k] / std::max(m_masse[k], epsilonAlphaNull);
       pressure = TB->eos[k]->computePressure(phases[k]->getDensity(), energieInterne);
       phases[k]->setPressure(pressure);
       phases[k]->verifyAndCorrectPhase();
   }
   mixture->setVelocity(m_qdm.getX() / rhoMel, m_qdm.getY() / rhoMel, m_qdm.getZ() / rhoMel);
   //Erasing small velocity variations
-  if (abs(mixture->getU()) < 1.e-8) mixture->setU(0.);
-  if (abs(mixture->getV()) < 1.e-8) mixture->setV(0.);
-  if (abs(mixture->getW()) < 1.e-8) mixture->setW(0.);
+  if (std::fabs(mixture->getU()) < 1.e-8) mixture->setU(0.);
+  if (std::fabs(mixture->getV()) < 1.e-8) mixture->setV(0.);
+  if (std::fabs(mixture->getW()) < 1.e-8) mixture->setW(0.);
   for (int k = 0; k < numberPhases; k++) {
     phases[k]->extendedCalculusPhase(mixture->getVelocity());
   }
@@ -364,7 +364,7 @@ void FluxKapila::integrateSourceTermsHeating(Cell *cell, const double &dt, const
   //    f -= m_masse[k] * vk[k];
   //    df -= m_masse[k] * dvkdp;
   //  }
-  //} while (abs(f)>1e-12);
+  //} while (std::fabs(f)>1e-12);
 
   ////Cell update
   //Phase *phase;

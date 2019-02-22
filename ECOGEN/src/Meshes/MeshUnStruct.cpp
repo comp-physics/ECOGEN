@@ -355,7 +355,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  Element *e1(cellInterfaces[i]->getB(BG1M)->getElement());
         //  Coord v1 = e1->vecteur(eG);
         //  Coord sin1(Coord::sin(v1, vG));
-        //  if (abs(sin1.norm()) <= 1e-8) {
+        //  if (std::fabs(sin1.norm()) <= 1e-8) {
         //    cellInterfaces[i]->setB(BG2M, cellInterfaces[i]->getB(BG1M)); // Si le cos est nul, meme cell pour B1 et B2
         //  }
         //  else {
@@ -389,7 +389,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //double a, b, beta1(1.), beta2(0.);
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
-        //if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+        //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
         //cellInterfaces[i]->setBeta(betaG1M, beta1);
         //cellInterfaces[i]->setBeta(betaG2M, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
@@ -432,7 +432,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  Element *e1(cellInterfaces[i]->getB(BG1P)->getElement());
         //  Coord v1 = e1->vecteur(eG);
         //  Coord sin1(Coord::sin(v1, vG));
-        //  if (abs(sin1.norm()) <= 1e-8) {
+        //  if (std::fabs(sin1.norm()) <= 1e-8) {
         //    cellInterfaces[i]->setB(BG2P, cellInterfaces[i]->getB(BG1P)); // Si le cos est nul, meme cell pour B1 et B2
         //  }
         //  else {
@@ -466,7 +466,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //beta1 = 1., beta2 = 0.;
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
-        //if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+        //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
         //cellInterfaces[i]->setBeta(betaG1P, beta1);
         //cellInterfaces[i]->setBeta(betaG2P, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
@@ -516,7 +516,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //    Element *e1(cellInterfaces[i]->getB(BD1M)->getElement());
         //    Coord v1 = e1->vecteur(eD);
         //    Coord sin1(Coord::sin(v1, vD));
-        //    if (abs(sin1.norm()) <= 1e-8) {
+        //    if (std::fabs(sin1.norm()) <= 1e-8) {
         //      cellInterfaces[i]->setB(BD2M, cellInterfaces[i]->getB(BD1M)); // Si le cos est nul, meme cell pour B1 et B2
         //    }
         //    else {
@@ -550,7 +550,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  beta1 = 1.; beta2 = 0.;
         //  a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //  b = (MB2.vectoriel(MB)).norm() / MB.norm();
-        //  if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+        //  if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
         //  cellInterfaces[i]->setBeta(betaD1M, beta1);
         //  cellInterfaces[i]->setBeta(betaD2M, beta2);
         //  //Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
@@ -593,7 +593,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //    Element *e1(cellInterfaces[i]->getB(BD1P)->getElement());
         //    Coord v1 = e1->vecteur(eD);
         //    Coord sin1(Coord::sin(v1, vD));
-        //    if (abs(sin1.norm()) <= 1e-8) {
+        //    if (std::fabs(sin1.norm()) <= 1e-8) {
         //      cellInterfaces[i]->setB(BD2P, cellInterfaces[i]->getB(BD1P)); // Si le cos est nul, meme cell pour B1 et B2
         //    }
         //    else {
@@ -628,7 +628,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //beta1 = 1., beta2 = 0.;
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
-        //if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+        //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
         //cellInterfaces[i]->setBeta(betaD1P, beta1);
         //cellInterfaces[i]->setBeta(betaD2P, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
@@ -1923,7 +1923,7 @@ void MeshUnStruct::rechercheElementsArrieres(ElementNS *element, FaceNS *face, C
   //  Element *e1(cellInterface->getB(BG1M)->getElement());
   //  Coord v1 = e1->vecteur(element);
   //  Coord sin1(Coord::sin(v1, vG));
-  //  if (abs(sin1.norm()) <= 1e-8) {
+  //  if (std::fabs(sin1.norm()) <= 1e-8) {
   //    cellInterface->setB(BG2M, cellInterface->getB(BG1M)); // Si le cos est nul, meme cell pour B1 et B2
   //  }
   //  else {
@@ -1957,7 +1957,7 @@ void MeshUnStruct::rechercheElementsArrieres(ElementNS *element, FaceNS *face, C
   //double a, b, beta1(1.), beta2(0.);
   //a = (MB1.vectoriel(MB)).norm() / MB.norm();
   //b = (MB2.vectoriel(MB)).norm() / MB.norm();
-  //if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+  //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
   //cellInterface->setBeta(betaG1M, beta1);
   //cellInterface->setBeta(betaG2M, beta2);
   ////Calcul de la distance du vertex M (cell interface) au vertex H (barycenter)
@@ -2008,7 +2008,7 @@ void MeshUnStruct::rechercheElementsAvants(ElementNS *element, FaceNS *face, Cel
   //  Element *e1(cellInterface->getB(BG1P)->getElement());
   //  Coord v1 = e1->vecteur(element);
   //  Coord sin1(Coord::sin(v1, vG));
-  //  if (abs(sin1.norm()) <= 1e-8) {
+  //  if (std::fabs(sin1.norm()) <= 1e-8) {
   //    cellInterface->setB(BG2P, cellInterface->getB(BG1P)); // Si le cos est nul, meme cell pour B1 et B2
   //  }
   //  else {
@@ -2042,7 +2042,7 @@ void MeshUnStruct::rechercheElementsAvants(ElementNS *element, FaceNS *face, Cel
   //double a, b, beta1(1.), beta2(0.);
   //a = (MB1.vectoriel(MB)).norm() / MB.norm();
   //b = (MB2.vectoriel(MB)).norm() / MB.norm();
-  //if (abs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
+  //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
   //cellInterface->setBeta(betaG1P, beta1);
   //cellInterface->setBeta(betaG2P, beta2);
   ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)

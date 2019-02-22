@@ -329,16 +329,16 @@ void APKSurfaceTension::addSymmetricTermsRadialAxeOnY(Cell *cell, const int &num
     fluxBufferKapila->m_qdm.setY(-m_sigma * w2*w2 / normW / r);
     fluxBufferKapila->m_energMixture = -m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r;
 
-    //if ((abs(-m_sigma * w1*w2 / normW / r) + abs(-m_sigma * w2*w2 / normW / r)) > 2*(abs(cell->getCons()->getQdm().getX()) + abs(cell->getCons()->getQdm().getY()))) {
-    //  fluxBufferKapila->m_qdm.setX((-m_sigma * w1*w2 / normW / r) * 2*(abs(cell->getCons()->getQdm().getX()) + abs(cell->getCons()->getQdm().getY())) / (abs(-m_sigma * w1*w2 / normW / r) + abs(-m_sigma * w2*w2 / normW / r)));
-    //  fluxBufferKapila->m_qdm.setY((-m_sigma * w2*w2 / normW / r) * 2*(abs(cell->getCons()->getQdm().getX()) + abs(cell->getCons()->getQdm().getY())) / (abs(-m_sigma * w1*w2 / normW / r) + abs(-m_sigma * w2*w2 / normW / r)));
+    //if ((std::fabs(-m_sigma * w1*w2 / normW / r) + std::fabs(-m_sigma * w2*w2 / normW / r)) > 2*(std::fabs(cell->getCons()->getQdm().getX()) + std::fabs(cell->getCons()->getQdm().getY()))) {
+    //  fluxBufferKapila->m_qdm.setX((-m_sigma * w1*w2 / normW / r) * 2*(std::fabs(cell->getCons()->getQdm().getX()) + std::fabs(cell->getCons()->getQdm().getY())) / (std::fabs(-m_sigma * w1*w2 / normW / r) + std::fabs(-m_sigma * w2*w2 / normW / r)));
+    //  fluxBufferKapila->m_qdm.setY((-m_sigma * w2*w2 / normW / r) * 2*(std::fabs(cell->getCons()->getQdm().getX()) + std::fabs(cell->getCons()->getQdm().getY())) / (std::fabs(-m_sigma * w1*w2 / normW / r) + std::fabs(-m_sigma * w2*w2 / normW / r)));
     //}
     //else {
     //  fluxBufferKapila->m_qdm.setX(-m_sigma * w1*w2 / normW / r);
     //  fluxBufferKapila->m_qdm.setY(-m_sigma * w2*w2 / normW / r);
     //}
-    //if (abs(-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r) > 2*abs(cell->getCons()->getEnergyMix())) {
-    //  fluxBufferKapila->m_energMixture = (-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r) * 2*abs(cell->getCons()->getEnergyMix()) / abs(-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r);
+    //if (std::fabs(-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r) > 2*std::fabs(cell->getCons()->getEnergyMix())) {
+    //  fluxBufferKapila->m_energMixture = (-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r) * 2*std::fabs(cell->getCons()->getEnergyMix()) / std::fabs(-m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r);
     //}
     //else {
     //  fluxBufferKapila->m_energMixture = -m_sigma / normW * (w1*w2*cell->getMixture()->getU() + w2*w2*cell->getMixture()->getV()) / r;

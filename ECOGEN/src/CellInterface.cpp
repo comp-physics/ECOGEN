@@ -254,9 +254,9 @@ void CellInterface::computeCritereAMR(const double &criteriaVar, std::string nam
   cd = m_cellRight->selectScalar(nameVariable, num);
 
   // Valeur de la variation
-  valueMin = std::min(abs(cd), abs(cg));
+  valueMin = std::min(std::fabs(cd), std::fabs(cg));
   if (valueMin < 1.e-2) { valueMin = 1.e-2; } //Utile pour alpha (quasi-seulement) ou velocity
-  variation = abs(cd - cg) / valueMin;
+  variation = std::fabs(cd - cg) / valueMin;
 
   //Mise a jour de xi si la variation est superieure au criteria
   if (variation >= criteriaVar) {
@@ -390,7 +390,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
         //Face selon X
         //------------
-        if (abs(m_face->getNormal().getX()) > epsilon) {
+        if (std::fabs(m_face->getNormal().getX()) > epsilon) {
           //Cote gauche
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
             for (int i = 0; i < 2; i++) {
@@ -501,7 +501,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
         //Face selon X
         //------------
-        if (abs(m_face->getNormal().getX()) > epsilon) {
+        if (std::fabs(m_face->getNormal().getX()) > epsilon) {
           //Cote gauche
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
             //First face
@@ -584,7 +584,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
       //Face selon X
       //------------
-      if (abs(m_face->getNormal().getX()) > epsilon) {
+      if (std::fabs(m_face->getNormal().getX()) > epsilon) {
         //Cote gauche
         if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
           for (int i = 0; i < 4; i++) {
@@ -663,7 +663,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
       //Face selon Y
       //------------
-      else if (abs(m_face->getNormal().getY()) > epsilon) {
+      else if (std::fabs(m_face->getNormal().getY()) > epsilon) {
         //Cote bas
         if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
           for (int i = 0; i < 4; i++) {
@@ -834,7 +834,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
       //Face selon X
       //------------
-      if (abs(abs(m_face->getNormal().getX()) - 1.) < epsilon) {
+      if (std::fabs(std::fabs(m_face->getNormal().getX()) - 1.) < epsilon) {
         //Cote gauche
         if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
           if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
@@ -893,7 +893,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
       //Face selon Y
       //------------
-      else if (abs(abs(m_face->getNormal().getY()) - 1.) < epsilon) {
+      else if (std::fabs(std::fabs(m_face->getNormal().getY()) - 1.) < epsilon) {
         //Cote bas
         if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
           if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
@@ -1093,7 +1093,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 
 				//Face in the x-direction
 				//-----------------------
-        if (abs(m_face->getNormal().getX()) > 0.99) {
+        if (std::fabs(m_face->getNormal().getX()) > 0.99) {
           //Left side
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
             for (int i = 0; i < 2; i++) {
@@ -1141,7 +1141,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
         }
         //Face in the y-direction
         //-----------------------
-        else if (abs(m_face->getNormal().getY()) > 0.99) {
+        else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
           //Bottom side
           if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
             for (int i = 0; i < 2; i++) {
@@ -1203,7 +1203,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 
 				//Face in the x-direction
 				//-----------------------
-        if (abs(m_face->getNormal().getX()) > 0.99) {
+        if (std::fabs(m_face->getNormal().getX()) > 0.99) {
           //Left side
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
             //First face
@@ -1233,7 +1233,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
         }
         //Face in the y-direction
         //-----------------------
-        else if (abs(m_face->getNormal().getY()) > 0.99) {
+        else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
           //Bottom side
           if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
             //First face
@@ -1285,7 +1285,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 
       //Face in the x-direction
       //-----------------------
-      if (abs(m_face->getNormal().getX()) > 0.99) {
+      if (std::fabs(m_face->getNormal().getX()) > 0.99) {
         //Left side
         if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
           for (int i = 0; i < 4; i++) {
@@ -1363,7 +1363,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
       }
       //Face in the y-direction
       //-----------------------
-      else if (abs(m_face->getNormal().getY()) > 0.99) {
+      else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
         //Bottom side
         if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
           for (int i = 0; i < 4; i++) {
@@ -1442,7 +1442,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
       }
       //Face in the z-direction
       //-----------------------
-      else if (abs(m_face->getNormal().getZ()) > 0.99) {
+      else if (std::fabs(m_face->getNormal().getZ()) > 0.99) {
         //Back side
         if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
           for (int i = 0; i < 4; i++) {
@@ -1534,7 +1534,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 
       //Face in the x-direction
       //-----------------------
-      if (abs(m_face->getNormal().getX()) > 0.99) {
+      if (std::fabs(m_face->getNormal().getX()) > 0.99) {
         //Left side
         if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
           if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
@@ -1592,7 +1592,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
       }
       //Face in the y-direction
       //-----------------------
-      else if (abs(m_face->getNormal().getY()) > 0.99) {
+      else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
         //Bottom side
         if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
@@ -1650,7 +1650,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
       }
       //Face in the z-direction
       //-----------------------
-      else if (abs(m_face->getNormal().getZ()) > 0.99) {
+      else if (std::fabs(m_face->getNormal().getZ()) > 0.99) {
         //Back side
         if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
           if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {

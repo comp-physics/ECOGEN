@@ -86,14 +86,14 @@ void EosIG::assignParametersEos(std::string name, std::vector<double> parameters
 //****************
 double EosIG::computeTemperature(const double &density, const double &pressure) const
 {
-  return pressure/(m_gamma-1.)/std::max(density, epsilon)/m_cv;
+  return pressure/(m_gamma-1.)/std::max(density, epsilonAlphaNull)/m_cv;
 }
 
 //***********************************************************************
 
 double EosIG::computeEnergy(const double &density, const double &pressure) const
 {
-  return pressure/ (m_gamma-1.)/std::max(density, epsilon) + m_eRef;
+  return pressure/ (m_gamma-1.)/std::max(density, epsilonAlphaNull) + m_eRef;
 }
 
 //***********************************************************************
@@ -107,43 +107,43 @@ double EosIG::computePressure(const double &density, const double &energy) const
 
 double EosIG::computeDensity(const double &pressure, const double &temperature) const
 {
-  return pressure/std::max(((m_gamma - 1.)*m_cv*temperature), epsilon);
+  return pressure/std::max(((m_gamma - 1.)*m_cv*temperature), epsilonAlphaNull);
 }
 
 //***********************************************************************
 
 double EosIG::computeSoundSpeed(const double &density, const double &pressure) const
 {
-  return sqrt(m_gamma*pressure/std::max(density, epsilon));
+  return sqrt(m_gamma*pressure/std::max(density, epsilonAlphaNull));
 }
 
 //***********************************************************************
 
 double EosIG::computeEntropy(const double &temperature, const double &pressure) const
 {
-  return m_cv*log(pow(temperature, m_gamma) / std::max(pow(pressure, m_gamma - 1.), epsilon)) + m_sRef;
+  return m_cv*log(pow(temperature, m_gamma) / std::max(pow(pressure, m_gamma - 1.), epsilonAlphaNull)) + m_sRef;
 }
 
 //***********************************************************************
 
 double EosIG::computePressureIsentropic(const double &initialPressure, const double &initialDensity, const double &finalDensity) const
 {
-  return initialPressure*pow(finalDensity/std::max(initialDensity, epsilon),m_gamma);
+  return initialPressure*pow(finalDensity/std::max(initialDensity, epsilonAlphaNull),m_gamma);
 }
 
 //***********************************************************************
 
 double EosIG::computePressureHugoniot(const double &initialPressure, const double &initialDensity, const double &finalDensity) const
 {
-  return initialPressure*((m_gamma+1.)*finalDensity-(m_gamma-1.)*initialDensity)/std::max(((m_gamma+1.)*initialDensity-(m_gamma-1.)*finalDensity), epsilon);
+  return initialPressure*((m_gamma+1.)*finalDensity-(m_gamma-1.)*initialDensity)/std::max(((m_gamma+1.)*initialDensity-(m_gamma-1.)*finalDensity), epsilonAlphaNull);
 }
 
 //***********************************************************************
 
 double EosIG::computeDensityIsentropic(const double &initialPressure, const double &initialDensity, const double &finalPressure, double *drhodp) const
 {
-  double finalDensity(initialDensity*pow(finalPressure/std::max(initialPressure, epsilon),1./m_gamma));
-  if(drhodp!=NULL) *drhodp = finalDensity/std::max((m_gamma*finalPressure), epsilon);
+  double finalDensity(initialDensity*pow(finalPressure/std::max(initialPressure, epsilonAlphaNull),1./m_gamma));
+  if(drhodp!=NULL) *drhodp = finalDensity/std::max((m_gamma*finalPressure), epsilonAlphaNull);
   return finalDensity;
 }
 
@@ -153,8 +153,8 @@ double EosIG::computeDensityHugoniot(const double &initialPressure, const double
 {
   double num((m_gamma + 1.)*finalPressure + (m_gamma - 1.)*initialPressure);
   double denom((m_gamma - 1.)*finalPressure + (m_gamma + 1.)*initialPressure);
-  double finalDensity(initialDensity*num / std::max(denom, epsilon));
-  if (drhodp != NULL) *drhodp = initialDensity*4.*m_gamma*initialPressure / std::max((denom*denom), epsilon);
+  double finalDensity(initialDensity*num / std::max(denom, epsilonAlphaNull));
+  if (drhodp != NULL) *drhodp = initialDensity*4.*m_gamma*initialPressure / std::max((denom*denom), epsilonAlphaNull);
   return finalDensity;
 }
 
@@ -164,8 +164,8 @@ double EosIG::computeDensityPfinal(const double &initialPressure, const double &
 {
   double num((m_gamma)*finalPressure);
   double denom(num + initialPressure - finalPressure);
-  double finalDensity(initialDensity*num / std::max(denom, epsilon));
-  if (drhodp != NULL) *drhodp = initialDensity*m_gamma*initialPressure / std::max((denom*denom), epsilon);
+  double finalDensity(initialDensity*num / std::max(denom, epsilonAlphaNull));
+  if (drhodp != NULL) *drhodp = initialDensity*m_gamma*initialPressure / std::max((denom*denom), epsilonAlphaNull);
   return finalDensity;
 }
 
@@ -175,8 +175,8 @@ double EosIG::computeEnthalpyIsentropic(const double &initialPressure, const dou
 {
   double finalRho, drho;
   finalRho = this->computeDensityIsentropic(initialPressure, initialDensity, finalPressure, &drho);
-  double finalEnthalpy(m_gamma*finalPressure/(m_gamma-1.) / std::max(finalRho, epsilon) +m_eRef);
-  if (dhdp != NULL) *dhdp = m_gamma / (m_gamma - 1.)*(finalRho - finalPressure*drho) / std::max((finalRho*finalRho), epsilon);
+  double finalEnthalpy(m_gamma*finalPressure/(m_gamma-1.) / std::max(finalRho, epsilonAlphaNull) +m_eRef);
+  if (dhdp != NULL) *dhdp = m_gamma / (m_gamma - 1.)*(finalRho - finalPressure*drho) / std::max((finalRho*finalRho), epsilonAlphaNull);
   return finalEnthalpy;
 }
 
@@ -187,9 +187,9 @@ double EosIG::computeDensitySaturation(const double &pressure, const double &Tsa
   double rho;
   if (drhodp != NULL) {
     *drhodp = (m_gamma - 1.)*m_cv*Tsat - pressure*(m_gamma - 1.)*m_cv*dTsatdP;
-    *drhodp /= std::max((((m_gamma - 1.)*m_cv*Tsat)*((m_gamma - 1.)*m_cv*Tsat)), epsilon);
+    *drhodp /= std::max((((m_gamma - 1.)*m_cv*Tsat)*((m_gamma - 1.)*m_cv*Tsat)), epsilonAlphaNull);
   }
-  rho = pressure / std::max(((m_gamma - 1.)*m_cv*Tsat), epsilon);
+  rho = pressure / std::max(((m_gamma - 1.)*m_cv*Tsat), epsilonAlphaNull);
   return rho;
 }
 
@@ -216,21 +216,21 @@ void EosIG::sendSpecialMixtureEos(double &gamPinfOverGamMinusOne, double &eRef, 
 
 double EosIG::vfpfh(const double &pressure, const double &enthalpy) const
 {
-  return (m_gamma - 1.)*(enthalpy - m_eRef) / std::max((m_gamma*pressure), epsilon);
+  return (m_gamma - 1.)*(enthalpy - m_eRef) / std::max((m_gamma*pressure), epsilonAlphaNull);
 }
 
 //***********************************************************************
 
 double EosIG::dvdpch(const double &pressure, const double &enthalpy) const
 {
-  return (1. - m_gamma) / m_gamma * (enthalpy - m_eRef) / std::max((pressure*pressure), epsilon);
+  return (1. - m_gamma) / m_gamma * (enthalpy - m_eRef) / std::max((pressure*pressure), epsilonAlphaNull);
 }
 
 //***********************************************************************
 
 double EosIG::dvdhcp(const double &pressure, const double &enthalpy) const
 {
-  return (m_gamma - 1.) / m_gamma / std::max(pressure, epsilon);
+  return (m_gamma - 1.) / m_gamma / std::max(pressure, epsilonAlphaNull);
 }
 
 //***********************************************************************

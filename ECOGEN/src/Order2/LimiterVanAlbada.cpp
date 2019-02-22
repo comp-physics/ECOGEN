@@ -48,7 +48,7 @@ double LimiterVanAlbada::limiteSlope(const double& slope1, const double& slope2)
 {
 	double zero(1e-6);
 	double slope(0.), produit(slope1*slope2), somme(slope1 + slope2);
-	if( (abs(slope1)>zero) && (abs(slope2)>zero) && (abs(somme)>zero)  && (produit>zero)){
+	if( (std::fabs(slope1)>zero) && (std::fabs(slope2)>zero) && (std::fabs(somme)>zero)  && (produit>zero)){
 		slope = produit*somme / (slope1*slope1 + slope2*slope2);
 	}
 	return slope;

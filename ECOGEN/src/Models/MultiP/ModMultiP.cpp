@@ -109,13 +109,13 @@ void ModMultiP::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, const int &n
   sL = std::min(uL - cL, uR - cR);
   sR = std::max(uR + cR, uL + cL);
 
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
-  if (abs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / abs(sR));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
+  if (std::fabs(sR)>1.e-3) dtMax = std::min(dtMax, dxRight / std::fabs(sR));
 
   //compute left and right mass flow rates and sM
   double mL(rhoL*(sL - uL)), mR(rhoR*(sR - uR)), mkL, mkR;
   double sM((pR - pL + mL*uL - mR*uR) / (mL - mR));
-  if (abs(sM)<1.e-8) sM = 0.;
+  if (std::fabs(sM)<1.e-8) sM = 0.;
 
   //Solution sampling
   if (sL >= 0.){
@@ -223,7 +223,7 @@ void ModMultiP::solveRiemannWall(Cell &cellLeft, const int &numberPhases, const 
   double uL = cellLeft.getMixture()->getVelocity().getX(), cL = cellLeft.getMixture()->getFrozenSoundSpeed(), pL = cellLeft.getMixture()->getPressure(), rhoL = cellLeft.getMixture()->getDensity();
 
   sL = std::min(uL - cL, -uL - cL);
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
 
   pStar = rhoL*(uL - sL)*uL + pL;
 
@@ -264,7 +264,7 @@ void ModMultiP::solveRiemannInflow(Cell &cellLeft, const int &numberPhases, cons
   //-----------------------------------------------------
   //Estimates for acoustic wave sL
   sL = uL - cL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   zL = rhoL*cL;
 
   int iteration(0);
@@ -295,7 +295,7 @@ void ModMultiP::solveRiemannInflow(Cell &cellLeft, const int &numberPhases, cons
       f -= TB->Yk0[k] * TB->vkStar[k];
       df -= TB->Yk0[k] * dvk;
     }
-  } while (abs(f)>1e-10);
+  } while (std::fabs(f)>1e-10);
 
   //Flux completion
   double Estar(0.5*(u*u + vL*vL + wL*wL)), ek, rhok;
@@ -335,13 +335,13 @@ void ModMultiP::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const 
     vecPhase = cellLeft.getPhase(k);
     //TB->rhokStar[k] = TB->eos[k]->computeDensityIsentropic(vecPhase->getPressure(), vecPhase->getDensity(), pStar); //other possiblity
     TB->rhokStar[k] = TB->eos[k]->computeDensityHugoniot(vecPhase->getPressure(), vecPhase->getDensity(), pStar);
-    vStar += vecPhase->getAlpha()*vecPhase->getDensity() / rhoL / TB->rhokStar[k];
+    vStar += vecPhase->getAlpha()*vecPhase->getDensity() / rhoL / std::max(TB->rhokStar[k], epsilonAlphaNull);
   }
   vmv0 = vStar - 1. / rhoL;
-  if (abs(vmv0) > 1e-10) { mL = sqrt((pL - pStar) / vmv0); }
+  if (std::fabs(vmv0) > 1e-10) { mL = sqrt((pL - pStar) / vmv0); }
   else { mL = zL; }
   sL = uL - mL / rhoL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   sM = uL + mL*vmv0;
 
   //2) Check for pathologic cases
@@ -411,11 +411,11 @@ void ModMultiP::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const 
         //rhok = TB->eos[k]->computeDensityIsentropic(vecPhase->getPressure(), vecPhase->getDensity(), p, &drhok); //other possiblity
         rhok = TB->eos[k]->computeDensityHugoniot(vecPhase->getPressure(), vecPhase->getDensity(), p, &drhok);
         YkL = vecPhase->getAlpha()*vecPhase->getDensity() / rhoL;
-        vStarL += YkL / rhok;
-        dvStarL -= YkL / (rhok * rhok) * drhok;
+        vStarL += YkL / std::max(rhok, epsilonAlphaNull);
+        dvStarL -= YkL / std::max((rhok * rhok), epsilonAlphaNull) * drhok;
       }
       vmv0 = vStarL - 1. / rhoL;
-      if (abs(vmv0) > 1e-10) {
+      if (std::fabs(vmv0) > 1e-10) {
         mL = sqrt((pL - p) / vmv0);
         dmL = 0.5*(-vmv0 + (p - pL)*dvStarL) / (vmv0*vmv0) / mL;
       }
@@ -424,19 +424,19 @@ void ModMultiP::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const 
         dmL = 0.;
       }
       sL = uL - mL / rhoL;
-      if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+      if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
       uStarL = uL + mL*vmv0;
       duStarL = dmL*vmv0 + mL*dvStarL;
       //solved function
       f = uStarR - uStarL;
       df = duStarR - duStarL;
-    } while (abs(f)>1e-3); //End iterative loop
+    } while (std::fabs(f)>1e-3); //End iterative loop
     pStar = p;
     uStar = 0.5*(uStarL + uStarR);
     rhoStar = 0.;
     for (int k = 0; k < numberPhases; k++) { 
       TB->YkStar[k] = TB->Yk0[k];
-      rhoStar += TB->YkStar[k] / TB->rhokStar[k];
+      rhoStar += TB->YkStar[k] / std::max(TB->rhokStar[k], epsilonAlphaNull);
     }
     rhoStar = 1. / rhoStar;
     uyStar = 0.;
@@ -448,7 +448,7 @@ void ModMultiP::solveRiemannTank(Cell &cellLeft, const int &numberPhases, const 
   double EStar(0.5*(uStar*uStar + uyStar*uyStar + uzStar*uzStar)), ek;
   for (int k = 0; k < numberPhases; k++) {
     ek = TB->eos[k]->computeEnergy(TB->rhokStar[k], pStar); EStar += TB->YkStar[k] * ek;
-    fluxBufferMultiP->m_alpha[k] = TB->YkStar[k] * rhoStar / TB->rhokStar[k] * uStar;
+    fluxBufferMultiP->m_alpha[k] = TB->YkStar[k] * rhoStar / std::max(TB->rhokStar[k], epsilonAlphaNull) * uStar;
     fluxBufferMultiP->m_masse[k] = fluxBufferMultiP->m_alpha[k] * TB->rhokStar[k];
     fluxBufferMultiP->m_energ[k] = fluxBufferMultiP->m_masse[k] * ek;
   }
@@ -481,13 +481,13 @@ void ModMultiP::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, con
     vecPhase = cellLeft.getPhase(k);
     //TB->rhokStar[k] = TB->eos[k]->computeDensityIsentropic(pL, vecPhase->getDensity(), pStar); //other possiblity
     TB->rhokStar[k] = TB->eos[k]->computeDensityHugoniot(pL, vecPhase->getDensity(), pStar);
-    vStar += vecPhase->getAlpha()*vecPhase->getDensity() /rhoL / TB->rhokStar[k];
+    vStar += vecPhase->getAlpha()*vecPhase->getDensity() / rhoL / std::max(TB->rhokStar[k], epsilonAlphaNull);
   }
   vSmvL = vStar - 1. / rhoL;
-  if (abs(vSmvL) > 1e-10) { mL = sqrt((pL - pStar) / vSmvL); }
+  if (std::fabs(vSmvL) > 1e-10) { mL = sqrt((pL - pStar) / vSmvL); }
 //  else { cout << "bug" << endl;  mL = zL; }
   sL = uL - mL / rhoL;
-  if (abs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / abs(sL));
+  if (std::fabs(sL)>1.e-3) dtMax = std::min(dtMax, dxLeft / std::fabs(sL));
   sM = uL + mL*vSmvL;
 
   //Pathologic case sL>0
@@ -516,7 +516,7 @@ void ModMultiP::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, con
     vecPhase = cellLeft.getPhase(k);
     double YkL = vecPhase->getAlpha()*vecPhase->getDensity() / rhoL;
     ekStar = TB->eos[k]->computeEnergy(TB->rhokStar[k], pStar);
-    fluxBufferMultiP->m_alpha[k] = YkL / TB->rhokStar[k] / vStar * uStar;
+    fluxBufferMultiP->m_alpha[k] = YkL / std::max(TB->rhokStar[k], epsilonAlphaNull) / vStar * uStar;
     fluxBufferMultiP->m_masse[k] = fluxBufferMultiP->m_alpha[k] * TB->rhokStar[k];
     fluxBufferMultiP->m_energ[k] = fluxBufferMultiP->m_masse[k] * ekStar;
   }

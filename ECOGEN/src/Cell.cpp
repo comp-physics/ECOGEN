@@ -154,6 +154,15 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
   // m_vecPhases[1]->setPressure(pressure);
   // m_vecPhases[0]->setPressure(pressure);
   // m_mixture->setPressure(pressure);
+
+  //Initial smearing for 1D cavitation test case. Uncomment only when needed.
+  // double coordX;
+  // coordX = pow(pow(coordinates.getX(), 2.), 0.5); //1D
+  // double variation(0.);
+  // double h(1./500./pow(2., (double)lvlMax));
+  // variation = 1. / 2.*(1. - tanh((coordX - 0.5)/1.5/h));
+  // double velocity(variation*(-100.)+(1.-variation)*100.);
+  // m_mixture->setVelocity(velocity, 0., 0.);
 }
 
 //***********************************************************************
@@ -219,7 +228,7 @@ void Cell::timeEvolution(const double &dt, const int &numberPhases, const int &n
   symmetry->addSymmetricTerms(this, numberPhases, type);     //m_cons is incremented by the symmetric terms from primitive variables at time n
   m_cons->multiply(dt, numberPhases);                        //m_cons is multiplied by dt
   m_cons->addFlux(1., numberPhases);                         //Adding the buffer fluxTempXXX to obtain Un+1 in m_cons
-  m_cons->schemeCorrection(this, numberPhases);              //Specific correction for non conservative models
+  m_cons->schemeCorrection(this, numberPhases);              //Specific correction for non-conservative models
 
   //Same process for transport (Un construction not needed)
   for (int k = 0; k < numberTransports; k++) {
@@ -347,8 +356,8 @@ void Cell::copyVec(Phase **vecPhases, Mixture *mixture, Transport *vecTransports
 //
 //    //imprX = true;
 //    //imprY = false;
-//    //if (abs(m_element->getPosition().getX() - m_element->getPosition().getY()) < 1.e-6) {
-//    if (abs(position - valueCut - epsilon) < dLsur2) {
+//    //if (std::fabs(m_element->getPosition().getX() - m_element->getPosition().getY()) < 1.e-6) {
+//    if (std::fabs(position - valueCut - epsilon) < dLsur2) {
 //      m_element->ecritPos(fileStream, imprX, imprY, imprZ);
 //      this->printPhasesMixture(m_numberPhases, m_numberTransports, fileStream);
 //      fileStream << m_lvl << " " << m_xi << " ";
@@ -401,7 +410,7 @@ void Cell::copyVec(Phase **vecPhases, Mixture *mixture, Transport *vecTransports
 //      position2 = m_element->getPosition().getZ();
 //    }
 //
-//    if ((abs(position1 - valueCut1 - epsilon1) < dL1sur2) && (abs(position2 - valueCut2 - epsilon2) < dL2sur2)) {
+//    if ((std::fabs(position1 - valueCut1 - epsilon1) < dL1sur2) && (std::fabs(position2 - valueCut2 - epsilon2) < dL2sur2)) {
 //      m_element->ecritPos(fileStream, imprX, imprY, imprZ);
 //      this->printPhasesMixture(m_numberPhases, m_numberTransports, fileStream);
 //      fileStream << m_lvl << " " << m_xi << " ";
@@ -561,9 +570,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
         double distanceX(m_cellInterfaces[b]->getCellGauche()->distanceX(m_cellInterfaces[b]->getCellDroite()));
         double distanceY(m_cellInterfaces[b]->getCellGauche()->distanceY(m_cellInterfaces[b]->getCellDroite()));
         double distanceZ(m_cellInterfaces[b]->getCellGauche()->distanceZ(m_cellInterfaces[b]->getCellDroite()));
-        distanceX = abs(distanceX);
-        distanceY = abs(distanceY);
-        distanceZ = abs(distanceZ);
+        distanceX = std::fabs(distanceX);
+        distanceY = std::fabs(distanceY);
+        distanceZ = std::fabs(distanceZ);
 
         gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
 
@@ -577,9 +586,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
         double distanceX(this->distanceX(m_cellInterfaces[b]));
         double distanceY(this->distanceY(m_cellInterfaces[b]));
         double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-        distanceX = abs(distanceX)*2.;
-        distanceY = abs(distanceY)*2.;
-        distanceZ = abs(distanceZ)*2.;
+        distanceX = std::fabs(distanceX)*2.;
+        distanceY = std::fabs(distanceY)*2.;
+        distanceZ = std::fabs(distanceZ)*2.;
         sommeDistanceX += distanceX;
         sommeDistanceY += distanceY;
         sommeDistanceZ += distanceZ;
@@ -608,9 +617,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
           double distanceX(this->distanceX(m_cellInterfaces[b]));
           double distanceY(this->distanceY(m_cellInterfaces[b]));
           double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = abs(distanceX)*2.;
-          distanceY = abs(distanceY)*2.;
-          distanceZ = abs(distanceZ)*2.;
+          distanceX = std::fabs(distanceX)*2.;
+          distanceY = std::fabs(distanceY)*2.;
+          distanceZ = std::fabs(distanceZ)*2.;
 
           gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
 
@@ -624,9 +633,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
           double distanceX(this->distanceX(m_cellInterfaces[b]));
           double distanceY(this->distanceY(m_cellInterfaces[b]));
           double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = abs(distanceX)*2.;
-          distanceY = abs(distanceY)*2.;
-          distanceZ = abs(distanceZ)*2.;
+          distanceX = std::fabs(distanceX)*2.;
+          distanceY = std::fabs(distanceY)*2.;
+          distanceZ = std::fabs(distanceZ)*2.;
           sommeDistanceX += distanceX;
           sommeDistanceY += distanceY;
           sommeDistanceZ += distanceZ;
@@ -651,9 +660,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
           double distanceX(this->distanceX(m_cellInterfaces[b]));
           double distanceY(this->distanceY(m_cellInterfaces[b]));
           double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = abs(distanceX)*2.;
-          distanceY = abs(distanceY)*2.;
-          distanceZ = abs(distanceZ)*2.;
+          distanceX = std::fabs(distanceX)*2.;
+          distanceY = std::fabs(distanceY)*2.;
+          distanceZ = std::fabs(distanceZ)*2.;
 
           gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
 
@@ -667,9 +676,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
           double distanceX(this->distanceX(m_cellInterfaces[b]));
           double distanceY(this->distanceY(m_cellInterfaces[b]));
           double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = abs(distanceX)*2.;
-          distanceY = abs(distanceY)*2.;
-          distanceZ = abs(distanceZ)*2.;
+          distanceX = std::fabs(distanceX)*2.;
+          distanceY = std::fabs(distanceY)*2.;
+          distanceZ = std::fabs(distanceZ)*2.;
           sommeDistanceX += distanceX;
           sommeDistanceY += distanceY;
           sommeDistanceZ += distanceZ;
@@ -2015,7 +2024,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
 		m_childrenCells[i]->getElement()->setLCFL(0.5*lCFLCellParent);
     m_childrenCells[i]->getElement()->setSize((1 - dimX*0.5)*dXParent, (1 - dimY*0.5)*dYParent, (1 - dimZ*0.5)*dZParent);
     //Face in the x-direction
-    if (abs(cellInterfaceRef->getFace()->getNormal().getX()) > 0.99) {
+    if (std::fabs(cellInterfaceRef->getFace()->getNormal().getX()) > 0.99) {
       //Ghost cells are on the right according to internal cells, the positions of the children are thus those on the left side
       if (cellInterfaceRef->getFace()->getPos().getX() < m_element->getPosition().getX()) { posXChild = posXCellParent - dimX*dXParent*0.25; }
       //Ghost cells are on the left according to internal cells, the positions of the children are thus those on the right side
@@ -2024,7 +2033,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
       posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
     }
     //Face in the y-direction
-    else if (abs(cellInterfaceRef->getFace()->getNormal().getY()) > 0.99) {
+    else if (std::fabs(cellInterfaceRef->getFace()->getNormal().getY()) > 0.99) {
       //Ghost cells are on the top according to internal cells, the positions of the children are thus those on the bottom side
       if (cellInterfaceRef->getFace()->getPos().getY() < m_element->getPosition().getY()) { posYChild = posYCellParent - dimY*dYParent*0.25; }
       //Ghost cells are on the bottom according to internal cells, the positions of the children are thus those on the top side
@@ -2033,7 +2042,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
       posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
     }
     //Face in the z-direction
-    else if (abs(cellInterfaceRef->getFace()->getNormal().getZ()) > 0.99) {
+    else if (std::fabs(cellInterfaceRef->getFace()->getNormal().getZ()) > 0.99) {
       //Ghost cells are on the front according to internal cells, the positions of the children are thus those on the back side
       if (cellInterfaceRef->getFace()->getPos().getZ() < m_element->getPosition().getZ()) { posZChild = posZCellParent - dimZ*dZParent*0.25; }
       //Ghost cells are on the back according to internal cells, the positions of the children are thus those on the front side

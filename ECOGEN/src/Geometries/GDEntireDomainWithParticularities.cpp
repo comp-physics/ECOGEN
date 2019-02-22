@@ -95,8 +95,8 @@ void GDEntireDomainWithParticularities::fillIn(Cell *cell, const int &numberPhas
    Coord posElement(cell->getPosition());
    double radius;
    //radius = posElement.getX(); //1D
-   //radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.), 0.5); //2D
-   radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
+   radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.), 0.5); //2D
+   //radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
    //radius = pow(pow(posElement.getX() - 153.6e-3, 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
    pressure = 1.e5 + 1.e-3 / radius * (1.e4 - 1.e5);
    //pressure = 1.e5 + 1.e-3 / radius * (4.e3 - 1.e5);

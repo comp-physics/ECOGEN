@@ -37,7 +37,7 @@
 
 using namespace tinyxml2;
 
-double epsilon;
+double epsilonAlphaNull;
 
 //***********************************************************************
 
@@ -112,10 +112,10 @@ double Eos::getLambda() const { return m_lambda; }
 void Eos::assignEpsilonForAlphaNull(bool alphaNull, std::string fileName) const
 {
   if (alphaNull) {
-    epsilon = 1.e-15;
+    epsilonAlphaNull = 1.e-15;
   }
   else {
-    epsilon = 0.;
+    epsilonAlphaNull = 0.;
   }
 }
 

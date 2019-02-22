@@ -81,7 +81,7 @@ class Eos
 	  //! \brief  get the thermal conductivity of the fluid
 	  //!return    \f$ \lambda \f$ (Unit: W/(m.K)).
 	  double getLambda() const;
-    //! \brief  Assign the epsilon value for alphaNull option (alpha = 0 => epsilon != 0 ; alpha != 0 => epsilon = 0)
+    //! \brief  Assign the epsilonAlphaNull value for alphaNull option (alpha = 0 => epsilonAlphaNull != 0 ; alpha != 0 => epsilonAlphaNull = 0)
     //! \param     alphaNull         \f$\alpha = 0 \f$ (boolean value)
     //! \param     fileName          Name of the open file
     void assignEpsilonForAlphaNull(bool alphaNull, std::string fileName) const;
@@ -164,6 +164,6 @@ class Eos
       double m_lambda;    //!< Thermal conductivity (W/(m.K))
 };
 
-extern double epsilon;    //!< Epsilon value to avoid division by 0 when alpha = 0 is activated. If alpha = 0 desactivated, i.e. alpha != 0, then epsilon = 0.
+extern double epsilonAlphaNull;    //!< Epsilon value to avoid division by 0 when alpha = 0 is activated. If alpha = 0 desactivated, i.e. alpha != 0, then epsilonAlphaNull = 0.
 
 #endif // EOS_H

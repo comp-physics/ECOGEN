@@ -94,7 +94,7 @@ double Mixture::computeTsat(const Eos *eosLiq, const Eos *eosVap, const double &
     }
     f = A + B / Tsat + C*log(Tsat) - log(pressure + pInfV) + D*log(pressure + pInfL);
     df = C / Tsat - B / (Tsat*Tsat);
-  } while (abs(f)>1e-10);
+  } while (std::fabs(f)>1e-10);
 
   double dfdp = -1. / (pressure + pInfV) + D / (pressure + pInfL);
   if (dTsat != 0) *dTsat = -dfdp / df;

@@ -2,8 +2,8 @@
 <CI>
     <!-- LIST OF GEOMETRICAL DOMAINS  -->
     <physicalDomains> 
-        <domain name="base" state="left" type="entireDomain"/>
-        <domain name="HP"  state="right" type="halfSpace">
+        <domain name="base" state="right" type="entireDomain"/>
+        <domain name="HP"  state="left" type="halfSpace">
             <dataHalfSpace axe="x" origin="0.5" direction="negative"/>
         </domain>
     </physicalDomains>
@@ -23,7 +23,7 @@
             <dataFluid alpha="0.99" density="1000.0" pressure="1.e5"/>
         </material>
         <mixture>
-            <velocity x="100." y="0." z="0."/>
+            <velocity x="-100." y="0." z="0."/>
         </mixture>
     </state>
 
@@ -35,7 +35,7 @@
             <dataFluid alpha="0.99" density="1000.0" pressure="1.e5"/>
         </material>
         <mixture>
-            <velocity x="-100." y="0." z="0."/>
+            <velocity x="100." y="0." z="0."/>
         </mixture>
     </state>
 

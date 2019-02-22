@@ -111,9 +111,9 @@ void FluxEuler::buildPrim(Phase **phases, Mixture *mixture, const int &numberPha
   phase->setDensity(m_masse);
   phase->setVelocity(m_qdm.getX() / m_masse, m_qdm.getY() / m_masse, m_qdm.getZ() / m_masse);
   //Erasing small velocity variations
-  if (abs(phase->getU()) < 1.e-8) phase->setU(0.);
-  if (abs(phase->getV()) < 1.e-8) phase->setV(0.);
-  if (abs(phase->getW()) < 1.e-8) phase->setW(0.);
+  if (std::fabs(phase->getU()) < 1.e-8) phase->setU(0.);
+  if (std::fabs(phase->getV()) < 1.e-8) phase->setV(0.);
+  if (std::fabs(phase->getW()) < 1.e-8) phase->setW(0.);
 
   totalEnergy = m_energ / m_masse;
   phase->setTotalEnergy(totalEnergy);

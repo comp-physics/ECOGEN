@@ -56,17 +56,17 @@ void ElementHexahedron::computeVolume(const Coord *noeuds)
   //On va computeer le volume des 6 tetraedres inclus dans l hexaerdre
   Coord v1, v2, v3;
   v1.setFromSubtractedVectors(noeuds[0], noeuds[1]); v2.setFromSubtractedVectors(noeuds[0], noeuds[3]); v3.setFromSubtractedVectors(noeuds[0], noeuds[4]);
-  double volumeT1 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT1 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[3], noeuds[1]); v2.setFromSubtractedVectors(noeuds[3], noeuds[7]); v3.setFromSubtractedVectors(noeuds[3], noeuds[4]);
-  double volumeT2 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT2 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[3], noeuds[1]); v2.setFromSubtractedVectors(noeuds[3], noeuds[7]); v3.setFromSubtractedVectors(noeuds[3], noeuds[2]);
-  double volumeT3 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT3 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[4], noeuds[1]); v2.setFromSubtractedVectors(noeuds[4], noeuds[7]); v3.setFromSubtractedVectors(noeuds[4], noeuds[5]);
-  double volumeT4 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT4 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[7], noeuds[2]); v2.setFromSubtractedVectors(noeuds[7], noeuds[6]); v3.setFromSubtractedVectors(noeuds[7], noeuds[5]);
-  double volumeT5 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT5 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   v1.setFromSubtractedVectors(noeuds[7], noeuds[2]); v2.setFromSubtractedVectors(noeuds[7], noeuds[5]); v3.setFromSubtractedVectors(noeuds[7], noeuds[1]);
-  double volumeT6 = abs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
+  double volumeT6 = std::fabs(Coord::determinant(v1, v2, v3)) / 6.; //volume du tetradre
   m_volume = volumeT1 + volumeT2 + volumeT3 + volumeT4 + volumeT5 + volumeT6; //volume de l Hexahedron
 }
 

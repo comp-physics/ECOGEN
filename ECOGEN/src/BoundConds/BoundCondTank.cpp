@@ -107,7 +107,7 @@ BoundCondTank::BoundCondTank(int numPhysique, XMLElement *element, int &numberPh
         if (m_ak0[k]<0. || m_ak0[k]>1.) throw ErrorXMLAttribut("alpha should be in [0,1]", fileName, __FILE__, __LINE__);
         sum += m_ak0[k];
       }
-      if (abs(sum - 1.) > 1.e-6) { throw ErrorXMLAttribut("sum of alpha should be 1", fileName, __FILE__, __LINE__); }
+      if (std::fabs(sum - 1.) > 1.e-6) { throw ErrorXMLAttribut("sum of alpha should be 1", fileName, __FILE__, __LINE__); }
       else {
         for (int k = 0; k < m_numberPhase; k++) { m_ak0[k] /= sum; }
       }
@@ -117,7 +117,7 @@ BoundCondTank::BoundCondTank(int numPhysique, XMLElement *element, int &numberPh
         if (m_Yk0[k]<0. || m_Yk0[k]>1.) throw ErrorXMLAttribut("massFrac should be in [0,1]", fileName, __FILE__, __LINE__);
         sum += m_Yk0[k];
       }
-      if (abs(sum - 1.) > 1.e-6) { throw ErrorXMLAttribut("sum of massFrac should be 1", fileName, __FILE__, __LINE__); }
+      if (std::fabs(sum - 1.) > 1.e-6) { throw ErrorXMLAttribut("sum of massFrac should be 1", fileName, __FILE__, __LINE__); }
       else {
         for (int k = 0; k < m_numberPhase; k++) { m_Yk0[k] /= sum; }
       }

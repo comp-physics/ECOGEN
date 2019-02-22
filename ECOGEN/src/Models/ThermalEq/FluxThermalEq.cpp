@@ -135,9 +135,9 @@ void FluxThermalEq::buildPrim(Phase **phases, Mixture *mixture, const int &numbe
   }
   mixture->setVelocity(m_qdm.getX() / rhoMel, m_qdm.getY() / rhoMel, m_qdm.getZ() / rhoMel);
   //Erasing small velocity variations
-  if (abs(mixture->getU()) < 1.e-8) mixture->setU(0.);
-  if (abs(mixture->getV()) < 1.e-8) mixture->setV(0.);
-  if (abs(mixture->getW()) < 1.e-8) mixture->setW(0.);
+  if (std::fabs(mixture->getU()) < 1.e-8) mixture->setU(0.);
+  if (std::fabs(mixture->getV()) < 1.e-8) mixture->setV(0.);
+  if (std::fabs(mixture->getW()) < 1.e-8) mixture->setW(0.);
   internalEnergy = m_energMixture / rhoMel - 0.5*(mixture->getU()*mixture->getU() + mixture->getV()*mixture->getV() + mixture->getW()*mixture->getW()) ;
   
   //Pressure and temperature determination

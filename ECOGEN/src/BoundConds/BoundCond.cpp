@@ -166,7 +166,7 @@ void BoundCond::raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCe
 
       //Face selon X
       //------------
-      if (abs(m_face->getNormal().getX()) > epsilon) {
+      if (std::fabs(m_face->getNormal().getX()) > epsilon) {
         //Cote gauche
         if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
           for (int i = 0; i < 2; i++) {
@@ -272,7 +272,7 @@ void BoundCond::raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCe
 
     //Face selon X
     //------------
-    if (abs(m_face->getNormal().getX()) > epsilon) {
+    if (std::fabs(m_face->getNormal().getX()) > epsilon) {
       //Cote gauche
       if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
         for (int i = 0; i < 4; i++) {
@@ -335,7 +335,7 @@ void BoundCond::raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCe
 
     //Face selon Y
     //------------
-    else if (abs(m_face->getNormal().getY()) > epsilon) {
+    else if (std::fabs(m_face->getNormal().getY()) > epsilon) {
       //Cote bas
       if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
         for (int i = 0; i < 4; i++) {
