@@ -302,8 +302,8 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix + 1, iy, iz, iMailleD);
         m_faces.push_back(new FaceCartesian());
-        if ((cells[iMailleG]->getPosition().getY() < yThreshold) && 
-            (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() + m_dXi[0] <= 0.)) {
+        if ((cells[iMailleD]->getPosition().getY() < yThreshold) && 
+            (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleD]->getPosition().getX() <= 0.)) {
           //Inner boundary faces taken as wall
           m_limYm->creeLimite(cellInterfaces);
           cellInterfaces[iFace]->setFace(m_faces[iFace]);
@@ -348,9 +348,11 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix, iy + 1, iz, iMailleD);
         m_faces.push_back(new FaceCartesian());
-        if ((cells[iMailleG]->getPosition().getY() < yThreshold) && 
-            (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) {
+        if (((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+             (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) || 
+             (cells[iMailleG]->getPosition().getY() <= 0.05*yThreshold)) {
           //Inner boundary faces taken as wall
+          tangent.setXYZ(1., 0., 0.); normal.setXYZ(0., -1., 0.); binormal.setXYZ(0., 0., 1.);
           m_limYm->creeLimite(cellInterfaces);
           cellInterfaces[iFace]->setFace(m_faces[iFace]);
           iMailleG = iMailleD;
@@ -359,6 +361,7 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
         }
         else {
           //Normal inner faces
+          tangent.setXYZ(-1., 0., 0.); normal.setXYZ(0., 1., 0.); binormal.setXYZ(0., 0., 1.);
           if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
           else { cellInterfaces.push_back(new CellInterfaceO2); }
           cellInterfaces[iFace]->setFace(m_faces[iFace]);

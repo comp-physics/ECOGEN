@@ -49,7 +49,7 @@ GDEntireDomainWithParticularities::~GDEntireDomainWithParticularities() {}
 bool GDEntireDomainWithParticularities::belong(Coord &posElement, const int &lvl) const
 {
   //1. -------------
-  return true; //always belong to entire domain
+  //return true; //always belong to entire domain
 
   //2. -------------
   //bool result(false);
@@ -65,6 +65,16 @@ bool GDEntireDomainWithParticularities::belong(Coord &posElement, const int &lvl
   //   if (posElement.getX() < 0.02) { result = true; }
   // }
   // return result;
+
+  //4. -------------
+  bool result(false);
+  //Variables for the inner boundary faces
+  double yThreshold(30.e-6), slope(1.732);
+  if ((posElement.getY() < yThreshold) && 
+      (posElement.getY() - slope*(posElement.getX()) <= 0.) ||
+      (posElement.getY() <= 0.05*yThreshold))
+    { result = true; }
+  return result;
 }
 
 //******************************************************************
@@ -90,21 +100,21 @@ void GDEntireDomainWithParticularities::fillIn(Cell *cell, const int &numberPhas
 
   //Particularities
   //1. ------------
-  if (cell->getElement() != 0) {
-   double pressure(0.);
-   Coord posElement(cell->getPosition());
-   double radius;
-   //radius = posElement.getX(); //1D
-   radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.), 0.5); //2D
-   //radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
-   //radius = pow(pow(posElement.getX() - 153.6e-3, 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
-   pressure = 1.e5 + 1.e-3 / radius * (1.e4 - 1.e5);
-   //pressure = 1.e5 + 1.e-3 / radius * (4.e3 - 1.e5);
-   //pressure = 1.e5 + 1.e-3 / radius * (1.e3 - 1.e5);
-   //pressure = 50.6625e5 + 100.e-6 / radius * (3.55e3 - 50.6625e5);
-   for (int k = 0; k < numberPhases; k++) { cell->getPhase(k)->setPressure(pressure); }
-   cell->getMixture()->setPressure(pressure);
-  }
+  // if (cell->getElement() != 0) {
+  //  double pressure(0.);
+  //  Coord posElement(cell->getPosition());
+  //  double radius;
+  //  //radius = posElement.getX(); //1D
+  //  radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.), 0.5); //2D
+  //  //radius = pow(pow(posElement.getX(), 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
+  //  //radius = pow(pow(posElement.getX() - 153.6e-3, 2.) + pow(posElement.getY(), 2.) + pow(posElement.getZ(), 2.), 0.5); //3D
+  //  pressure = 1.e5 + 1.e-3 / radius * (1.e4 - 1.e5);
+  //  //pressure = 1.e5 + 1.e-3 / radius * (4.e3 - 1.e5);
+  //  //pressure = 1.e5 + 1.e-3 / radius * (1.e3 - 1.e5);
+  //  //pressure = 50.6625e5 + 100.e-6 / radius * (3.55e3 - 50.6625e5);
+  //  for (int k = 0; k < numberPhases; k++) { cell->getPhase(k)->setPressure(pressure); }
+  //  cell->getMixture()->setPressure(pressure);
+  // }
 
   //2. ------------
   //Nothing special here
@@ -120,6 +130,9 @@ void GDEntireDomainWithParticularities::fillIn(Cell *cell, const int &numberPhas
   //    cell->getMixture()->setPressure(pressure);
   //  }
   //}
+
+  //4. ------------
+  //Nothing special here
 }
 
 //***********************************************************
