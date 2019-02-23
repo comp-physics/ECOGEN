@@ -45,6 +45,7 @@ MeshCartesianAMR::MeshCartesianAMR(double lX, int numberCellsX, double lY, int n
   m_lvlMax(lvlMax), m_criteriaVar(criteriaVar), m_varRho(varRho), m_varP(varP), m_varU(varU), m_varAlpha(varAlpha), m_xiSplit(xiSplit), m_xiJoin(xiJoin)
 {
   m_type = AMR;
+  parallel = new ParallelAMR;
 }
 
 //***********************************************************************
@@ -55,12 +56,12 @@ MeshCartesianAMR::~MeshCartesianAMR(){
 
 //***********************************************************************
 
-int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
-{
-  this->meshStretching();
-  this->initializeGeometrieAMR(cells, cellInterfaces, ordreCalcul);
-  return m_geometrie;
-}
+//int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+//{
+//  this->meshStretching();
+//  this->initializeGeometrieAMR(cells, cellInterfaces, ordreCalcul);
+//  return m_geometrie;
+//}
 
 
 //***********************************************************************
@@ -145,8 +146,8 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
        offsets[2*d+1][d] =+1;
    }
 
-   std::vector<int> elements_rec;
-   std::vector<int> elements_snd;
+   std::vector<std::vector<ElementCartesian*>> elements_rec;
+   std::vector<std::vector<ElementCartesian*>> elements_snd;
    const auto sizeNonGhostCells=cells.size();
    for(unsigned int i = 0; i < sizeNonGhostCells; ++i)
    {
@@ -427,7 +428,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(std::vector<Cell *> *c
   if (resumeSimulation == 0) { //Only for simulation from input files
     for (int iterInit = 0; iterInit < 2; iterInit++) {
       for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-        if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(cells, eos, lvl); }
+        if (Ncpu > 1) { parallel->communicationsPrimitivesAMR(eos, lvl); }
         this->procedureRaffinement(cellsLvl, cellInterfacesLvl, lvl, addPhys, model, nbCellsTotalAMR, cells, eos);
         for (unsigned int i = 0; i < cellsLvl[lvl + 1].size(); i++) {
           cellsLvl[lvl + 1][i]->fill(domains, m_lvlMax);
@@ -441,7 +442,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(std::vector<Cell *> *c
       }
     }
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(cells, eos, lvl); }
+      if (Ncpu > 1) { parallel->communicationsPrimitivesAMR(eos, lvl); }
       for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
         if (!cellsLvl[lvl][i]->getSplit()) { cellsLvl[lvl][i]->completeFulfillState(); }
       }
@@ -474,7 +475,7 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
   //      cellsLvl[lvl][i]->setToZeroXi();
   //  }
   //}
-  if (Ncpu > 1) { parallel.communicationsXi(cells, lvl); }
+  if (Ncpu > 1) { parallel->communicationsXi( lvl); }
   
   //2) Smoothing de Xi
   //------------------
@@ -487,7 +488,7 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
 
     //Evolution temporelle
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->timeEvolutionXi(); }
-		if (Ncpu > 1) { parallel.communicationsXi(cells, lvl); }
+		if (Ncpu > 1) { parallel->communicationsXi( lvl); }
   }
 
 	if (lvl < m_lvlMax) {
@@ -505,16 +506,16 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
       //5) Raffinement et deraffinement des cells fantomes
       //-----------------------------------------------------
       //Communication split + Raffinement et deraffinement des cells fantomes + Reconstruction du tableau de cells fantomes de niveau lvl + 1
-      parallel.communicationsSplit(cells, lvl);
+      parallel->communicationsSplit( lvl);
       m_cellsLvlGhost[lvlPlus1].clear();
       for (unsigned int i = 0; i < m_cellsLvlGhost[lvl].size(); i++) { m_cellsLvlGhost[lvl][i]->chooseRefineDeraffineGhost(m_numberCellsY, m_numberCellsZ, addPhys, model, m_cellsLvlGhost); }
       //Communications primitives pour mettre a jour les cells deraffinees
-      parallel.communicationsPrimitivesAMR(cells, eos, lvl);
+      parallel->communicationsPrimitivesAMR( eos, lvl);
 
       //6) Mise a jour des communications persistantes au niveau lvl + 1
       //----------------------------------------------------------------
-      parallel.communicationsNumberGhostCells(cells, lvlPlus1);	//Communication des numbers d'elements a envoyer et a recevoir de chaque cote de la limite parallele
-      parallel.updatePersistentCommunicationsLvl(lvlPlus1, m_geometrie);
+      parallel->communicationsNumberGhostCells(lvlPlus1);	//Communication des numbers d'elements a envoyer et a recevoir de chaque cote de la limite parallele
+      parallel->updatePersistentCommunicationsLvl(lvlPlus1, m_geometrie);
     }
 
     //7) Reconstruction des tableaux de cells et cell interfaces lvl + 1
@@ -777,49 +778,49 @@ void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases
     int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1; //+1 for the interface detection
   }
-	parallel.initializePersistentCommunicationsAMR(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie, m_lvlMax);
+	parallel->initializePersistentCommunicationsAMR(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie, m_lvlMax);
 }
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, Eos **eos, const int &lvl, Prim type)
+void MeshCartesianAMR::communicationsPrimitives( Eos **eos, const int &lvl, Prim type)
 {
-	parallel.communicationsPrimitivesAMR(cells, eos, lvl, type);
+	parallel->communicationsPrimitivesAMR( eos, lvl, type);
 }
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsSlopes(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void MeshCartesianAMR::communicationsSlopes( const int &lvl)
 {
-	parallel.communicationsSlopesAMR(cells, lvl);
+	parallel->communicationsSlopesAMR( lvl);
 }
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsVector(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void MeshCartesianAMR::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	parallel.communicationsVectorAMR(cells, nameVector, m_geometrie, lvl, num, index);
+	parallel->communicationsVectorAMR( nameVector, m_geometrie, lvl, num, index);
 }
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void MeshCartesianAMR::communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const int &lvl)
 {
-	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhysAMR(cells, m_geometrie, lvl); }
+	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhysAMR(m_numberPhases, m_geometrie, lvl); }
 }
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsTransports(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void MeshCartesianAMR::communicationsTransports( const int &lvl)
 {
-  parallel.communicationsTransportsAMR(cells, lvl);
+  parallel->communicationsTransportsAMR( lvl);
 }
 
 //***********************************************************************
 
 void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 {
-	parallel.finalizeAMR(lvlMax);
+	parallel->finalizeAMR(lvlMax);
 }
 
 //***********************************************************************

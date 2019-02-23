@@ -52,13 +52,6 @@ Run::~Run(){}
 
 void Run::initialize(int argc, char* argv[])
 {
-  //1) Initialization of parallel computing (also needed for 1 CPU!)
-  //----------------------------------------------------------------
-  parallel.initialization(argc, argv);
-  if (Ncpu > 1){
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (rankCpu == 0) std::cout << "T" << m_numTest << " | Number of CPU : " << Ncpu << std::endl;
-  }
 
   //2) Reading input file (XML format)
   //----------------------------------
@@ -70,6 +63,14 @@ void Run::initialize(int argc, char* argv[])
   }
   catch (ErrorXML &) { throw; }
   TB = new Tools(m_numberPhases);
+
+  //1) Initialization of parallel computing (also needed for 1 CPU!)
+  //----------------------------------------------------------------
+  parallel->initialization(argc, argv);
+  if (Ncpu > 1){
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rankCpu == 0) std::cout << "T" << m_numTest << " | Number of CPU : " << Ncpu << std::endl;
+  }
 
   //3) Mesh data initialization
   //---------------------------
@@ -117,7 +118,7 @@ void Run::initialize(int argc, char* argv[])
   //8) Intialization of persistant communications for parallel computing
   //--------------------------------------------------------------------
 	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cells, m_order);
-  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_cells, m_eos, 0); }
+  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
 
 	//9) AMR initialization
 	//---------------------
@@ -149,7 +150,7 @@ void Run::initialize(int argc, char* argv[])
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
       //for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->lookForPmax(m_pMax, m_pMaxWall); }
-      //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
+      //if (Ncpu > 1) { parallel->computePMax(m_pMax[0], m_pMaxWall[0]); }
       //-----
       m_outPut->prepareOutputInfos();
       if (rankCpu == 0) m_outPut->ecritInfos();
@@ -186,7 +187,7 @@ void Run::resumeSimulation()
 
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-      //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(cells, eos, lvl); }
+      //if (Ncpu > 1) { parallel->communicationsPrimitivesAMR(cells, eos, lvl); }
       for (unsigned int i = 0; i < m_cellsLvl[lvl + 1].size(); i++) {
         m_cellsLvl[lvl + 1][i]->completeFulfillState(resume);
       }
@@ -198,7 +199,7 @@ void Run::resumeSimulation()
 
   //Initial communications
   if (Ncpu > 1) {
-    m_mesh->communicationsPrimitives(m_cells, m_eos, 0);
+    m_mesh->communicationsPrimitives( m_eos, 0);
   }
 
   std::cout << " ...OK" << std::endl;
@@ -257,7 +258,7 @@ void Run::solver()
       //General printings
       //Only for few test case
       //-----
-      //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
+      //if (Ncpu > 1) { parallel->computePMax(m_pMax[0], m_pMaxWall[0]); }
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
       //-----
@@ -276,7 +277,7 @@ void Run::solver()
     //-------------------------- TIME STEP UPDATING --------------------------
 
     m_dt = m_cfl * dtMax;
-    if (Ncpu > 1) { parallel.computeDt(m_dt); }
+    if (Ncpu > 1) { parallel->computeDt(m_dt); }
 
   } //time iterative loop end
   if (rankCpu == 0) std::cout << "T" << m_numTest << " | ---------------------------------------" << std::endl;
@@ -303,8 +304,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   if (m_order == "SECONDORDER") {
     for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
     if (Ncpu > 1) {
-      m_mesh->communicationsSlopes(m_cells, lvl);
-      if (lvl > 0) { m_mesh->communicationsSlopes(m_cells, lvl - 1); } //Comble un defaut d'un cas particulier non communique a temps (fantome niveau quelconque, cell lvl l, cell lvl l+1)
+      m_mesh->communicationsSlopes( lvl);
+      if (lvl > 0) { m_mesh->communicationsSlopes( lvl - 1); } //Comble un defaut d'un cas particulier non communique a temps (fantome niveau quelconque, cell lvl l, cell lvl l+1)
       //KS//FP// A reflechir si mieux a faire (a appliquer sur les 3 communications des slopes)
     }
   }
@@ -324,8 +325,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
     if (m_order == "SECONDORDER") {
       for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
       if (Ncpu > 1) {
-        m_mesh->communicationsSlopes(m_cells, lvl);
-        if (lvl > 0) { m_mesh->communicationsSlopes(m_cells, lvl - 1); }
+        m_mesh->communicationsSlopes( lvl);
+        if (lvl > 0) { m_mesh->communicationsSlopes( lvl - 1); }
       }
     }
     if (lvl < m_lvlMax) { this->integrationProcedure(dt, lvl + 1, dtMax, nbCellsTotalAMR); }
@@ -349,7 +350,7 @@ void Run::advancingProcedure(double &dt, int &lvl, double &dtMax) const
   //5) Averaging childs cells in mother cell (if AMR)
   if (lvl < m_lvlMax) { for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->averageChildrenInParent(); } }
   //6) Final communications
-  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_cells, m_eos, lvl); }
+  if (Ncpu > 1) { m_mesh->communicationsPrimitives( m_eos, lvl); }
   //Only for few test case
   //-----
   //for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->lookForPmax(m_pMax, m_pMaxWall); }
@@ -382,14 +383,14 @@ void Run::solveHyperbolicO2(double &dt, int &lvl, double &dtMax) const
 
   //5) vecPhasesO2 communications
   //-----------------------------
-  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_cells, m_eos, lvl, vecPhasesO2);	}
+  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, lvl, vecPhasesO2);	}
 
   //6) Optional new slopes determination (improves code stability)
   //--------------------------------------------------------------
   for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports, vecPhasesO2); } }
   if (Ncpu > 1) {
-    m_mesh->communicationsSlopes(m_cells, lvl);
-    if (lvl > 0) { m_mesh->communicationsSlopes(m_cells, lvl - 1); }
+    m_mesh->communicationsSlopes( lvl);
+    if (lvl > 0) { m_mesh->communicationsSlopes( lvl - 1); }
   }
 
   //7) Spatial scheme on predicted variables
@@ -434,9 +435,9 @@ void Run::solveAdditionalPhysics(double &dt, int &lvl) const
 {
   //1) Preparation of variables for additional (gradients computations, etc) and communications
   //-------------------------------------------------------------------------------------------
-  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_cells, m_eos, lvl); }
+  if (Ncpu > 1) { m_mesh->communicationsPrimitives( m_eos, lvl); }
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
-  if (Ncpu > 1) { m_mesh->communicationsAddPhys(m_addPhys, m_cells, lvl); }
+  if (Ncpu > 1) { m_mesh->communicationsAddPhys(m_addPhys,  lvl); }
 
   //2) Additional physics fluxes determination (Surface tensions, viscosity, conductivity, ...)
   //-------------------------------------------------------------------------------------------
@@ -480,7 +481,7 @@ void Run::solveRelaxations(int &lvl) const
   }
   //Reset of colour function (transports) using volume fraction
   for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { m_addPhys[pa]->reinitializeColorFunction(m_cellsLvl, lvl); }
-  if (Ncpu > 1) { m_mesh->communicationsTransports(m_cells, lvl); }
+  if (Ncpu > 1) { m_mesh->communicationsTransports( lvl); }
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
   //Optional energy corrections and other relaxations
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
@@ -497,7 +498,7 @@ void Run::verifyErrors() const
 {
   try {
     if (Ncpu > 1) {
-      parallel.verifyStateCPUs();
+      parallel->verifyStateCPUs();
     }
     else if (errors.size() != 0) {
       for (unsigned int e = 0; e < errors.size(); e++) {

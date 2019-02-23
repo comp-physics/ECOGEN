@@ -36,6 +36,7 @@
 //! \date      February 19 2019
 
 #include "MeshCartesian.h"
+#include "../Parallel/ParallelAMR.h"
 
 class MeshCartesianAMR : public MeshCartesian
 {
@@ -46,7 +47,7 @@ public:
     bool varAlpha = false, double xiSplit = 1., double xiJoin = 1.);
   virtual ~MeshCartesianAMR();
 
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
+  //virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
   void initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul, decomposition::Decomposition* _decomp);
 	virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
@@ -72,13 +73,13 @@ public:
   virtual int getLvlMax() const { return m_lvlMax; };
 
 	//Pour parallele
-	virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
-	virtual void communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, Eos **eos, const int &lvl, Prim type = vecPhases);
-	virtual void communicationsSlopes(const TypeMeshContainer<Cell *> &cells, const int &lvl);
-	virtual void communicationsVector(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, const int &lvl, int num, int index);
-	virtual void communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const TypeMeshContainer<Cell *> &cells, const int &lvl);
-  virtual void communicationsTransports(const TypeMeshContainer<Cell *> &cells, const int &lvl);
-	virtual void finalizeParallele(const int &lvlMax);
+  virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
+  virtual void communicationsPrimitives( Eos **eos, const int &lvl, Prim type = vecPhases);
+  virtual void communicationsSlopes( const int &lvl);
+  virtual void communicationsVector( std::string nameVector, const int &dim, const int &lvl, int num, int index);
+  virtual void communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const int &lvl);
+  virtual void communicationsTransports( const int &lvl);
+  virtual void finalizeParallele(const int &lvlMax);
 
 private:
   int m_lvlMax;                              //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

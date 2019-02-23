@@ -215,19 +215,19 @@ void APKConductivity::solveFluxConductivityOther(Coord &gradTkLeft, double &alph
 
 //***********************************************************************
 
-void APKConductivity::communicationsAddPhys(const TypeMeshContainer<Cell *> &cells, const int &dim)
+void APKConductivity::communicationsAddPhys(int numberPhases, const int &dim)
 {
-  for (int k = 0; k < cells[0]->getNumberPhases(); k++) {
-    parallel.communicationsVector(cells, "QPA", dim, m_numQPA, k);
+  for (int k = 0; k < numberPhases; k++) {
+    parallel->communicationsVector( "QPA", dim, m_numQPA, k);
   }
 }
 
 //***********************************************************************
 
-void APKConductivity::communicationsAddPhysAMR(const TypeMeshContainer<Cell *> &cells, const int &dim, const int &lvl)
+void APKConductivity::communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl)
 {
-	for (int k = 0; k < cells[0]->getNumberPhases(); k++) {
-		parallel.communicationsVectorAMR(cells, "QPA", dim, lvl, m_numQPA, k);
+  for (int k = 0; k < numberPhases; k++) {
+		parallel->communicationsVectorAMR( "QPA", dim, lvl, m_numQPA, k);
 	}
 }
 

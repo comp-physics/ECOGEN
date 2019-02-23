@@ -47,113 +47,115 @@ public:
   virtual ~Parallel();
 
   void initialization(int &argc, char *argv[]);
-  void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour);
-  void setElementsToSend(const int neighbour, int* numberElement, const int &numberElements);
-  void setElementsToReceive(const int neighbour, int* numberElement, const int &numberElements);
-	void initializePersistentCommunications(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim);
-	void computeDt(double &dt);
+  virtual void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour);
+  virtual void setElementsToSend(int neighbour, Cell* cell);
+  virtual void setElementsToReceive(int neighbour, Cell* cell);
+  void initializePersistentCommunications(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim);
+  void computeDt(double &dt);
   void computePMax(double &pMax, double &pMaxWall);
-	void finalize(const int &lvlMax);
-	void stopRun();
-	void verifyStateCPUs();
+  void finalize(const int &lvlMax);
+  void stopRun();
+  void verifyStateCPUs();
   
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsPrimitives();
   void finalizePersistentCommunicationsPrimitives(const int &lvlMax);
-  void communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, Eos **eos, Prim type = vecPhases);
+  void communicationsPrimitives(Eos **eos, Prim type = vecPhases);
 
-	//Methodes pour toutes les slopes
-	void initializePersistentCommunicationsSlopes();
-	void finalizePersistentCommunicationsSlopes(const int &lvlMax);
-	void communicationsSlopes(const TypeMeshContainer<Cell *> &cells);
+  //Methodes pour toutes les slopes
+  void initializePersistentCommunicationsSlopes();
+  void finalizePersistentCommunicationsSlopes(const int &lvlMax);
+  void communicationsSlopes();
 
   //Methodes pour une variable scalar
   void initializePersistentCommunicationsScalar();
   void finalizePersistentCommunicationsScalar(const int &lvlMax);
-  
+
   //Methodes pour une variable vectorielle
   void initializePersistentCommunicationsVector(const int &dim);
   void finalizePersistentCommunicationsVector(const int &lvlMax);
-  void communicationsVector(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, int num=0, int index=-1);
+  void communicationsVector(std::string nameVector, const int &dim, int num=0, int index=-1);
 
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsTransports();
   void finalizePersistentCommunicationsTransports(const int &lvlMax);
-  void communicationsTransports(const TypeMeshContainer<Cell *> &cells);
+  void communicationsTransports();
 
-	//Methodes pour les variables AMR
-	void initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax);
-	void initializePersistentCommunicationsLvlAMR(const int &lvlMax);
-	void updatePersistentCommunicationsLvl(int lvl, const int &dim);
-	void finalizeAMR(const int &lvlMax);
+  //Methodes pour les variables AMR
+  void initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax);
+  void initializePersistentCommunicationsLvlAMR(const int &lvlMax);
+  void updatePersistentCommunicationsLvl(int lvl, const int &dim);
+  void finalizeAMR(const int &lvlMax);
 
-	void initializePersistentCommunicationsXi();
-	void finalizePersistentCommunicationsXi(const int &lvlMax);
-	void communicationsXi(const TypeMeshContainer<Cell *> &cells, const int &lvl);
+  void initializePersistentCommunicationsXi();
+  void finalizePersistentCommunicationsXi(const int &lvlMax);
+  void communicationsXi(const int &lvl);
 
-	void initializePersistentCommunicationsSplit();
-	void finalizePersistentCommunicationsSplit(const int &lvlMax);
-	void communicationsSplit(const TypeMeshContainer<Cell *> &cells, const int &lvl);
+  void initializePersistentCommunicationsSplit();
+  void finalizePersistentCommunicationsSplit(const int &lvlMax);
+  void communicationsSplit(const int &lvl);
 
-	void initializePersistentCommunicationsNumberGhostCells();
-	void finalizePersistentCommunicationsNumberGhostCells();
-	void communicationsNumberGhostCells(const TypeMeshContainer<Cell *> &cells, const int &lvl);
+  void initializePersistentCommunicationsNumberGhostCells();
+  void finalizePersistentCommunicationsNumberGhostCells();
+  void communicationsNumberGhostCells( const int &lvl);
 
-	void communicationsPrimitivesAMR(const TypeMeshContainer<Cell *> &cells, Eos **eos, const int &lvl, Prim type = vecPhases);
-	void communicationsSlopesAMR(const TypeMeshContainer<Cell *> &cells, const int &lvl);
-	void communicationsVectorAMR(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, const int &lvl, int num = 0, int index = -1);
-  void communicationsTransportsAMR(const TypeMeshContainer<Cell *> &cells, const int &lvl);
+  void communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type = vecPhases);
+  void communicationsSlopesAMR( const int &lvl);
+  void communicationsVectorAMR( std::string nameVector, const int &dim, const int &lvl, int num = 0, int index = -1);
+  void communicationsTransportsAMR( const int &lvl);
 
 private:
     
   int m_stateCPU;
   bool *m_isNeighbour;
   std::string *m_whichCpuAmIForNeighbour;
-	int ** m_elementsToSend;
-	int ** m_elementsToReceive;
-	int * m_numberElementsToSendToNeighbour;
-	int * m_numberElementsToReceiveFromNeighbour;
-	int m_numberPrimitiveVariables;          /*Number of primitive variables to send (phases + mixture + transports)*/
-	int m_numberSlopeVariables;              /*Number of slope variables to send (phases + mixture + transports)*/
+  //int ** m_elementsToSend;
+  //int ** m_elementsToReceive;
+  std::vector<TypeMeshContainer<Cell*>> m_elementsToSend;
+  std::vector<TypeMeshContainer<Cell*>> m_elementsToReceive;
+  int * m_numberElementsToSendToNeighbour;
+  int * m_numberElementsToReceiveFromNeighbour;
+  int m_numberPrimitiveVariables;          /*Number of primitive variables to send (phases + mixture + transports)*/
+  int m_numberSlopeVariables;              /*Number of slope variables to send (phases + mixture + transports)*/
   int m_numberTransportVariables;          /*Number of transport variables to send*/
 
-	std::vector<double **> m_bufferReceive;
-	std::vector<double **> m_bufferSend;
-	std::vector<double **> m_bufferReceiveSlopes;
-	std::vector<double **> m_bufferSendSlopes;
-	std::vector<double **> m_bufferReceiveScalar;
-	std::vector<double **> m_bufferSendScalar;
-	std::vector<double **> m_bufferReceiveVector;
-	std::vector<double **> m_bufferSendVector;
+  std::vector<double **> m_bufferReceive;
+  std::vector<double **> m_bufferSend;
+  std::vector<double **> m_bufferReceiveSlopes;
+  std::vector<double **> m_bufferSendSlopes;
+  std::vector<double **> m_bufferReceiveScalar;
+  std::vector<double **> m_bufferSendScalar;
+  std::vector<double **> m_bufferReceiveVector;
+  std::vector<double **> m_bufferSendVector;
   std::vector<double **> m_bufferReceiveTransports;
   std::vector<double **> m_bufferSendTransports;
-	std::vector<double **> m_bufferReceiveXi;
-	std::vector<double **> m_bufferSendXi;
-	std::vector<bool **> m_bufferReceiveSplit;
-	std::vector<bool **> m_bufferSendSplit;
-	int * m_bufferNumberElementsToSendToNeighbor;
-	int * m_bufferNumberElementsToReceiveFromNeighbour;
+  std::vector<double **> m_bufferReceiveXi;
+  std::vector<double **> m_bufferSendXi;
+  std::vector<bool **> m_bufferReceiveSplit;
+  std::vector<bool **> m_bufferSendSplit;
+  int * m_bufferNumberElementsToSendToNeighbor;
+  int * m_bufferNumberElementsToReceiveFromNeighbour;
   
-	std::vector<MPI_Request **> m_reqSend;
-	std::vector<MPI_Request **> m_reqReceive;
-	std::vector<MPI_Request **> m_reqSendSlopes;
-	std::vector<MPI_Request **> m_reqReceiveSlopes;
-	std::vector<MPI_Request **> m_reqSendScalar;
-	std::vector<MPI_Request **> m_reqReceiveScalar;
-	std::vector<MPI_Request **> m_reqSendVector;
-	std::vector<MPI_Request **> m_reqReceiveVector;
+  std::vector<MPI_Request **> m_reqSend;
+  std::vector<MPI_Request **> m_reqReceive;
+  std::vector<MPI_Request **> m_reqSendSlopes;
+  std::vector<MPI_Request **> m_reqReceiveSlopes;
+  std::vector<MPI_Request **> m_reqSendScalar;
+  std::vector<MPI_Request **> m_reqReceiveScalar;
+  std::vector<MPI_Request **> m_reqSendVector;
+  std::vector<MPI_Request **> m_reqReceiveVector;
   std::vector<MPI_Request **> m_reqSendTransports;
   std::vector<MPI_Request **> m_reqReceiveTransports;
-	std::vector<MPI_Request **> m_reqSendXi;
-	std::vector<MPI_Request **> m_reqReceiveXi;
-	std::vector<MPI_Request **> m_reqSendSplit;
-	std::vector<MPI_Request **> m_reqReceiveSplit;
-	MPI_Request ** m_reqNumberElementsToSendToNeighbor;
-	MPI_Request ** m_reqNumberElementsToReceiveFromNeighbour;
+  std::vector<MPI_Request **> m_reqSendXi;
+  std::vector<MPI_Request **> m_reqReceiveXi;
+  std::vector<MPI_Request **> m_reqSendSplit;
+  std::vector<MPI_Request **> m_reqReceiveSplit;
+  MPI_Request ** m_reqNumberElementsToSendToNeighbor;
+  MPI_Request ** m_reqNumberElementsToReceiveFromNeighbour;
 
 };
 
-extern Parallel parallel;
+extern Parallel* parallel;
 extern int rankCpu;
 extern int Ncpu;
 

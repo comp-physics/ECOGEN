@@ -38,11 +38,15 @@
 
 Mesh::Mesh() :
   m_numFichier(0)
-{}
+{
+}
 
 //***********************************************************************
 
-Mesh::~Mesh(){}
+Mesh::~Mesh()
+{
+    delete parallel;
+}
 
 //***********************************************************************
 
@@ -115,42 +119,42 @@ void Mesh::initializePersistentCommunications(const int numberPhases, const int 
     int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1; //+1 for the interface detection
   }
-	parallel.initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);
+	parallel->initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);
 }
 
 //***********************************************************************
 
-void Mesh::communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, Eos **eos, const int &lvl, Prim type)
+void Mesh::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
 {
-	parallel.communicationsPrimitives(cells, eos, type);
+	parallel->communicationsPrimitives( eos, type);
 }
 
 //***********************************************************************
 
-void Mesh::communicationsSlopes(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Mesh::communicationsSlopes( const int &lvl)
 {
-	parallel.communicationsSlopes(cells);
+	parallel->communicationsSlopes();
 }
 
 //***********************************************************************
 
-void Mesh::communicationsVector(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void Mesh::communicationsVector( std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	parallel.communicationsVector(cells, nameVector, m_geometrie, num, index);
+	parallel->communicationsVector( nameVector, m_geometrie, num, index);
 }
 
 //***********************************************************************
 
-void Mesh::communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Mesh::communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const int &lvl)
 {
-	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhys(cells, m_geometrie); }
+	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhys( m_numberPhases, m_geometrie); }
 }
 
 //***********************************************************************
 
-void Mesh::communicationsTransports(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Mesh::communicationsTransports( const int &lvl)
 {
-  parallel.communicationsTransports(cells);
+  parallel->communicationsTransports();
 }
 
 
@@ -158,7 +162,7 @@ void Mesh::communicationsTransports(const TypeMeshContainer<Cell *> &cells, cons
 
 void Mesh::finalizeParallele(const int &lvlMax)
 {
-	parallel.finalize(lvlMax);
+	parallel->finalize(lvlMax);
 }
 
 //***********************************************************************

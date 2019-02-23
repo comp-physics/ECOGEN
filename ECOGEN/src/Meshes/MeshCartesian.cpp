@@ -63,6 +63,7 @@ MeshCartesian::MeshCartesian(double lX, int numberCellsX, double lY, int numberC
   m_offsetX = 0;
   m_offsetY = 0;
   m_offsetZ = 0;
+  parallel = new Parallel;
 }
 
 //***********************************************************************
@@ -582,19 +583,7 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
   //Declaration du tableau de mailles
   //---------------------------------
   //Decoupage parallele du domain geometrique
-  this->decoupageParallele();
-  for (int i = 0; i < m_numberCellsCalcul; i++) {
-	  if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
-	  else { cells.push_back(new CellO2); }
-    m_elements.push_back(new ElementCartesian());
-    cells[i]->setElement(m_elements[i], i);
-  }
-	for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
-		if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
-		else { cells.push_back(new CellO2Ghost); }
-    m_elements.push_back(new ElementCartesian());
-		cells[i]->setElement(m_elements[i], i);
-	}
+  this->decoupageParallele(ordreCalcul,cells);
   
   //Geometrical data settings for computational cells
   //-------------------------------------------------
@@ -1061,7 +1050,7 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
 
 //***********************************************************************
 
-void MeshCartesian::decoupageParallele()
+void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer<Cell*>& cells)
 {
   int ix, iy, iz;
   int maille_par_cpu, reste, iMaille, neighbour;
@@ -1097,54 +1086,63 @@ void MeshCartesian::decoupageParallele()
     if (rankCpu > 0 && rankCpu < Ncpu - 1){ m_numberCellsTotal = m_numberCellsCalcul + 2 * numberElements; }
     else{ m_numberCellsTotal = m_numberCellsCalcul + numberElements; }
 
+
+    //Generating cells 
+    for (int i = 0; i < m_numberCellsCalcul; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+    for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2Ghost); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+
     ////***************Table de connectivite**********
 
     //Le number des mailles paralleles est situe en dehors du number de maille "vraies"
     //donc commence a numberCells
     compteMaillesParallele = m_numberCellsCalcul;
-    elements_rec = new int[numberElements];
-    elements_env = new int[numberElements];
     countElements = 0;
     if (rankCpu > 0)
     {
       neighbour = rankCpu - 1;
       whichCpuAmIForNeighbour = "RIGHT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_rec[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_env[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_env, numberElements);
-      parallel.setElementsToReceive(neighbour, elements_rec, numberElements);
     }
     countElements = 0;
     if (rankCpu < Ncpu - 1)
     {
       neighbour = rankCpu + 1;
       whichCpuAmIForNeighbour = "LEFT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_rec[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_env[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_env, numberElements);
-      parallel.setElementsToReceive(neighbour, elements_rec, numberElements);
     }
   }
 
@@ -1225,14 +1223,25 @@ void MeshCartesian::decoupageParallele()
       else { m_numberCellsTotal += numberElementsY; }
     }
 
+    //Generating cells 
+    for (int i = 0; i < m_numberCellsCalcul; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+    for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2Ghost); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+
     //Connectivity table
     //The number of the ghost cells is located apart from the number of "true" cells, hence start at m_numberCellsCalcul
     compteMaillesParallele = m_numberCellsCalcul;
     int neighbourCpuCoordX, neighbourCpuCoordY;
     //In the x-direction
-    int *elements_recX, *elements_envX;
-    elements_recX = new int[numberElementsX];
-    elements_envX = new int[numberElementsX];
     countElements = 0;
     if (m_CpuCoordX > 0)
     {
@@ -1242,21 +1251,20 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       whichCpuAmIForNeighbour = "RIGHT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recX[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envX[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
+
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envX, numberElementsX);
-      parallel.setElementsToReceive(neighbour, elements_recX, numberElementsX);
     }
     countElements = 0;
     if (m_CpuCoordX < m_numberCpuX - 1)
@@ -1267,26 +1275,21 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       whichCpuAmIForNeighbour = "LEFT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recX[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envX[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envX, numberElementsX);
-      parallel.setElementsToReceive(neighbour, elements_recX, numberElementsX);
     }
     //In the y-direction
-    int *elements_recY, *elements_envY;
-    elements_recY = new int[numberElementsY];
-    elements_envY = new int[numberElementsY];
     countElements = 0;
     if (m_CpuCoordY > 0)
     {
@@ -1296,21 +1299,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       whichCpuAmIForNeighbour = "TOP";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iy = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recY[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envY[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envY, numberElementsY);
-      parallel.setElementsToReceive(neighbour, elements_recY, numberElementsY);
     }
     countElements = 0;
     if (m_CpuCoordY < m_numberCpuY - 1)
@@ -1321,21 +1322,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       whichCpuAmIForNeighbour = "BOTTOM";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iy = m_numberCellsY - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recY[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envY[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envY, numberElementsY);
-      parallel.setElementsToReceive(neighbour, elements_recY, numberElementsY);
     }
   }
 
@@ -1436,14 +1435,25 @@ void MeshCartesian::decoupageParallele()
       else { m_numberCellsTotal += numberElementsZ; }
     }
 
+    //Generating cells 
+    for (int i = 0; i < m_numberCellsCalcul; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+    for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
+        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+        else { cells.push_back(new CellO2Ghost); }
+        m_elements.push_back(new ElementCartesian());
+        cells[i]->setElement(m_elements[i], i);
+    }
+
     //Connectivity table
     //The number of the ghost cells is located apart from the number of "true" cells, hence start at m_numberCellsCalcul
     compteMaillesParallele = m_numberCellsCalcul;
     int neighbourCpuCoordX, neighbourCpuCoordY, neighbourCpuCoordZ;
     //In the x-direction
-    int *elements_recX, *elements_envX;
-    elements_recX = new int[numberElementsX];
-    elements_envX = new int[numberElementsX];
     countElements = 0;
     if (m_CpuCoordX > 0)
     {
@@ -1455,21 +1465,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "RIGHT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recX[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envX[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envX, numberElementsX);
-      parallel.setElementsToReceive(neighbour, elements_recX, numberElementsX);
     }
     countElements = 0;
     if (m_CpuCoordX < m_numberCpuX - 1)
@@ -1482,26 +1490,21 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "LEFT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recX[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envX[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envX, numberElementsX);
-      parallel.setElementsToReceive(neighbour, elements_recX, numberElementsX);
     }
     //In the y-direction
-    int *elements_recY, *elements_envY;
-    elements_recY = new int[numberElementsY];
-    elements_envY = new int[numberElementsY];
     countElements = 0;
     if (m_CpuCoordY > 0)
     {
@@ -1513,21 +1516,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "TOP";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iy = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recY[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envY[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envY, numberElementsY);
-      parallel.setElementsToReceive(neighbour, elements_recY, numberElementsY);
     }
     countElements = 0;
     if (m_CpuCoordY < m_numberCpuY - 1)
@@ -1540,26 +1541,21 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "BOTTOM";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iy = m_numberCellsY - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
-          elements_recY[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envY[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envY, numberElementsY);
-      parallel.setElementsToReceive(neighbour, elements_recY, numberElementsY);
     }
     //In the z-direction
-    int *elements_recZ, *elements_envZ;
-    elements_recZ = new int[numberElementsZ];
-    elements_envZ = new int[numberElementsZ];
     countElements = 0;
     if (m_CpuCoordZ > 0)
     {
@@ -1571,21 +1567,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "FRONT";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iz = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iy = 0; iy < m_numberCellsY; iy++)
         {
-          elements_recZ[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envZ[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envZ, numberElementsZ);
-      parallel.setElementsToReceive(neighbour, elements_recZ, numberElementsZ);
     }
     countElements = 0;
     if (m_CpuCoordZ < m_numberCpuZ - 1)
@@ -1598,21 +1592,19 @@ void MeshCartesian::decoupageParallele()
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
       whichCpuAmIForNeighbour = "BACK";
-      parallel.setNeighbour(neighbour, whichCpuAmIForNeighbour);
+      parallel->setNeighbour(neighbour, whichCpuAmIForNeighbour);
       iz = m_numberCellsZ - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iy = 0; iy < m_numberCellsY; iy++)
         {
-          elements_recZ[countElements] = compteMaillesParallele;
           this->construitIGlobal(ix, iy, iz, iMaille);
-          elements_envZ[countElements] = iMaille;
+          parallel->setElementsToSend(neighbour, cells[iMaille]);
+          parallel->setElementsToReceive(neighbour, cells[compteMaillesParallele]);
           ++countElements;
           ++compteMaillesParallele;
         }
       }
-      parallel.setElementsToSend(neighbour, elements_envZ, numberElementsZ);
-      parallel.setElementsToReceive(neighbour, elements_recZ, numberElementsZ);
     }
   }
 }

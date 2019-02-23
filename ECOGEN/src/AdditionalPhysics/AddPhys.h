@@ -112,12 +112,12 @@ class AddPhys
     //! \brief     Communication of the additional physics quantities for parallel purposes
     //! \param     cells                cells vector
     //! \param     dim                  dimension
-    virtual void communicationsAddPhys(const TypeMeshContainer<Cell *> &cells, const int &dim) { Errors::errorMessage("communicationsAddPhys not implemented for used additional physic"); };
+    virtual void communicationsAddPhys(int numberPhases,const int &dim) { Errors::errorMessage("communicationsAddPhys not implemented for used additional physic"); };
     //! \brief     Communication of the additional physics quantities for parallel purposes with Adaptive Mesh Refinement
     //! \param     cells                cells vector
     //! \param     dim                  dimension
     //! \param     lvl                  level
-    virtual void communicationsAddPhysAMR(const TypeMeshContainer<Cell *> &cells, const int &dim, const int &lvl) { Errors::errorMessage("communicationsAddPhysAMR not implemented for used additional physic"); };
+    virtual void communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl) { Errors::errorMessage("communicationsAddPhysAMR not implemented for used additional physic"); };
     
     //! \brief     Return the associated number of the transport equation (only used for surface tension)
     virtual int getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return 0; };

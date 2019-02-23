@@ -56,7 +56,7 @@ public:
   void initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   virtual void effetsMesh(CellInterface **face, const int &numberPhases) const {};
-  void decoupageParallele();
+  void decoupageParallele(std::string ordreCalcul,TypeMeshContainer<Cell*>& cells);
   virtual std::string whoAmI() const;
 
   //Printing / Reading

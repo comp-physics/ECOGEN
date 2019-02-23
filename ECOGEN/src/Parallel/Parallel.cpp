@@ -36,7 +36,7 @@
 #include "../Eos/Eos.h"
 
 //Variables linked to parallel computation
-Parallel parallel;
+Parallel* parallel;
 int rankCpu, Ncpu;
 
 //***********************************************************************
@@ -57,84 +57,86 @@ void Parallel::initialization(int &argc, char* argv[])
 
   m_isNeighbour = new bool[Ncpu];
   m_whichCpuAmIForNeighbour = new std::string[Ncpu];
-	m_elementsToSend = new int*[Ncpu];
-  m_elementsToReceive = new int*[Ncpu];
+  //m_elementsToSend = new int*[Ncpu];
+  //m_elementsToReceive = new int*[Ncpu];
+  m_elementsToSend.resize(Ncpu);
+  m_elementsToReceive.resize(Ncpu);
   m_numberElementsToSendToNeighbour = new int[Ncpu];
   m_numberElementsToReceiveFromNeighbour = new int[Ncpu]; // A priori can be different if weird mesh !
 
   m_bufferSend.push_back(new double*[Ncpu]);
   m_bufferReceive.push_back(new double*[Ncpu]);
-	m_bufferSendSlopes.push_back(new double*[Ncpu]);
-	m_bufferReceiveSlopes.push_back(new double*[Ncpu]);
+  m_bufferSendSlopes.push_back(new double*[Ncpu]);
+  m_bufferReceiveSlopes.push_back(new double*[Ncpu]);
   m_bufferSendScalar.push_back(new double*[Ncpu]);
   m_bufferReceiveScalar.push_back(new double*[Ncpu]);
   m_bufferSendVector.push_back(new double*[Ncpu]);
   m_bufferReceiveVector.push_back(new double*[Ncpu]);
   m_bufferSendTransports.push_back(new double*[Ncpu]);
   m_bufferReceiveTransports.push_back(new double*[Ncpu]);
-	m_bufferSendXi.push_back(new double*[Ncpu]);
-	m_bufferReceiveXi.push_back(new double*[Ncpu]);
-	m_bufferSendSplit.push_back(new bool*[Ncpu]);
-	m_bufferReceiveSplit.push_back(new bool*[Ncpu]);
-	m_bufferNumberElementsToSendToNeighbor = new int[Ncpu];
-	m_bufferNumberElementsToReceiveFromNeighbour = new int[Ncpu];
+  m_bufferSendXi.push_back(new double*[Ncpu]);
+  m_bufferReceiveXi.push_back(new double*[Ncpu]);
+  m_bufferSendSplit.push_back(new bool*[Ncpu]);
+  m_bufferReceiveSplit.push_back(new bool*[Ncpu]);
+  m_bufferNumberElementsToSendToNeighbor = new int[Ncpu];
+  m_bufferNumberElementsToReceiveFromNeighbour = new int[Ncpu];
 
   m_reqSend.push_back(new MPI_Request*[Ncpu]);
   m_reqReceive.push_back(new MPI_Request*[Ncpu]);
-	m_reqSendSlopes.push_back(new MPI_Request*[Ncpu]);
-	m_reqReceiveSlopes.push_back(new MPI_Request*[Ncpu]);
+  m_reqSendSlopes.push_back(new MPI_Request*[Ncpu]);
+  m_reqReceiveSlopes.push_back(new MPI_Request*[Ncpu]);
   m_reqSendScalar.push_back(new MPI_Request*[Ncpu]);
   m_reqReceiveScalar.push_back(new MPI_Request*[Ncpu]);
   m_reqSendVector.push_back(new MPI_Request*[Ncpu]);
   m_reqReceiveVector.push_back(new MPI_Request*[Ncpu]);
   m_reqSendTransports.push_back(new MPI_Request*[Ncpu]);
   m_reqReceiveTransports.push_back(new MPI_Request*[Ncpu]);
-	m_reqSendXi.push_back(new MPI_Request*[Ncpu]);
-	m_reqReceiveXi.push_back(new MPI_Request*[Ncpu]);
-	m_reqSendSplit.push_back(new MPI_Request*[Ncpu]);
-	m_reqReceiveSplit.push_back(new MPI_Request*[Ncpu]);
-	m_reqNumberElementsToSendToNeighbor = new MPI_Request*[Ncpu];
-	m_reqNumberElementsToReceiveFromNeighbour = new MPI_Request*[Ncpu];
+  m_reqSendXi.push_back(new MPI_Request*[Ncpu]);
+  m_reqReceiveXi.push_back(new MPI_Request*[Ncpu]);
+  m_reqSendSplit.push_back(new MPI_Request*[Ncpu]);
+  m_reqReceiveSplit.push_back(new MPI_Request*[Ncpu]);
+  m_reqNumberElementsToSendToNeighbor = new MPI_Request*[Ncpu];
+  m_reqNumberElementsToReceiveFromNeighbour = new MPI_Request*[Ncpu];
 
   for (int i = 0; i < Ncpu; i++) {
-    m_isNeighbour[i] = false;
-    m_whichCpuAmIForNeighbour[i] = "";
-    m_numberElementsToSendToNeighbour[i] = 0;
-    m_numberElementsToReceiveFromNeighbour[i] = 0;
-		m_elementsToSend[i] = NULL;
-    m_elementsToReceive[i] = NULL;
-    m_bufferSend[0][i] = NULL;
-    m_bufferReceive[0][i] = NULL;
-    m_reqSend[0][i] = NULL;
-    m_reqReceive[0][i] = NULL;
-		m_bufferSendSlopes[0][i] = NULL;
-		m_bufferReceiveSlopes[0][i] = NULL;
-		m_reqSendSlopes[0][i] = NULL;
-		m_reqReceiveSlopes[0][i] = NULL;
-    m_bufferSendScalar[0][i] = NULL;
-    m_bufferReceiveScalar[0][i] = NULL;
-    m_reqSendScalar[0][i] = NULL;
-    m_reqReceiveScalar[0][i] = NULL;
-    m_bufferSendVector[0][i] = NULL;
-    m_bufferReceiveVector[0][i] = NULL;
-    m_reqSendVector[0][i] = NULL;
-    m_reqReceiveVector[0][i] = NULL;
-    m_bufferSendTransports[0][i] = NULL;
-    m_bufferReceiveTransports[0][i] = NULL;
-    m_reqSendTransports[0][i] = NULL;
-    m_reqReceiveTransports[0][i] = NULL;
-		m_bufferSendXi[0][i] = NULL;
-		m_bufferReceiveXi[0][i] = NULL;
-		m_reqSendXi[0][i] = NULL;
-		m_reqReceiveXi[0][i] = NULL;
-		m_bufferSendSplit[0][i] = NULL;
-		m_bufferReceiveSplit[0][i] = NULL;
-		m_reqSendSplit[0][i] = NULL;
-		m_reqReceiveSplit[0][i] = NULL;
-		m_bufferNumberElementsToSendToNeighbor[i] = 0;
-		m_bufferNumberElementsToReceiveFromNeighbour[i] = 0;
-		m_reqNumberElementsToSendToNeighbor[i] = NULL;
-		m_reqNumberElementsToReceiveFromNeighbour[i] = NULL;
+      m_isNeighbour[i] = false;
+      m_whichCpuAmIForNeighbour[i] = "";
+      m_numberElementsToSendToNeighbour[i] = 0;
+      m_numberElementsToReceiveFromNeighbour[i] = 0;
+      //m_elementsToSend[i] = NULL;
+      //m_elementsToReceive[i] = NULL;
+      m_bufferSend[0][i] = NULL;
+      m_bufferReceive[0][i] = NULL;
+      m_reqSend[0][i] = NULL;
+      m_reqReceive[0][i] = NULL;
+      m_bufferSendSlopes[0][i] = NULL;
+      m_bufferReceiveSlopes[0][i] = NULL;
+      m_reqSendSlopes[0][i] = NULL;
+      m_reqReceiveSlopes[0][i] = NULL;
+      m_bufferSendScalar[0][i] = NULL;
+      m_bufferReceiveScalar[0][i] = NULL;
+      m_reqSendScalar[0][i] = NULL;
+      m_reqReceiveScalar[0][i] = NULL;
+      m_bufferSendVector[0][i] = NULL;
+      m_bufferReceiveVector[0][i] = NULL;
+      m_reqSendVector[0][i] = NULL;
+      m_reqReceiveVector[0][i] = NULL;
+      m_bufferSendTransports[0][i] = NULL;
+      m_bufferReceiveTransports[0][i] = NULL;
+      m_reqSendTransports[0][i] = NULL;
+      m_reqReceiveTransports[0][i] = NULL;
+      m_bufferSendXi[0][i] = NULL;
+      m_bufferReceiveXi[0][i] = NULL;
+      m_reqSendXi[0][i] = NULL;
+      m_reqReceiveXi[0][i] = NULL;
+      m_bufferSendSplit[0][i] = NULL;
+      m_bufferReceiveSplit[0][i] = NULL;
+      m_reqSendSplit[0][i] = NULL;
+      m_reqReceiveSplit[0][i] = NULL;
+      m_bufferNumberElementsToSendToNeighbor[i] = 0;
+      m_bufferNumberElementsToReceiveFromNeighbour[i] = 0;
+      m_reqNumberElementsToSendToNeighbor[i] = NULL;
+      m_reqNumberElementsToReceiveFromNeighbour[i] = NULL;
   } 
 }
 
@@ -148,30 +150,18 @@ void Parallel::setNeighbour(const int neighbour, std::string whichCpuAmIForNeigh
 
 //***********************************************************************
 
-void Parallel::setElementsToSend(const int neighbour, int* numberElement, const int &numberElements)
+void Parallel::setElementsToSend(int neighbour, Cell* _cell)
 {
-  m_numberElementsToSendToNeighbour[neighbour] = numberElements;
-
-  //We size the table where will be stored the numbers of elements to send to neighbour "neighbour"
-	m_elementsToSend[neighbour] = new int[numberElements];
-  //Then we store the numbers from the furnished table
-  for (int i = 0; i < numberElements; i++) {
-		m_elementsToSend[neighbour][i] = numberElement[i];
-  }
+    m_elementsToSend[neighbour].push_back(_cell);
+    m_numberElementsToSendToNeighbour[neighbour]=m_elementsToSend[neighbour].size();
 }
 
 //***********************************************************************
 
-void Parallel::setElementsToReceive(const int neighbour, int* numberElement, const int &numberElements)
+void Parallel::setElementsToReceive(int neighbour, Cell* _cell)
 {
-  m_numberElementsToReceiveFromNeighbour[neighbour] = numberElements;
-  
-  //We size the table where will be stored the numbers of elements where will be received the sent data from neighbour "neighbour"
-  m_elementsToReceive[neighbour] = new int[numberElements];
-  //Then we store the numbers from the furnished table
-  for (int i = 0; i < numberElements; i++) {
-    m_elementsToReceive[neighbour][i] = numberElement[i];
-  }
+    m_elementsToReceive[neighbour].push_back(_cell);
+    m_numberElementsToReceiveFromNeighbour[neighbour]=m_elementsToReceive[neighbour].size();
 }
 
 //***********************************************************************
@@ -182,14 +172,14 @@ void Parallel::initializePersistentCommunications(const int &numberPrimitiveVari
 		m_numberPrimitiveVariables = numberPrimitiveVariables;
     m_numberSlopeVariables = numberSlopeVariables;
     m_numberTransportVariables = numberTransportVariables;
-		//Initialization of communications of primitive variables from resolved model
-		parallel.initializePersistentCommunicationsPrimitives();
-		//Initialization of communications of slopes for second order
-		parallel.initializePersistentCommunicationsSlopes();
-		//Initialization of communications necessary for additional physics (vectors of dim=3)
-		parallel.initializePersistentCommunicationsVector(dim);
+    //Initialization of communications of primitive variables from resolved model
+    parallel->initializePersistentCommunicationsPrimitives();
+    //Initialization of communications of slopes for second order
+    parallel->initializePersistentCommunicationsSlopes();
+    //Initialization of communications necessary for additional physics (vectors of dim=3)
+    parallel->initializePersistentCommunicationsVector(dim);
     //Initialization of communications of transported variables
-    parallel.initializePersistentCommunicationsTransports();
+    parallel->initializePersistentCommunicationsTransports();
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -300,7 +290,7 @@ void Parallel::finalizePersistentCommunicationsPrimitives(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, Eos **eos, Prim type)
+void Parallel::communicationsPrimitives(Eos **eos, Prim type)
 {
   int count(0);
   MPI_Status status;
@@ -310,8 +300,12 @@ void Parallel::communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, 
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				cells[m_elementsToSend[neighbour][i]]->fillBufferPrimitives(m_bufferSend[0][neighbour], count, type);
+				m_elementsToSend[neighbour][i]->fillBufferPrimitives(m_bufferSend[0][neighbour], count, type);
       }
+      //std::cout
+      //<<" rank "<<rankCpu<<" "
+      //<<"count "<<count<<" "
+      //<<std::endl;
 
       //Sending request
       MPI_Start(m_reqSend[0][neighbour]);
@@ -324,7 +318,7 @@ void Parallel::communicationsPrimitives(const TypeMeshContainer<Cell *> &cells, 
       //Receivings
       count = -1;
       for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				cells[m_elementsToReceive[neighbour][i]]->getBufferPrimitives(m_bufferReceive[0][neighbour], count, eos, type);
+				m_elementsToReceive[neighbour][i]->getBufferPrimitives(m_bufferReceive[0][neighbour], count, eos, type);
       }
     }
   }
@@ -383,7 +377,7 @@ void Parallel::finalizePersistentCommunicationsSlopes(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSlopes(const TypeMeshContainer<Cell *> &cells)
+void Parallel::communicationsSlopes()
 {
 	int count(0);
 	MPI_Status status;
@@ -393,7 +387,7 @@ void Parallel::communicationsSlopes(const TypeMeshContainer<Cell *> &cells)
 			//Prepation of sendings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				cells[m_elementsToSend[neighbour][i]]->fillBufferSlopes(m_bufferSendSlopes[0][neighbour], count, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferSlopes(m_bufferSendSlopes[0][neighbour], count, m_whichCpuAmIForNeighbour[neighbour]);
 			}
       
 			//Sending request
@@ -407,7 +401,7 @@ void Parallel::communicationsSlopes(const TypeMeshContainer<Cell *> &cells)
 			//Receivings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				cells[m_elementsToReceive[neighbour][i]]->getBufferSlopes(m_bufferReceiveSlopes[0][neighbour], count);
+				m_elementsToReceive[neighbour][i]->getBufferSlopes(m_bufferReceiveSlopes[0][neighbour], count);
 			}
 		}
 	}
@@ -520,7 +514,7 @@ void Parallel::finalizePersistentCommunicationsVector(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsVector(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, int num, int index)
+void Parallel::communicationsVector( std::string nameVector, const int &dim, int num, int index)
 {
 	int count(0);
 	MPI_Status status;
@@ -531,7 +525,7 @@ void Parallel::communicationsVector(const TypeMeshContainer<Cell *> &cells, std:
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++)	{
 			  //Automatic filing of m_bufferSendVector in function of the gradient coordinates
-				cells[m_elementsToSend[neighbour][i]]->fillBufferVector(m_bufferSendVector[0][neighbour], count, dim, nameVector, num, index);
+				m_elementsToSend[neighbour][i]->fillBufferVector(m_bufferSendVector[0][neighbour], count, dim, nameVector, num, index);
 			}
 
 			//Sending request
@@ -546,7 +540,7 @@ void Parallel::communicationsVector(const TypeMeshContainer<Cell *> &cells, std:
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++)	{
 			  //Automatic filing of m_bufferReceiveVector in function of the gradient coordinates
-				cells[m_elementsToReceive[neighbour][i]]->getBufferVector(m_bufferReceiveVector[0][neighbour], count, dim, nameVector, num, index);
+				m_elementsToReceive[neighbour][i]->getBufferVector(m_bufferReceiveVector[0][neighbour], count, dim, nameVector, num, index);
 			}
 		} //End neighbour
 	}
@@ -606,7 +600,7 @@ void Parallel::finalizePersistentCommunicationsTransports(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsTransports(const TypeMeshContainer<Cell *> &cells)
+void Parallel::communicationsTransports()
 {
   int count(0);
   MPI_Status status;
@@ -616,7 +610,7 @@ void Parallel::communicationsTransports(const TypeMeshContainer<Cell *> &cells)
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        cells[m_elementsToSend[neighbour][i]]->fillBufferTransports(m_bufferSendTransports[0][neighbour], count);
+        m_elementsToSend[neighbour][i]->fillBufferTransports(m_bufferSendTransports[0][neighbour], count);
       }
 
       //Sending request
@@ -630,7 +624,7 @@ void Parallel::communicationsTransports(const TypeMeshContainer<Cell *> &cells)
       //Receivings
       count = -1;
       for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-        cells[m_elementsToReceive[neighbour][i]]->getBufferTransports(m_bufferReceiveTransports[0][neighbour], count);
+        m_elementsToReceive[neighbour][i]->getBufferTransports(m_bufferReceiveTransports[0][neighbour], count);
       }
     }
   }
@@ -647,20 +641,21 @@ void Parallel::initializePersistentCommunicationsAMR(const int &numberPrimitiveV
 		m_numberSlopeVariables = numberSlopeVariables;
     m_numberTransportVariables = numberTransportVariables;
 		//Initialization of communications of primitive variables from resolved model
-		parallel.initializePersistentCommunicationsPrimitives();
+		parallel->initializePersistentCommunicationsPrimitives();
 		//Initialization of communications of slopes for second order
-		parallel.initializePersistentCommunicationsSlopes();
+		parallel->initializePersistentCommunicationsSlopes();
 		//Initialization of communications necessary for additional physics (vectors of dim=3)
-		parallel.initializePersistentCommunicationsVector(dim);
-    //Initialization of communications of transported variables
-    parallel.initializePersistentCommunicationsTransports();
-		//Initialization of communications for AMR variables
-		parallel.initializePersistentCommunicationsXi();
-		parallel.initializePersistentCommunicationsSplit();
-		parallel.initializePersistentCommunicationsNumberGhostCells();
-		//Initialization of communications for the levels superior to 0
-		parallel.initializePersistentCommunicationsLvlAMR(lvlMax);
+		parallel->initializePersistentCommunicationsVector(dim);
+        //Initialization of communications of transported variables
+        parallel->initializePersistentCommunicationsTransports();
+        //Initialization of communications for AMR variables
+        parallel->initializePersistentCommunicationsXi();
+        parallel->initializePersistentCommunicationsSplit();
+        parallel->initializePersistentCommunicationsNumberGhostCells();
+        //Initialization of communications for the levels superior to 0
+        parallel->initializePersistentCommunicationsLvlAMR(lvlMax);
 	}
+
 	MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -670,31 +665,31 @@ void Parallel::initializePersistentCommunicationsLvlAMR(const int &lvlMax)
 {
 	//Extension of parallel variables to the maximum AMR level. We starts at 1, the level 0 being already initialized
 	for (int lvl = 1; lvl <= lvlMax; lvl++) {
-		m_bufferSend.push_back(new double*[Ncpu]);
-		m_bufferReceive.push_back(new double*[Ncpu]);
-		m_bufferSendSlopes.push_back(new double*[Ncpu]);
-		m_bufferReceiveSlopes.push_back(new double*[Ncpu]);
-		m_bufferSendVector.push_back(new double*[Ncpu]);
-		m_bufferReceiveVector.push_back(new double*[Ncpu]);
-    m_bufferSendTransports.push_back(new double*[Ncpu]);
-    m_bufferReceiveTransports.push_back(new double*[Ncpu]);
-		m_bufferSendXi.push_back(new double*[Ncpu]);
-		m_bufferReceiveXi.push_back(new double*[Ncpu]);
-		m_bufferSendSplit.push_back(new bool*[Ncpu]);
-		m_bufferReceiveSplit.push_back(new bool*[Ncpu]);
+        m_bufferSend.push_back(new double*[Ncpu]);
+        m_bufferReceive.push_back(new double*[Ncpu]);
+        m_bufferSendSlopes.push_back(new double*[Ncpu]);
+        m_bufferReceiveSlopes.push_back(new double*[Ncpu]);
+        m_bufferSendVector.push_back(new double*[Ncpu]);
+        m_bufferReceiveVector.push_back(new double*[Ncpu]);
+        m_bufferSendTransports.push_back(new double*[Ncpu]);
+        m_bufferReceiveTransports.push_back(new double*[Ncpu]);
+        m_bufferSendXi.push_back(new double*[Ncpu]);
+        m_bufferReceiveXi.push_back(new double*[Ncpu]);
+        m_bufferSendSplit.push_back(new bool*[Ncpu]);
+        m_bufferReceiveSplit.push_back(new bool*[Ncpu]);
 
-		m_reqSend.push_back(new MPI_Request*[Ncpu]);
-		m_reqReceive.push_back(new MPI_Request*[Ncpu]);
-		m_reqSendSlopes.push_back(new MPI_Request*[Ncpu]);
-		m_reqReceiveSlopes.push_back(new MPI_Request*[Ncpu]);
-		m_reqSendVector.push_back(new MPI_Request*[Ncpu]);
-		m_reqReceiveVector.push_back(new MPI_Request*[Ncpu]);
-    m_reqSendTransports.push_back(new MPI_Request*[Ncpu]);
-    m_reqReceiveTransports.push_back(new MPI_Request*[Ncpu]);
-		m_reqSendXi.push_back(new MPI_Request*[Ncpu]);
-		m_reqReceiveXi.push_back(new MPI_Request*[Ncpu]);
-		m_reqSendSplit.push_back(new MPI_Request*[Ncpu]);
-		m_reqReceiveSplit.push_back(new MPI_Request*[Ncpu]);
+        m_reqSend.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceive.push_back(new MPI_Request*[Ncpu]);
+        m_reqSendSlopes.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceiveSlopes.push_back(new MPI_Request*[Ncpu]);
+        m_reqSendVector.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceiveVector.push_back(new MPI_Request*[Ncpu]);
+        m_reqSendTransports.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceiveTransports.push_back(new MPI_Request*[Ncpu]);
+        m_reqSendXi.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceiveXi.push_back(new MPI_Request*[Ncpu]);
+        m_reqSendSplit.push_back(new MPI_Request*[Ncpu]);
+        m_reqReceiveSplit.push_back(new MPI_Request*[Ncpu]);
 
 		for (int i = 0; i < Ncpu; i++) {
 			m_bufferSend[lvl][i] = NULL;
@@ -706,17 +701,17 @@ void Parallel::initializePersistentCommunicationsLvlAMR(const int &lvlMax)
 			m_reqSendSlopes[lvl][i] = NULL;
 			m_reqReceiveSlopes[lvl][i] = NULL;
 			m_bufferSendVector[lvl][i] = NULL;
-			m_bufferReceiveVector[lvl][i] = NULL;
-			m_reqSendVector[lvl][i] = NULL;
-			m_reqReceiveVector[lvl][i] = NULL;
-      m_bufferSendTransports[lvl][i] = NULL;
-      m_bufferReceiveTransports[lvl][i] = NULL;
-      m_reqSendTransports[lvl][i] = NULL;
-      m_reqReceiveTransports[lvl][i] = NULL;
-			m_bufferSendXi[lvl][i] = NULL;
-			m_bufferReceiveXi[lvl][i] = NULL;
-			m_reqSendXi[lvl][i] = NULL;
-			m_reqReceiveXi[lvl][i] = NULL;
+            m_bufferReceiveVector[lvl][i] = NULL;
+            m_reqSendVector[lvl][i] = NULL;
+            m_reqReceiveVector[lvl][i] = NULL;
+            m_bufferSendTransports[lvl][i] = NULL;
+            m_bufferReceiveTransports[lvl][i] = NULL;
+            m_reqSendTransports[lvl][i] = NULL;
+            m_reqReceiveTransports[lvl][i] = NULL;
+            m_bufferSendXi[lvl][i] = NULL;
+            m_bufferReceiveXi[lvl][i] = NULL;
+            m_reqSendXi[lvl][i] = NULL;
+            m_reqReceiveXi[lvl][i] = NULL;
 			m_bufferSendSplit[lvl][i] = NULL;
 			m_bufferReceiveSplit[lvl][i] = NULL;
 			m_reqSendSplit[lvl][i] = NULL;
@@ -822,10 +817,10 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 			MPI_Request_free(m_reqSendSlopes[lvl][neighbour]);
 			MPI_Request_free(m_reqReceiveSlopes[lvl][neighbour]);
 			MPI_Request_free(m_reqSendVector[lvl][neighbour]);
-			MPI_Request_free(m_reqReceiveVector[lvl][neighbour]);
-      MPI_Request_free(m_reqSendTransports[lvl][neighbour]);
-      MPI_Request_free(m_reqReceiveTransports[lvl][neighbour]);
-			MPI_Request_free(m_reqSendXi[lvl][neighbour]);
+            MPI_Request_free(m_reqReceiveVector[lvl][neighbour]);
+            MPI_Request_free(m_reqSendTransports[lvl][neighbour]);
+            MPI_Request_free(m_reqReceiveTransports[lvl][neighbour]);
+            MPI_Request_free(m_reqSendXi[lvl][neighbour]);
 			MPI_Request_free(m_reqReceiveXi[lvl][neighbour]);
 			MPI_Request_free(m_reqSendSplit[lvl][neighbour]);
 			MPI_Request_free(m_reqReceiveSplit[lvl][neighbour]);
@@ -835,22 +830,22 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 			delete m_reqSendSlopes[lvl][neighbour];
 			delete m_reqReceiveSlopes[lvl][neighbour];
 			delete m_reqSendVector[lvl][neighbour];
-			delete m_reqReceiveVector[lvl][neighbour];
-      delete m_reqSendTransports[lvl][neighbour];
-      delete m_reqReceiveTransports[lvl][neighbour];
-			delete m_reqSendXi[lvl][neighbour];
-			delete m_reqReceiveXi[lvl][neighbour];
-			delete m_reqSendSplit[lvl][neighbour];
-			delete m_reqReceiveSplit[lvl][neighbour];
+            delete m_reqReceiveVector[lvl][neighbour];
+            delete m_reqSendTransports[lvl][neighbour];
+            delete m_reqReceiveTransports[lvl][neighbour];
+            delete m_reqSendXi[lvl][neighbour];
+            delete m_reqReceiveXi[lvl][neighbour];
+            delete m_reqSendSplit[lvl][neighbour];
+            delete m_reqReceiveSplit[lvl][neighbour];
 
-			delete[] m_bufferSend[lvl][neighbour];
-			delete[] m_bufferReceive[lvl][neighbour];
-			delete[] m_bufferSendSlopes[lvl][neighbour];
-			delete[] m_bufferReceiveSlopes[lvl][neighbour];
-			delete[] m_bufferSendVector[lvl][neighbour];
-			delete[] m_bufferReceiveVector[lvl][neighbour];
-      delete[] m_bufferSendTransports[lvl][neighbour];
-      delete[] m_bufferReceiveTransports[lvl][neighbour];
+            delete[] m_bufferSend[lvl][neighbour];
+            delete[] m_bufferReceive[lvl][neighbour];
+            delete[] m_bufferSendSlopes[lvl][neighbour];
+            delete[] m_bufferReceiveSlopes[lvl][neighbour];
+            delete[] m_bufferSendVector[lvl][neighbour];
+            delete[] m_bufferReceiveVector[lvl][neighbour];
+            delete[] m_bufferSendTransports[lvl][neighbour];
+            delete[] m_bufferReceiveTransports[lvl][neighbour];
 			delete[] m_bufferSendXi[lvl][neighbour];
 			delete[] m_bufferReceiveXi[lvl][neighbour];
 			delete[] m_bufferSendSplit[lvl][neighbour];
@@ -1014,7 +1009,7 @@ void Parallel::finalizePersistentCommunicationsXi(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsXi(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Parallel::communicationsXi(const int &lvl)
 {
 	int count(0);
 	MPI_Status status;
@@ -1025,7 +1020,7 @@ void Parallel::communicationsXi(const TypeMeshContainer<Cell *> &cells, const in
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendXi
-				cells[m_elementsToSend[neighbour][i]]->fillBufferXi(m_bufferSendXi[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferXi(m_bufferSendXi[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
 			}
 
 			//Sending request
@@ -1040,7 +1035,7 @@ void Parallel::communicationsXi(const TypeMeshContainer<Cell *> &cells, const in
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferReceiveXi
-				cells[m_elementsToReceive[neighbour][i]]->getBufferXi(m_bufferReceiveXi[lvl][neighbour], count, lvl);
+				m_elementsToReceive[neighbour][i]->getBufferXi(m_bufferReceiveXi[lvl][neighbour], count, lvl);
 			}
 		}
 	}
@@ -1099,7 +1094,7 @@ void Parallel::finalizePersistentCommunicationsSplit(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSplit(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Parallel::communicationsSplit( const int &lvl)
 {
 	int count(0);
 	MPI_Status status;
@@ -1110,7 +1105,7 @@ void Parallel::communicationsSplit(const TypeMeshContainer<Cell *> &cells, const
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendSplit
-				cells[m_elementsToSend[neighbour][i]]->fillBufferSplit(m_bufferSendSplit[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferSplit(m_bufferSendSplit[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
 			}
       
 			//Sending request
@@ -1125,7 +1120,7 @@ void Parallel::communicationsSplit(const TypeMeshContainer<Cell *> &cells, const
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferReceiveSplit
-				cells[m_elementsToReceive[neighbour][i]]->getBufferSplit(m_bufferReceiveSplit[lvl][neighbour], count, lvl);
+				m_elementsToReceive[neighbour][i]->getBufferSplit(m_bufferReceiveSplit[lvl][neighbour], count, lvl);
 			}
 		}
 	}
@@ -1174,7 +1169,7 @@ void Parallel::finalizePersistentCommunicationsNumberGhostCells()
 
 //***********************************************************************
 
-void Parallel::communicationsNumberGhostCells(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Parallel::communicationsNumberGhostCells( const int &lvl)
 {
 	MPI_Status status;
 
@@ -1185,7 +1180,7 @@ void Parallel::communicationsNumberGhostCells(const TypeMeshContainer<Cell *> &c
 			m_bufferNumberElementsToSendToNeighbor[neighbour] = 0;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendSplit
-				cells[m_elementsToSend[neighbour][i]]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], lvl, m_whichCpuAmIForNeighbour[neighbour]);
 			}
 
 
@@ -1205,7 +1200,7 @@ void Parallel::communicationsNumberGhostCells(const TypeMeshContainer<Cell *> &c
 
 //***********************************************************************
 
-void Parallel::communicationsPrimitivesAMR(const TypeMeshContainer<Cell *> &cells, Eos **eos, const int &lvl, Prim type)
+void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type)
 {
 	int count(0);
 	MPI_Status status;
@@ -1215,7 +1210,7 @@ void Parallel::communicationsPrimitivesAMR(const TypeMeshContainer<Cell *> &cell
 			//Prepation of sendings
 			count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        cells[m_elementsToSend[neighbour][i]]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], type);
+        m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], type);
       }
 
 			//Sending request
@@ -1229,7 +1224,7 @@ void Parallel::communicationsPrimitivesAMR(const TypeMeshContainer<Cell *> &cell
 			//Receivings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				cells[m_elementsToReceive[neighbour][i]]->getBufferPrimitivesAMR(m_bufferReceive[lvl][neighbour], count, lvl, eos, type);
+				m_elementsToReceive[neighbour][i]->getBufferPrimitivesAMR(m_bufferReceive[lvl][neighbour], count, lvl, eos, type);
 			}
 		}
 	}
@@ -1237,7 +1232,7 @@ void Parallel::communicationsPrimitivesAMR(const TypeMeshContainer<Cell *> &cell
 
 //***********************************************************************
 
-void Parallel::communicationsSlopesAMR(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Parallel::communicationsSlopesAMR( const int &lvl)
 {
 	int count(0);
 	MPI_Status status;
@@ -1247,7 +1242,7 @@ void Parallel::communicationsSlopesAMR(const TypeMeshContainer<Cell *> &cells, c
 			//Prepation of sendings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				cells[m_elementsToSend[neighbour][i]]->fillBufferSlopesAMR(m_bufferSendSlopes[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferSlopesAMR(m_bufferSendSlopes[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
 			}
 
 			//Sending request
@@ -1261,7 +1256,7 @@ void Parallel::communicationsSlopesAMR(const TypeMeshContainer<Cell *> &cells, c
 			//Receivings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				cells[m_elementsToReceive[neighbour][i]]->getBufferSlopesAMR(m_bufferReceiveSlopes[lvl][neighbour], count, lvl);
+				m_elementsToReceive[neighbour][i]->getBufferSlopesAMR(m_bufferReceiveSlopes[lvl][neighbour], count, lvl);
 			}
 		}
 	}
@@ -1269,7 +1264,7 @@ void Parallel::communicationsSlopesAMR(const TypeMeshContainer<Cell *> &cells, c
 
 //***********************************************************************
 
-void Parallel::communicationsVectorAMR(const TypeMeshContainer<Cell *> &cells, std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void Parallel::communicationsVectorAMR( std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
 	int count(0);
 	MPI_Status status;
@@ -1280,7 +1275,7 @@ void Parallel::communicationsVectorAMR(const TypeMeshContainer<Cell *> &cells, s
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendVector function of gradient coordinates
-				cells[m_elementsToSend[neighbour][i]]->fillBufferVectorAMR(m_bufferSendVector[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], dim, nameVector, num, index);
+				m_elementsToSend[neighbour][i]->fillBufferVectorAMR(m_bufferSendVector[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], dim, nameVector, num, index);
 			}
 
 			//Sending request
@@ -1294,7 +1289,7 @@ void Parallel::communicationsVectorAMR(const TypeMeshContainer<Cell *> &cells, s
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferReceiveVector function of gradient coordinates
-				cells[m_elementsToReceive[neighbour][i]]->getBufferVectorAMR(m_bufferReceiveVector[lvl][neighbour], count, lvl, dim, nameVector, num, index);
+				m_elementsToReceive[neighbour][i]->getBufferVectorAMR(m_bufferReceiveVector[lvl][neighbour], count, lvl, dim, nameVector, num, index);
 			}
 		}
 	}
@@ -1302,7 +1297,7 @@ void Parallel::communicationsVectorAMR(const TypeMeshContainer<Cell *> &cells, s
 
 //***********************************************************************
 
-void Parallel::communicationsTransportsAMR(const TypeMeshContainer<Cell *> &cells, const int &lvl)
+void Parallel::communicationsTransportsAMR( const int &lvl)
 {
   int count(0);
   MPI_Status status;
@@ -1312,7 +1307,7 @@ void Parallel::communicationsTransportsAMR(const TypeMeshContainer<Cell *> &cell
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        cells[m_elementsToSend[neighbour][i]]->fillBufferTransportsAMR(m_bufferSendTransports[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+        m_elementsToSend[neighbour][i]->fillBufferTransportsAMR(m_bufferSendTransports[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
       }
 
       //Sending request
@@ -1326,7 +1321,7 @@ void Parallel::communicationsTransportsAMR(const TypeMeshContainer<Cell *> &cell
       //Receivings
       count = -1;
       for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-        cells[m_elementsToReceive[neighbour][i]]->getBufferTransportsAMR(m_bufferReceiveTransports[lvl][neighbour], count, lvl);
+        m_elementsToReceive[neighbour][i]->getBufferTransportsAMR(m_bufferReceiveTransports[lvl][neighbour], count, lvl);
       }
     }
   }
