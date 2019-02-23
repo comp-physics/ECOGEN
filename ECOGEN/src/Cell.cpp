@@ -1106,6 +1106,7 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
 
   for (int i = 0; i < numberCellsChildren; i++) {
 
+
     //Children cells creation
     //-----------------------
     this->createChildCell(i, m_lvl);
@@ -1967,7 +1968,116 @@ void Cell::chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ,	
 
 //***********************************************************************
 
+//FIXME:
 void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
+{
+	//--------------------------------------
+	//Initializations (children and dimension)
+	//--------------------------------------
+
+  //Notice that the children number of ghost cells is different than for internal cells
+	double dimX(1.), dimY(0.), dimZ(0.);
+	int numberCellsChildren(2);
+	int dim(1);
+	if (nbCellsZ != 1) {
+		numberCellsChildren = 8;
+		dimY = 1.;
+		dimZ = 1.;
+		dim = 3;
+	}
+	else if (nbCellsY != 1) {
+		numberCellsChildren = 4;
+		dimY = 1.;
+		dim = 2;
+	}
+	CellInterface* cellInterfaceRef(0); //cellInterfaceRef always is the one with the level corresponding to the current ghost-cell level
+	for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+		if (m_cellInterfaces[b]->whoAmI() == 0) { cellInterfaceRef = m_cellInterfaces[b]; break; } //Cell interface type CellInterface/O2
+	}
+	int allocateSlopeLocal = 1;
+
+	//---------------
+	//Cell refinement
+	//---------------
+
+	//Initialization of mesh data for children cells
+	//----------------------------------------------
+    double posXCellParent, posYCellParent, posZCellParent;
+    double dXParent, dYParent, dZParent;
+    double posXChild, posYChild, posZChild;
+    posXCellParent = m_element->getPosition().getX();
+    posYCellParent = m_element->getPosition().getY();
+    posZCellParent = m_element->getPosition().getZ();
+    dXParent = m_element->getSizeX();
+    dYParent = m_element->getSizeY();
+    dZParent = m_element->getSizeZ();
+    double volumeCellParent, lCFLCellParent;
+    volumeCellParent = m_element->getVolume();
+	lCFLCellParent = m_element->getLCFL();
+
+	for (int i = 0; i < numberCellsChildren; i++) 
+    {
+		//Children cells creation
+		//-----------------------
+		this->createChildCell(i, m_lvl);
+		m_element->creerElementChild();
+		m_childrenCells[i]->setElement(m_element->getElementChild(i), i);
+        m_childrenCells[i]->getElement()->setVolume(volumeCellParent / std::pow(2,dim) );
+        m_childrenCells[i]->getElement()->setLCFL(0.5*lCFLCellParent);
+        m_childrenCells[i]->getElement()->setSize((1 - dimX*0.5)*dXParent, (1 - dimY*0.5)*dYParent, (1 - dimZ*0.5)*dZParent);
+
+        //Face in the x-direction
+        if (std::fabs(cellInterfaceRef->getFace()->getNormal().getX()) > 0.99) {
+                //Ghost cells are on the right according to internal cells, the positions of the children are thus those on the left side
+                if (cellInterfaceRef->getFace()->getPos().getX() < m_element->getPosition().getX()) { posXChild = posXCellParent - dimX*dXParent*0.25; }
+                //Ghost cells are on the left according to internal cells, the positions of the children are thus those on the right side
+                else { posXChild = posXCellParent + dimX*dXParent*0.25; }
+          posYChild = posYCellParent + dimY*dYParent*(double)(-0.25 + 0.5 * (i % 2));
+          posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
+        }
+        //Face in the y-direction
+        else if (std::fabs(cellInterfaceRef->getFace()->getNormal().getY()) > 0.99) {
+          //Ghost cells are on the top according to internal cells, the positions of the children are thus those on the bottom side
+          if (cellInterfaceRef->getFace()->getPos().getY() < m_element->getPosition().getY()) { posYChild = posYCellParent - dimY*dYParent*0.25; }
+          //Ghost cells are on the bottom according to internal cells, the positions of the children are thus those on the top side
+          else { posYChild = posYCellParent + dimY*dYParent*0.25; }
+          posXChild = posXCellParent + dimX*dXParent*(double)(-0.25 + 0.5 * (i % 2));
+          posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
+        }
+        //Face in the z-direction
+        else if (std::fabs(cellInterfaceRef->getFace()->getNormal().getZ()) > 0.99) {
+          //Ghost cells are on the front according to internal cells, the positions of the children are thus those on the back side
+          if (cellInterfaceRef->getFace()->getPos().getZ() < m_element->getPosition().getZ()) { posZChild = posZCellParent - dimZ*dZParent*0.25; }
+          //Ghost cells are on the back according to internal cells, the positions of the children are thus those on the front side
+          else { posZChild = posZCellParent + dimZ*dZParent*0.25; }
+          posXChild = posXCellParent + dimX*dXParent*(double)(-0.25 + 0.5 * (i % 2));
+          posYChild = posYCellParent + dimY*dYParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
+        }
+            m_childrenCells[i]->getElement()->setPos(posXChild, posYChild, posZChild);
+
+        //Initialization of main arrays according to model and number of phases
+        //+ physical initialization: physical data for children cells
+		//-------------------------------------------------------------------------------------
+		m_childrenCells[i]->allocate(m_numberPhases, m_numberTransports, addPhys, model);
+		for (int k = 0; k < m_numberPhases; k++) {
+			m_childrenCells[i]->copyPhase(k, m_vecPhases[k]);
+		}
+		m_childrenCells[i]->copyMixture(m_mixture);
+		m_childrenCells[i]->getCons()->setToZero(m_numberPhases);
+		for (int k = 0; k < m_numberTransports; k++) { m_childrenCells[i]->setTransport(m_vecTransports[k].getValue(), k); }
+		for (int k = 0; k < m_numberTransports; k++) { m_childrenCells[i]->setConsTransport(0., k); }
+		m_childrenCells[i]->setXi(m_xi);
+	}
+
+	//----------------------------------
+	//External cell-interface refinement
+	//----------------------------------
+
+	for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+		if (!m_cellInterfaces[b]->getSplit()) { m_cellInterfaces[b]->raffineCellInterfaceExterneGhost(nbCellsY, nbCellsZ, dXParent, dYParent, dZParent, this, dim); }
+	}
+}
+void Cell::refineCellAndCellInterfacesGhost2(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
 {
 	//--------------------------------------
 	//Initializations (children and dimension)
@@ -2000,35 +2110,39 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
 
 	//Initialization of mesh data for children cells
 	//----------------------------------------------
-	double posXCellParent, posYCellParent, posZCellParent;
-	double dXParent, dYParent, dZParent;
-	double posXChild, posYChild, posZChild;
-	posXCellParent = m_element->getPosition().getX();
-	posYCellParent = m_element->getPosition().getY();
-	posZCellParent = m_element->getPosition().getZ();
-  dXParent = m_element->getSizeX();
-  dYParent = m_element->getSizeY();
-  dZParent = m_element->getSizeZ();
-	double volumeCellParent, lCFLCellParent;
-	volumeCellParent = m_element->getVolume();
+    double posXCellParent, posYCellParent, posZCellParent;
+    double dXParent, dYParent, dZParent;
+    double posXChild, posYChild, posZChild;
+    posXCellParent = m_element->getPosition().getX();
+    posYCellParent = m_element->getPosition().getY();
+    posZCellParent = m_element->getPosition().getZ();
+    dXParent = m_element->getSizeX();
+    dYParent = m_element->getSizeY();
+    dZParent = m_element->getSizeZ();
+    double volumeCellParent, lCFLCellParent;
+    volumeCellParent = m_element->getVolume();
 	lCFLCellParent = m_element->getLCFL();
 
 	for (int i = 0; i < numberCellsChildren; i++) {
+
+        //FIXME: 
+        //make child based on i ( which is determined by the config )
+
 
 		//Children cells creation
 		//-----------------------
 		this->createChildCell(i, m_lvl);
 		m_element->creerElementChild();
 		m_childrenCells[i]->setElement(m_element->getElementChild(i), i);
-		m_childrenCells[i]->getElement()->setVolume(volumeCellParent / (double)numberCellsChildren / 2);
-		m_childrenCells[i]->getElement()->setLCFL(0.5*lCFLCellParent);
-    m_childrenCells[i]->getElement()->setSize((1 - dimX*0.5)*dXParent, (1 - dimY*0.5)*dYParent, (1 - dimZ*0.5)*dZParent);
-    //Face in the x-direction
-    if (std::fabs(cellInterfaceRef->getFace()->getNormal().getX()) > 0.99) {
-      //Ghost cells are on the right according to internal cells, the positions of the children are thus those on the left side
-      if (cellInterfaceRef->getFace()->getPos().getX() < m_element->getPosition().getX()) { posXChild = posXCellParent - dimX*dXParent*0.25; }
-      //Ghost cells are on the left according to internal cells, the positions of the children are thus those on the right side
-      else { posXChild = posXCellParent + dimX*dXParent*0.25; }
+        m_childrenCells[i]->getElement()->setVolume(volumeCellParent / (double)numberCellsChildren / 2);
+        m_childrenCells[i]->getElement()->setLCFL(0.5*lCFLCellParent);
+        m_childrenCells[i]->getElement()->setSize((1 - dimX*0.5)*dXParent, (1 - dimY*0.5)*dYParent, (1 - dimZ*0.5)*dZParent);
+        //Face in the x-direction
+        if (std::fabs(cellInterfaceRef->getFace()->getNormal().getX()) > 0.99) {
+            //Ghost cells are on the right according to internal cells, the positions of the children are thus those on the left side
+            if (cellInterfaceRef->getFace()->getPos().getX() < m_element->getPosition().getX()) { posXChild = posXCellParent - dimX*dXParent*0.25; }
+            //Ghost cells are on the left according to internal cells, the positions of the children are thus those on the right side
+            else { posXChild = posXCellParent + dimX*dXParent*0.25; }
       posYChild = posYCellParent + dimY*dYParent*(double)(-0.25 + 0.5 * (i % 2));
       posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 2) % 2));
     }

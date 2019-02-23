@@ -1709,6 +1709,700 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 		}
 	}
 }
+void CellInterface::raffineCellInterfaceExterneGhost2(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent,
+	const double &dZParent, Cell *cellRef, const int &dim)
+{
+	//La creation des children cell interfaces n'est pas systematique, on regarde d'abord si ces children cell interfaces ne sont pas deja crees.
+	//Dans tous les cas on re-attribut les liaisons cells/cell interfaces.
+
+	int allocateSlopeLocal(1);
+  double surfaceChild(pow(0.5, dim - 1.)*m_face->getSurface());
+
+	if (nbCellsZ == 1) {
+		if (nbCellsY == 1) {
+
+			//--------------------------------------------------
+			//--------------------- Cas 1D ---------------------
+			//--------------------------------------------------
+
+			//Cell interface pas encore split -> Creation des children cell interfaces
+			//------------------------------------------------------------------------
+			if (m_lvl == cellRef->getLvl()) {
+
+				this->creerCellInterfaceChild();
+				m_cellInterfacesChildren[0]->m_face = m_face->creerNouvelleFace();
+				m_cellInterfacesChildren[0]->m_face->initializeAutres(surfaceChild, m_face->getNormal(), m_face->getTangent(), m_face->getBinormal());
+				m_cellInterfacesChildren[0]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY(), m_face->getPos().getZ());
+        m_cellInterfacesChildren[0]->m_face->setSize(m_face->getSize());
+				if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+					//Cell interface number 1 (gauche)
+					m_cellInterfacesChildren[0]->initializeGauche(m_cellLeft);
+					m_cellInterfacesChildren[0]->initializeDroite(cellRef->getCellChild(0));
+					m_cellLeft->addCellInterface(m_cellInterfacesChildren[0]);
+					cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[0]);
+				}
+				else {
+					//Cell interface number 2 (droite)
+					m_cellInterfacesChildren[0]->initializeGauche(cellRef->getCellChild(0));
+					m_cellInterfacesChildren[0]->initializeDroite(m_cellRight);
+					cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[0]);
+					m_cellRight->addCellInterface(m_cellInterfacesChildren[0]);
+				}
+				m_cellInterfacesChildren[0]->associeModel(m_mod);
+				m_cellInterfacesChildren[0]->allocateSlopes(cellRef->getNumberPhases(), cellRef->getNumberTransports(), allocateSlopeLocal);
+			}
+
+			//Cell interface deja split -> on met seulement a jour les liaisons cells/cell interfaces
+			//---------------------------------------------------------------------------------------
+			else {
+				if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+					//Cell interface number 1 (gauche)
+					m_cellRight = cellRef->getCellChild(0);
+					cellRef->getCellChild(0)->addCellInterface(this);
+				}
+				else {
+					//Cell interface number 2 (droite)
+					m_cellLeft = cellRef->getCellChild(0);
+					cellRef->getCellChild(0)->addCellInterface(this);
+				}
+			}
+		}
+		else {
+
+			//--------------------------------------------------
+			//--------------------- Cas 2D ---------------------
+			//--------------------------------------------------
+
+			//Cell interface pas encore split -> Creation des children cell interfaces
+			//------------------------------------------------------------------------
+			if (m_lvl == cellRef->getLvl()) {
+
+				//Creation des cell interfaces et faces enfants avec premiere initialization
+				//----------------------------------------------------------------
+				for (int i = 0; i < 2; i++) {
+					this->creerCellInterfaceChild();
+					m_cellInterfacesChildren[i]->m_face = m_face->creerNouvelleFace();
+					m_cellInterfacesChildren[i]->m_face->initializeAutres(surfaceChild, m_face->getNormal(), m_face->getTangent(), m_face->getBinormal());
+				}
+
+				//Face in the x-direction
+				//-----------------------
+        if (std::fabs(m_face->getNormal().getX()) > 0.99) {
+          //Left side
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            for (int i = 0; i < 2; i++) {
+              //First face
+              if (i == 0) {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+                m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(0));
+                m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+                cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              //Second face
+              else {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+                m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(1));
+                m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+                cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              m_cellInterfacesChildren[i]->m_face->setSize(0., 0.5*m_face->getSizeY(), m_face->getSizeZ());
+            }
+          }
+          //Right side
+          else {
+            for (int i = 0; i < 2; i++) {
+              //First face
+              if (i == 0) {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(0));
+                m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+                cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+                m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              //Second face
+              else {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(1));
+                m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+                cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+                m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              m_cellInterfacesChildren[i]->m_face->setSize(0., 0.5*m_face->getSizeY(), m_face->getSizeZ());
+            }
+          }
+        }
+        //Face in the y-direction
+        //-----------------------
+        else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
+          //Bottom side
+          if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+            for (int i = 0; i < 2; i++) {
+              //First face
+              if (i == 0) {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+                m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(0));
+                m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+                cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              //Second face
+              else {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+                m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(1));
+                m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+                cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              m_cellInterfacesChildren[i]->m_face->setSize(0.5*m_face->getSizeX(), 0., m_face->getSizeZ());
+            }
+          }
+          //Top side
+          else {
+            for (int i = 0; i < 2; i++) {
+              //First face
+              if (i == 0) {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(0));
+                m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+                cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+                m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              //Second face
+              else {
+                m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ());
+                m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(1));
+                m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+                cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+                m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+              }
+              m_cellInterfacesChildren[i]->m_face->setSize(0.5*m_face->getSizeX(), 0., m_face->getSizeZ());
+            }
+          }
+        }
+
+				//Association du model et des slopes
+				//-----------------------------------
+				for (int i = 0; i < 2; i++) {
+					m_cellInterfacesChildren[i]->associeModel(m_mod);
+					m_cellInterfacesChildren[i]->allocateSlopes(cellRef->getNumberPhases(), cellRef->getNumberTransports(), allocateSlopeLocal);
+				}
+
+			}
+
+			//Cell interface deja split -> on met seulement a jour les liaisons cells/cell interfaces
+			//---------------------------------------------------------------------------------------
+			else {
+
+				//Face in the x-direction
+				//-----------------------
+        if (std::fabs(m_face->getNormal().getX()) > 0.99) {
+          //Left side
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            //First face
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              m_cellRight = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            //Second face
+            else {
+              m_cellRight = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+          }
+          //Right side
+          else {
+            //First face
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              m_cellLeft = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            //Second face
+            else {
+              m_cellLeft = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+          }
+        }
+        //Face in the y-direction
+        //-----------------------
+        else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
+          //Bottom side
+          if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+            //First face
+            if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+              m_cellRight = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            //Second face
+            else {
+              m_cellRight = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+          }
+          //Top side
+          else {
+            //First face
+            if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+              m_cellLeft = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            //Second face
+            else {
+              m_cellLeft = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+          }
+        }
+			}
+		}
+	}
+	else {
+
+		//--------------------------------------------------
+		//--------------------- Cas 3D ---------------------
+		//--------------------------------------------------
+
+		//Cell interface pas encore split -> Creation des children cell interfaces
+		//------------------------------------------------------------------------
+		if (m_lvl == cellRef->getLvl()) {
+
+			//Creation des cell interfaces et faces enfants avec premiere initialization
+			//--------------------------------------------------------------------------
+			for (int i = 0; i < 4; i++) {
+				this->creerCellInterfaceChild();
+				m_cellInterfacesChildren[i]->m_face = m_face->creerNouvelleFace();
+				m_cellInterfacesChildren[i]->m_face->initializeAutres(surfaceChild, m_face->getNormal(), m_face->getTangent(), m_face->getBinormal());
+        m_cellInterfacesChildren[i]->m_face->setSize(0.5*m_face->getSize());
+			}
+
+      //Face in the x-direction
+      //-----------------------
+      if (std::fabs(m_face->getNormal().getX()) > 0.99) {
+        //Left side
+        if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(0));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(2));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(1));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(3));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+          }
+        }
+        //Right side
+        else {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(0));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(2));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(1));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX(), m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(3));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+          }
+        }
+      }
+      //Face in the y-direction
+      //-----------------------
+      else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
+        //Bottom side
+        if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(0));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(2));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(1));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(3));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+
+          }
+        }
+        //Top side
+        else {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(0));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(2));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() - 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(1));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY(), m_face->getPos().getZ() + 0.25*dZParent);
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(3));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+          }
+        }
+      }
+      //Face in the z-direction
+      //-----------------------
+      else if (std::fabs(m_face->getNormal().getZ()) > 0.99) {
+        //Back side
+        if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(0));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(2));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(1));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(m_cellLeft);
+              m_cellInterfacesChildren[i]->initializeDroite(cellRef->getCellChild(3));
+              m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+          }
+        }
+        //Front side
+        else {
+          for (int i = 0; i < 4; i++) {
+            //First face
+            if (i == 0) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(0));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(0)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Second face
+            else if (i == 1) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() - 0.25*dXParent, m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(2));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(2)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Third face
+            else if (i == 2) {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY() - 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(1));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+            //Fourth face
+            else {
+              m_cellInterfacesChildren[i]->m_face->setPos(m_face->getPos().getX() + 0.25*dXParent, m_face->getPos().getY() + 0.25*dYParent, m_face->getPos().getZ());
+              m_cellInterfacesChildren[i]->initializeGauche(cellRef->getCellChild(3));
+              m_cellInterfacesChildren[i]->initializeDroite(m_cellRight);
+              cellRef->getCellChild(3)->addCellInterface(m_cellInterfacesChildren[i]);
+              m_cellRight->addCellInterface(m_cellInterfacesChildren[i]);
+            }
+          }
+        }
+      }
+
+			//Association du model et des slopes
+			//-----------------------------------
+			for (int i = 0; i < 4; i++) {
+				m_cellInterfacesChildren[i]->associeModel(m_mod);
+				m_cellInterfacesChildren[i]->allocateSlopes(cellRef->getNumberPhases(), cellRef->getNumberTransports(), allocateSlopeLocal);
+			}
+
+		}
+
+		//Cell interface deja split -> on met seulement a jour les liaisons cells/cell interfaces
+		//---------------------------------------------------------------------------------------
+		else {
+
+      //Face in the x-direction
+      //-----------------------
+      if (std::fabs(m_face->getNormal().getX()) > 0.99) {
+        //Left side
+        if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+          if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //First face
+              m_cellRight = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellRight = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //Third face
+              m_cellRight = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellRight = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+        //Right side
+        else {
+          if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //First face
+              m_cellLeft = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellLeft = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //Third face
+              m_cellLeft = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellLeft = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+      }
+      //Face in the y-direction
+      //-----------------------
+      else if (std::fabs(m_face->getNormal().getY()) > 0.99) {
+        //Bottom side
+        if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //First face
+              m_cellRight = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellRight = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //Third face
+              m_cellRight = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellRight = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+        //Top side
+        else {
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //First face
+              m_cellLeft = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellLeft = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+              //Third face
+              m_cellLeft = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellLeft = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+      }
+      //Face in the z-direction
+      //-----------------------
+      else if (std::fabs(m_face->getNormal().getZ()) > 0.99) {
+        //Back side
+        if (m_face->getPos().getZ() < cellRef->getElement()->getPosition().getZ()) {
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              //First face
+              m_cellRight = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellRight = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              //Third face
+              m_cellRight = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellRight = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+        //Front side
+        else {
+          if (m_face->getPos().getX() < cellRef->getElement()->getPosition().getX()) {
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              //First face
+              m_cellLeft = cellRef->getCellChild(0);
+              cellRef->getCellChild(0)->addCellInterface(this);
+            }
+            else {
+              //Second face
+              m_cellLeft = cellRef->getCellChild(2);
+              cellRef->getCellChild(2)->addCellInterface(this);
+            }
+          }
+          else {
+            if (m_face->getPos().getY() < cellRef->getElement()->getPosition().getY()) {
+              //Third face
+              m_cellLeft = cellRef->getCellChild(1);
+              cellRef->getCellChild(1)->addCellInterface(this);
+            }
+            else {
+              //Fourth face
+              m_cellLeft = cellRef->getCellChild(3);
+              cellRef->getCellChild(3)->addCellInterface(this);
+            }
+          }
+        }
+      }
+		}
+	}
+}
 
 //***********************************************************************
 

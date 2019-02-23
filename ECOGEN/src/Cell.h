@@ -233,6 +233,7 @@ class Cell
         void getBufferTransportsAMR(double *buffer, int &counter, const int &lvl);
         void chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost);           /*!< Choice for refinement, unrefinement of the ghost parent cell + Update of ghost cell vector for lvl+1 */
         void refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
+        void refineCellAndCellInterfacesGhost2(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
         void unrefineCellAndCellInterfacesGhost();                                                               /*!< Unrefinement of parent ghost cell by destruction of children ghost cells */
         void fillBufferXi(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
         void getBufferXi(double *buffer, int &counter, const int &lvl);

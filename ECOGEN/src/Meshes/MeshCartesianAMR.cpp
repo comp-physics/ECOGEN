@@ -56,12 +56,12 @@ MeshCartesianAMR::~MeshCartesianAMR(){
 
 //***********************************************************************
 
-//int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
-//{
-//  this->meshStretching();
-//  this->initializeGeometrieAMR(cells, cellInterfaces, ordreCalcul);
-//  return m_geometrie;
-//}
+int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+{
+  this->meshStretching();
+  this->initializeGeometrieAMR(cells, cellInterfaces, ordreCalcul);
+  return m_geometrie;
+}
 
 
 //***********************************************************************
@@ -126,7 +126,11 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
 
 //***********************************************************************
 
-void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul, decomposition::Decomposition* decomp)
+void 
+MeshCartesianAMR::
+createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells,     
+TypeMeshContainer<CellInterface*>& cellInterfaces, 
+std::string ordreCalcul, decomposition::Decomposition* decomp)
 {
    Cell* cellTmp;
    if (ordreCalcul == "FIRSTORDER") { cellTmp = new Cell; }
@@ -146,8 +150,6 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
        offsets[2*d+1][d] =+1;
    }
 
-   std::vector<std::vector<ElementCartesian*>> elements_rec;
-   std::vector<std::vector<ElementCartesian*>> elements_snd;
    const auto sizeNonGhostCells=cells.size();
    for(unsigned int i = 0; i < sizeNonGhostCells; ++i)
    {
@@ -296,8 +298,12 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
                        m_elements.push_back(new ElementCartesian());
                        m_elements.back()->setKey(nKey);
                        cells.back()->setElement(m_elements.back(), cells.size()-1);
-                       //elements_rec.push_back(); // index of ghost
-                       //elements_snd.push_back(); // index of non-ghost
+
+                       if(Ncpu>1)
+                       {
+                           parallel->setElementsToSend(decomp->get_rank(cells[i]->getElement()->getKey()),cells[i]);
+                           parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                       }
 
                        const auto coord = nKey.coordinate();
                        const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
@@ -320,7 +326,6 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
                        cells.back()->addCellInterface(cellInterfaces.back());
 
                    }
-
                }
                else //Negative offset
                {
@@ -342,6 +347,12 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
                        m_elements.push_back(new ElementCartesian());
                        m_elements.back()->setKey(nKey);
                        cells.back()->setElement(m_elements.back(), cells.size()-1);
+
+                       if(Ncpu>1)
+                       {
+                           parallel->setElementsToSend(decomp->get_rank(cells[i]->getElement()->getKey()),cells[i]);
+                           parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                       }
 
                        const auto coord = nKey.coordinate();
                        const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
