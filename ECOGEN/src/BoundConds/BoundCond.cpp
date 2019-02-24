@@ -88,7 +88,7 @@ void BoundCond::solveRiemann(const int &numberPhases, const int &numberTransport
 
   //Probleme de Riemann
   double dxLeft(m_cellLeft->getElement()->getLCFL());
-  dxLeft = dxLeft*pow(2., (double)m_lvl);
+  dxLeft = dxLeft*std::pow(2., (double)m_lvl);
   this->solveRiemannLimite(*cellLeft, numberPhases, dxLeft, dtMax);
   //Traitement des fonctions de transport (m_Sm connu : doit etre place apres l appel au Solveur de Riemann)
   if (numberTransports > 0) { this->solveRiemannTransportLimite(*cellLeft, numberTransports); }
@@ -121,7 +121,7 @@ void BoundCond::raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCe
   const double &dZParent, Cell *cellRef, const int &dim)
 {
   //Le cell interface est une CL -> Creation des children cell interfaces
-  double surfaceChild(pow(0.5, dim - 1.)*m_face->getSurface());
+  double surfaceChild(std::pow(0.5, dim - 1.)*m_face->getSurface());
   double epsilon(1.e-6);
   int allocateSlopeLocal = 1;
 

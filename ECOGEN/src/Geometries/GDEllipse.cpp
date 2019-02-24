@@ -94,14 +94,14 @@ bool GDEllipse::belong(Coord &posElement, const int &lvl) const
     switch (axes[i])
     {
     case X:
-      if (i == 0) { sum += pow((posElement.getX() - m_centerPos.getX()) / m_radius1, 2.); break; }
-      else { sum += pow((posElement.getX() - m_centerPos.getX()) / m_radius2, 2.); break; }
+      if (i == 0) { sum += std::pow((posElement.getX() - m_centerPos.getX()) / m_radius1, 2.); break; }
+      else { sum += std::pow((posElement.getX() - m_centerPos.getX()) / m_radius2, 2.); break; }
     case Y:
-      if (i == 0) { sum += pow((posElement.getY() - m_centerPos.getY()) / m_radius1, 2.); break; }
-      else { sum += pow((posElement.getY() - m_centerPos.getY()) / m_radius2, 2.); break; }
+      if (i == 0) { sum += std::pow((posElement.getY() - m_centerPos.getY()) / m_radius1, 2.); break; }
+      else { sum += std::pow((posElement.getY() - m_centerPos.getY()) / m_radius2, 2.); break; }
     case Z:
-      if (i == 0) { sum += pow((posElement.getZ() - m_centerPos.getZ()) / m_radius1, 2.); break; }
-      else { sum += pow((posElement.getZ() - m_centerPos.getZ()) / m_radius2, 2.); break; }
+      if (i == 0) { sum += std::pow((posElement.getZ() - m_centerPos.getZ()) / m_radius1, 2.); break; }
+      else { sum += std::pow((posElement.getZ() - m_centerPos.getZ()) / m_radius2, 2.); break; }
     }
   }
 

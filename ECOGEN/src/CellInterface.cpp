@@ -131,8 +131,8 @@ void CellInterface::solveRiemann(const int &numberPhases, const int &numberTrans
   //Probleme de Riemann
   double dxLeft(m_cellLeft->getElement()->getLCFL());
   double dxRight(m_cellRight->getElement()->getLCFL());
-  dxLeft = dxLeft*pow(2., (double)m_lvl);
-  dxRight = dxRight*pow(2., (double)m_lvl);
+  dxLeft = dxLeft*std::pow(2., (double)m_lvl);
+  dxRight = dxRight*std::pow(2., (double)m_lvl);
   m_mod->solveRiemannIntern(*m_cellLeft, *m_cellRight, numberPhases, dxLeft, dxRight, dtMax);
   //Traitement des fonctions de transport (m_Sm connu : doit etre place apres l appel au Solveur de Riemann)
   if (numberTransports > 0) { m_mod->solveRiemannTransportIntern(*m_cellLeft, *m_cellRight, numberTransports); }
@@ -319,7 +319,7 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
 
   double epsilon(1.e-6);
   int allocateSlopeLocal(1);
-  double surfaceChild(pow(0.5,dim-1.)*m_face->getSurface());
+  double surfaceChild(std::pow(0.5,dim-1.)*m_face->getSurface());
 
   if (nbCellsZ == 1) {
     if (nbCellsY == 1) {
@@ -1022,7 +1022,7 @@ void CellInterface::raffineCellInterfaceExterneGhost(const int &nbCellsY, const 
 	//Dans tous les cas on re-attribut les liaisons cells/cell interfaces.
 
 	int allocateSlopeLocal(1);
-  double surfaceChild(pow(0.5, dim - 1.)*m_face->getSurface());
+  double surfaceChild(std::pow(0.5, dim - 1.)*m_face->getSurface());
 
 	if (nbCellsZ == 1) {
 		if (nbCellsY == 1) {
@@ -1716,7 +1716,7 @@ void CellInterface::raffineCellInterfaceExterneGhost2(const int &nbCellsY, const
 	//Dans tous les cas on re-attribut les liaisons cells/cell interfaces.
 
 	int allocateSlopeLocal(1);
-  double surfaceChild(pow(0.5, dim - 1.)*m_face->getSurface());
+  double surfaceChild(std::pow(0.5, dim - 1.)*m_face->getSurface());
 
 	if (nbCellsZ == 1) {
 		if (nbCellsY == 1) {

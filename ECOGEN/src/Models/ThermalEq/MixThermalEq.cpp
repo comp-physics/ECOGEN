@@ -232,7 +232,7 @@ double MixThermalEq::computeTemperatureIsentrope(const double *Yk, const double 
   double puissance(0.), fk;
   for (int k = 0; k < numberPhases; k++) {
     puissance = (TB->eos[k]->getGamma() - 1.)*Yk[k] * TB->eos[k]->getCv()/cM;
-    fk = pow((p + TB->eos[k]->getPInf()) / ((p0 + TB->eos[k]->getPInf())), puissance);
+    fk = std::pow((p + TB->eos[k]->getPInf()) / ((p0 + TB->eos[k]->getPInf())), puissance);
     T *= fk;
     if (dTdp != NULL) *dTdp += puissance/ (p + TB->eos[k]->getPInf());
   }

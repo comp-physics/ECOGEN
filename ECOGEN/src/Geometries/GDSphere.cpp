@@ -68,9 +68,9 @@ GDSphere::~GDSphere(){}
 bool GDSphere::belong(Coord &posElement, const int &lvl) const
 {
   double sum;
-  sum = pow(posElement.getX() - m_centerPos.getX(), 2.)
-        + pow(posElement.getY() - m_centerPos.getY(), 2.)
-        + pow(posElement.getZ() - m_centerPos.getZ(), 2.);
+  sum = std::pow(posElement.getX() - m_centerPos.getX(), 2.)
+        + std::pow(posElement.getY() - m_centerPos.getY(), 2.)
+        + std::pow(posElement.getZ() - m_centerPos.getZ(), 2.);
   if (sum <= m_radius*m_radius) return true;
   return false;
 }

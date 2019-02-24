@@ -281,8 +281,8 @@ void CellInterfaceO2::solveRiemann(const int &numberPhases, const int &numberTra
   //Probleme de Riemann
   double dxLeft(m_cellLeft->getElement()->getLCFL());
   double dxRight(m_cellRight->getElement()->getLCFL());
-  dxLeft = dxLeft*pow(2., (double)m_lvl);
-  dxRight = dxRight*pow(2., (double)m_lvl);
+  dxLeft = dxLeft*std::pow(2., (double)m_lvl);
+  dxRight = dxRight*std::pow(2., (double)m_lvl);
   m_mod->solveRiemannIntern(*cellLeft, *cellRight, numberPhases, dxLeft, dxRight, dtMax);
   //Traitement des fonctions de transport (m_Sm connu : doit etre place apres l appel au Solveur de Riemann)
   if (numberTransports > 0) { m_mod->solveRiemannTransportIntern(*cellLeft, *cellRight, numberTransports); }

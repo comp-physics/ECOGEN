@@ -91,11 +91,11 @@ bool GDDisc::belong(Coord &posElement, const int &lvl) const
     switch (axes[i])
     {
     case X:
-      sum += pow(posElement.getX() - m_centerPos.getX(), 2.); break;
+      sum += std::pow(posElement.getX() - m_centerPos.getX(), 2.); break;
     case Y:
-      sum += pow(posElement.getY() - m_centerPos.getY(), 2.); break;
+      sum += std::pow(posElement.getY() - m_centerPos.getY(), 2.); break;
     case Z:
-      sum += pow(posElement.getZ() - m_centerPos.getZ(), 2.); break;
+      sum += std::pow(posElement.getZ() - m_centerPos.getZ(), 2.); break;
     }
   }
   

@@ -478,11 +478,11 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
   //  x = cellsLvl[lvl][i]->getPosition().getX();
   //  y = cellsLvl[lvl][i]->getPosition().getY();
   //  //z = cellsLvl[lvl][i]->getPosition().getZ();
-  //  //if (pow((x*x + y*y + z*z), 0.5) > 500.e-6) {
-  //  //if (pow((x*x + y*y), 0.5) > 6.e-4) {
+  //  //if (std::pow((x*x + y*y + z*z), 0.5) > 500.e-6) {
+  //  //if (std::pow((x*x + y*y), 0.5) > 6.e-4) {
   //  //if ((x > 250e-6) || (y > 200.e-6)) {
   //  //if (x > 15.) {
-  //  if (pow((x*x + y * y), 0.5) > 5.) {
+  //  if (std::pow((x*x + y * y), 0.5) > 5.) {
   //      cellsLvl[lvl][i]->setToZeroXi();
   //  }
   //}

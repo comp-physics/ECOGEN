@@ -290,7 +290,7 @@ void Run::solver()
 void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsTotalAMR)
 {
   //1) AMR Level time step determination
-  double dtLvl = dt * pow(2., -(double)lvl);
+  double dtLvl = dt * std::pow(2., -(double)lvl);
   
   //2) (Un)Reffinement procedure
   if (m_lvlMax > 0) { 

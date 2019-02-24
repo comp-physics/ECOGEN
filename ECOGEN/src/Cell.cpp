@@ -136,14 +136,14 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
   //Initial smearing of the interface. Uncomment only when needed.
   // double radius;
   // double x_init(0.), y_init(0.), z_init(0.);
-  // //radius = pow(pow(coordinates.getX() - x_init, 2.), 0.5); //1D
+  // //radius = std::pow(std::pow(coordinates.getX() - x_init, 2.), 0.5); //1D
   // x_init = 3175.e-6;
-  // radius = pow(pow(coordinates.getX() - x_init, 2.) + pow(coordinates.getY() - y_init, 2.), 0.5); //2D
-  // //radius = pow(pow(coordinates.getX() - x_init, 2.) + pow(coordinates.getY() - y_init, 2.) + pow(coordinates.getZ() - z_init, 2.), 0.5); //3D
+  // radius = std::pow(std::pow(coordinates.getX() - x_init, 2.) + std::pow(coordinates.getY() - y_init, 2.), 0.5); //2D
+  // //radius = std::pow(std::pow(coordinates.getX() - x_init, 2.) + std::pow(coordinates.getY() - y_init, 2.) + std::pow(coordinates.getZ() - z_init, 2.), 0.5); //3D
   // double alphaAir(0.), alphaEau(0.);
-  // //double h(3200.e-6/50./pow(2., (double)lvlMax)); //0.04e-3
-  // //double h(3.e-4/150./pow(2., (double)lvlMax));
-  // double h(350.e-6/100./pow(2., (double)lvlMax));
+  // //double h(3200.e-6/50./std::pow(2., (double)lvlMax)); //0.04e-3
+  // //double h(3.e-4/150./std::pow(2., (double)lvlMax));
+  // double h(350.e-6/100./std::pow(2., (double)lvlMax));
   // alphaAir = 1. / 2.*(1. - tanh((radius - 100.e-6)/1.5/h));
   // if (alphaAir > 1.) alphaAir = 1.;
   // if (alphaAir < 0.) alphaAir = 0.;
@@ -157,9 +157,9 @@ void Cell::fill(std::vector<GeometricalDomain*> &domains, const int &lvlMax)
 
   //Initial smearing for 1D cavitation test case. Uncomment only when needed.
   // double coordX;
-  // coordX = pow(pow(coordinates.getX(), 2.), 0.5); //1D
+  // coordX = std::pow(std::pow(coordinates.getX(), 2.), 0.5); //1D
   // double variation(0.);
-  // double h(1./500./pow(2., (double)lvlMax));
+  // double h(1./500./std::pow(2., (double)lvlMax));
   // variation = 1. / 2.*(1. - tanh((coordX - 0.5)/1.5/h));
   // double velocity(variation*(-100.)+(1.-variation)*100.);
   // m_mixture->setVelocity(velocity, 0., 0.);
@@ -343,7 +343,7 @@ void Cell::copyVec(Phase **vecPhases, Mixture *mixture, Transport *vecTransports
 //  if (m_childrenCells.size() == 0) {
 //    bool imprX(false), imprY(false), imprZ(false);
 //    double dLsur2, position, epsilon;
-//    dLsur2 = dL / pow(2., (double)m_lvl) / 2.;
+//    dLsur2 = dL / std::pow(2., (double)m_lvl) / 2.;
 //    epsilon = 1.e-3*dLsur2;
 //    if (variableConstanteCut == "x") {
 //      imprY = true;
@@ -379,8 +379,8 @@ void Cell::copyVec(Phase **vecPhases, Mixture *mixture, Transport *vecTransports
 //  if (m_childrenCells.size() == 0) {
 //    bool imprX(true), imprY(true), imprZ(true);
 //    double dL1sur2, dL2sur2, position1, position2, epsilon1, epsilon2;
-//    dL1sur2 = dL1 / pow(2., (double)m_lvl) / 2.;
-//    dL2sur2 = dL2 / pow(2., (double)m_lvl) / 2.;
+//    dL1sur2 = dL1 / std::pow(2., (double)m_lvl) / 2.;
+//    dL2sur2 = dL2 / std::pow(2., (double)m_lvl) / 2.;
 //    epsilon1 = 1.e-3*dL1sur2;
 //    epsilon2 = 1.e-3*dL2sur2;
 //
@@ -443,7 +443,7 @@ double Cell::selectScalar(std::string nameVariable, int num) const
   if (nameVariable == "TR") {
     return m_vecTransports[num].getValue();
     //double psi(0.), coeff(0.75);
-    //psi = pow(m_vecTransports[num].getValue(), coeff) / (pow(m_vecTransports[num].getValue(), coeff) + pow((1 - m_vecTransports[num].getValue()), coeff));
+    //psi = std::pow(m_vecTransports[num].getValue(), coeff) / (std::pow(m_vecTransports[num].getValue(), coeff) + std::pow((1 - m_vecTransports[num].getValue()), coeff));
     //return psi;
   }
   else if (nameVariable == "P") {
