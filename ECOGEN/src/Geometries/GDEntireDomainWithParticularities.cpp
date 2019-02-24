@@ -70,9 +70,10 @@ bool GDEntireDomainWithParticularities::belong(Coord &posElement, const int &lvl
   bool result(false);
   //Variables for the inner boundary faces
   double yThreshold(30.e-6), slope(1.732);
-  if ((posElement.getY() < yThreshold) && 
-      (posElement.getY() - slope*(posElement.getX()) <= 0.) ||
-      (posElement.getY() <= 0.05*yThreshold))
+  double yThreshold2(0.05*yThreshold);
+  if (((posElement.getY() < yThreshold) && 
+      (posElement.getY() - slope*(posElement.getX()) <= 0.)) ||
+      (posElement.getY() <= yThreshold2))
     { result = true; }
   return result;
 }

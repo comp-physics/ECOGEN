@@ -286,8 +286,9 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
 
   //Initialization des faces internes
   //*********************************
-//Variables for the inner boundary faces
+  //Variables for the inner boundary faces
   double yThreshold(30.e-6), slope(1.732);
+  double yThreshold2(0.05*yThreshold);
 
   int iMailleG, iMailleD, iFace(0), iTemp;
   Cell *BGM=0, *BGP=0, *BDM=0, *BDP=0;
@@ -306,7 +307,6 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
             (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleD]->getPosition().getX() <= 0.)) {
           //Inner boundary faces taken as wall
           m_limYm->creeLimite(cellInterfaces);
-          cellInterfaces[iFace]->setFace(m_faces[iFace]);
           iMailleD = iMailleG;
           cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
           cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
@@ -315,11 +315,11 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
           //Normal inner faces
           if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
           else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cellInterfaces[iFace]->setFace(m_faces[iFace]);
           cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
           cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
           cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
         }
+        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         surface = m_dYj[iy] * m_dZk[iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(0., m_dYj[iy], m_dZk[iz]);
@@ -350,11 +350,10 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
         m_faces.push_back(new FaceCartesian());
         if (((cells[iMailleG]->getPosition().getY() < yThreshold) && 
              (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) || 
-             (cells[iMailleG]->getPosition().getY() <= 0.05*yThreshold)) {
+             (cells[iMailleG]->getPosition().getY() <= yThreshold2)) {
           //Inner boundary faces taken as wall
           tangent.setXYZ(1., 0., 0.); normal.setXYZ(0., -1., 0.); binormal.setXYZ(0., 0., 1.);
           m_limYm->creeLimite(cellInterfaces);
-          cellInterfaces[iFace]->setFace(m_faces[iFace]);
           iMailleG = iMailleD;
           cellInterfaces[iFace]->initialize(cells[iMailleD], cells[iMailleG]);
           cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
@@ -364,11 +363,11 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
           tangent.setXYZ(-1., 0., 0.); normal.setXYZ(0., 1., 0.); binormal.setXYZ(0., 0., 1.);
           if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
           else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cellInterfaces[iFace]->setFace(m_faces[iFace]);
           cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
           cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
           cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
         }
+        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         surface = m_dXi[ix] * m_dZk[iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(m_dXi[ix], 0., m_dZk[iz]);
@@ -676,6 +675,10 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
   
   //Initialization des faces internes
   //*********************************
+  //Variables for the inner boundary faces
+  double yThreshold(30.e-6), slope(1.732);
+  double yThreshold2(0.05*yThreshold);
+
   int iMailleG, iMailleD, iFace(0);
   //Faces selon X
   tangent.setXYZ(0., 1., 0.); normal.setXYZ(1., 0., 0.); binormal.setXYZ(0., 0., 1.);
@@ -685,15 +688,26 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
     {
       for (iz = 0; iz < m_numberCellsZ; iz++)
       {
-        if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        m_faces.push_back(new FaceCartesian());
-        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix + 1, iy, iz, iMailleD);
-        cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-        cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-        cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        m_faces.push_back(new FaceCartesian());
+        if ((cells[iMailleD]->getPosition().getY() < yThreshold) && 
+            (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleD]->getPosition().getX() <= 0.)) {
+          //Inner boundary faces taken as wall
+          m_limYm->creeLimite(cellInterfaces);
+          iMailleD = iMailleG;
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+        }
+        else {
+          //Normal inner faces
+          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+          else { cellInterfaces.push_back(new CellInterfaceO2); }
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
+        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         surface = m_dYj[m_offsetY + iy] * m_dZk[m_offsetZ + iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(0., m_dYj[m_offsetY + iy], m_dZk[m_offsetZ + iz]);
@@ -713,15 +727,29 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
     {
       for (iz = 0; iz < m_numberCellsZ; iz++)
       {
-        if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        m_faces.push_back(new FaceCartesian());
-        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         this->construitIGlobal(ix, iy, iz, iMailleG);
         this->construitIGlobal(ix, iy + 1, iz, iMailleD);
-        cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
-        cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
-        cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        m_faces.push_back(new FaceCartesian());
+        if (((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+             (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) || 
+             (cells[iMailleG]->getPosition().getY() <= yThreshold2)) {
+          //Inner boundary faces taken as wall
+          tangent.setXYZ(1., 0., 0.); normal.setXYZ(0., -1., 0.); binormal.setXYZ(0., 0., 1.);
+          m_limYm->creeLimite(cellInterfaces);
+          iMailleG = iMailleD;
+          cellInterfaces[iFace]->initialize(cells[iMailleD], cells[iMailleG]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
+        else {
+          //Normal inner faces
+          tangent.setXYZ(-1., 0., 0.); normal.setXYZ(0., 1., 0.); binormal.setXYZ(0., 0., 1.);
+          if(ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+          else { cellInterfaces.push_back(new CellInterfaceO2); }
+          cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
+          cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+        }
+        cellInterfaces[iFace]->setFace(m_faces[iFace]);
         surface = m_dXi[m_offsetX + ix] * m_dZk[m_offsetZ + iz];
         m_faces[iFace]->initializeAutres(surface, normal, tangent, binormal);
         m_faces[iFace]->setSize(m_dXi[m_offsetX + ix], 0., m_dZk[m_offsetZ + iz]);
@@ -794,9 +822,18 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
           if (m_geometrie > 1) lCFL *= 0.6;
           cells[iMailleG]->getElement()->setLCFL(lCFL);
           //setting boundary
-          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-          else { cellInterfaces.push_back(new CellInterfaceO2); }     
-					cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          if ((cells[iMailleD]->getPosition().getY() < yThreshold) && 
+              (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleD]->getPosition().getX() <= 0.)) {
+            //Inner boundary faces taken as wall
+            m_limYm->creeLimite(cellInterfaces);
+            iMailleD = iMailleG;
+          }
+          else {
+            //Normal inner faces
+            if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+            else { cellInterfaces.push_back(new CellInterfaceO2); }
+            cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          }
         }
         //B) Physical boundary condition treatment
         //----------------------------------------
@@ -846,9 +883,18 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
           if (m_geometrie > 1) lCFL *= 0.6;
           cells[iMailleD]->getElement()->setLCFL(lCFL);
           //setting boundary
-          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-          else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          if ((cells[iMailleD]->getPosition().getY() < yThreshold) && 
+              (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleD]->getPosition().getX() <= 0.)) {
+            //Inner boundary faces taken as wall
+            m_limYm->creeLimite(cellInterfaces);
+            iMailleD = iMailleG;
+          }
+          else {
+            //Normal inner faces
+            if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+            else { cellInterfaces.push_back(new CellInterfaceO2); }
+            cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          }
         }
         //B) Physical boundary condition treatment
         //----------------------------------------
@@ -902,9 +948,20 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
           if (m_geometrie > 1) lCFL *= 0.6;
           cells[iMailleG]->getElement()->setLCFL(lCFL);
           //setting boundary
-          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-          else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          if (((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+             (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) || 
+             (cells[iMailleG]->getPosition().getY() <= yThreshold2)) {
+            //Inner boundary faces taken as wall
+            tangent.setXYZ(1., 0., 0.); normal.setXYZ(0., -1., 0.); binormal.setXYZ(0., 0., 1.);
+            m_limYm->creeLimite(cellInterfaces);
+            iMailleG = iMailleD;
+          }
+          else {
+            //Normal inner faces
+            if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+            else { cellInterfaces.push_back(new CellInterfaceO2); }
+            cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          }
         } 
         //B) Physical boundary condition treatment
         //----------------------------------------
@@ -937,6 +994,7 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
     {
       for (iz = 0; iz < m_numberCellsZ; iz++)
       {
+        tangent.setXYZ(-1., 0., 0.); normal.setXYZ(0., 1., 0.); binormal.setXYZ(0., 0., 1.);
         this->construitIGlobal(ix, iy, iz, iMailleG);
         //A) CPU neighbour limits treatment
         //---------------------------------
@@ -954,9 +1012,20 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
           if (m_geometrie > 1) lCFL *= 0.6;
           cells[iMailleD]->getElement()->setLCFL(lCFL);
           //setting boundary
-          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-          else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          if (((cells[iMailleG]->getPosition().getY() < yThreshold) && 
+             (cells[iMailleG]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() <= 0.)) || 
+             (cells[iMailleG]->getPosition().getY() <= yThreshold2)) {
+            //Inner boundary faces taken as wall
+            tangent.setXYZ(1., 0., 0.); normal.setXYZ(0., -1., 0.); binormal.setXYZ(0., 0., 1.);
+            m_limYm->creeLimite(cellInterfaces);
+            iMailleG = iMailleD;
+          }
+          else {
+            //Normal inner faces
+            if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+            else { cellInterfaces.push_back(new CellInterfaceO2); }
+            cells[iMailleD]->addCellInterface(cellInterfaces[iFace]);
+          }
         }
         //B) Physical boundary condition treatment
         //----------------------------------------
