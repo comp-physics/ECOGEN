@@ -1,0 +1,16 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<computationParam>
+	<run>bubbleCone</run>
+	<outputMode format="XML" binary="true" precision="10"/>
+	<timeControlMode iterations="true">
+		<iterations number="3" iterFreq="1"/>
+		<physicalTime totalTime="7.e-7" timeFreq="7.e-9"/>
+	</timeControlMode>
+	<computationControl CFL="0.4"/>
+	<secondOrder>
+		<globalLimiter>mc</globalLimiter>
+		<globalVolumeFractionLimiter>thinc</globalVolumeFractionLimiter>
+    	<interfaceVolumeFractionLimiter>thinc</interfaceVolumeFractionLimiter>
+	</secondOrder>
+	<!-- <resumeSimulation fileNumber="5"/> -->
+</computationParam>
