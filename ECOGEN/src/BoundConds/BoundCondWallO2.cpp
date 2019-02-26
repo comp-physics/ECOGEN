@@ -90,6 +90,32 @@ void BoundCondWallO2::allocateSlopes(const int &numberPhases, const int &numberT
   for (int k = 0; k < numberTransports; k++) {
     m_vecTransportsSlopes[k].setValue(0.);
   }
+
+  //Allocation des variables externes
+  if (allocateSlopeLocal < 1) {
+    slopesPhasesLocal1 = new Phase*[numberPhases];
+    slopesPhasesLocal2 = new Phase*[numberPhases];
+    for (int k = 0; k < numberPhases; k++) {
+      m_cellLeft->getPhase(k)->allocateAndCopyPhase(&slopesPhasesLocal1[k]);
+      m_cellLeft->getPhase(k)->allocateAndCopyPhase(&slopesPhasesLocal2[k]);
+      slopesPhasesLocal1[k]->setToZero();
+      slopesPhasesLocal2[k]->setToZero();
+    }
+
+    m_cellLeft->getMixture()->allocateAndCopyMixture(&slopesMixtureLocal1);
+    m_cellLeft->getMixture()->allocateAndCopyMixture(&slopesMixtureLocal2);
+    slopesMixtureLocal1->setToZero();
+    slopesMixtureLocal2->setToZero();
+
+    slopesTransportLocal1 = new double[numberTransports];
+    slopesTransportLocal2 = new double[numberTransports];
+    for (int k = 0; k < numberTransports; k++) {
+      slopesTransportLocal1[k] = 0.;
+      slopesTransportLocal2[k] = 0.;
+    }
+
+    allocateSlopeLocal = 1;
+  }
 }
 
 //***********************************************************************
