@@ -2521,3 +2521,9 @@ CellInterface* CellInterface::getCellInterfaceChild(const int &numChild)
 }
 
 //***********************************************************************
+CellInterface* CellInterface::getCellInterfaceChildBack()
+{
+  return m_cellInterfacesChildren.back();
+}
+
+//***********************************************************************

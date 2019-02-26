@@ -116,6 +116,7 @@ class CellInterface
     int getLvl() const;                                         /*!< Renvoie le niveau du cell interface */
     int getNumberCellInterfacesChildren() const;                          /*!< Renvoie le number de children cell interfaces de ce cell interface*/
     CellInterface *getCellInterfaceChild(const int &numChild);          /*!< Renvoie le child cell interface correspondant au number */
+    CellInterface *getCellInterfaceChildBack();          /*!< Renvoie le child cell interface correspondant au number */
 
    protected:
     Cell *m_cellLeft;

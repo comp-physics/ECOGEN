@@ -61,18 +61,12 @@ public:
   //! \brief     Set the value in the z-direction of the Coord object
   //! \param     z                    value of the z-direction coordinate
   void setZ(const double &z);
-  //! \brief     Set the value in the i-direction of the Coord object
-  //! \param     val                    value of the i-direction coordinate
-  void set(const double &val, int i );
   //! \brief     Return the value in the x-direction of the Coord object
   double getX() const;
   //! \brief     Return the value in the y-direction of the Coord object
   double getY() const;
   //! \brief     Return the value in the z-direction of the Coord object
   double getZ() const;
-  //! \brief     Return the value in the z-direction of the Coord object
-  //! \param     i                    direction coordinate
-  double get(int i) const;
   //! \brief     Return the value of the norm of the Coord object
   double norm() const;
   //! \brief     Return the value of the squared norm of the Coord object

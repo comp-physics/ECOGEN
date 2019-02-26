@@ -2069,7 +2069,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
                         auto next=child_coord;
                         next[(idx+1)%dim]+=i;
                         next[(idx+2)%dim]+=j;
-                        decomposition::Key<3> next_key(next,key->level()+1);
+                        decomposition::Key<3> next_key(next,key.level()+1);
 
                         Cell* childCellGhost;
 
@@ -2123,46 +2123,46 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
                         const double surfaceChild(std::pow(0.5, dim - 1.)*face->getSurface());
 
                         //Same level 
-                        if(GhostCellNeighbor->getLevel()==m_lvl)
+                        if(GhostCellNeighbor->getLvl()==m_lvl)
                         {
                             //Push back faces
-                            this->creerCellInterfaceChild();
-                            Face f = new FaceCartesian;
-                            m_cellInterfacesChildren.back().setFace(f);
+                            m_cellInterfaces[b]->creerCellInterfaceChild();
+                            Face* f = new FaceCartesian;
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->setFace(f);
 
                             //face properties
-                            cellInterfacesChildren.back()->face->initializeAutres(surfaceChild, face->getNormal(), face->getTangent(), face->getBinormal());
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->initializeAutres(surfaceChild, face->getNormal(), face->getTangent(), face->getBinormal());
 
                             auto cellInterfacePosition=childCellGhost->getPosition();
                             cellInterfacePosition.setX( cellInterfacePosition.getX()+ face->getNormal().getX()*0.5*childCellGhost->getSizeX() );
                             cellInterfacePosition.setY( cellInterfacePosition.getY()+ face->getNormal().getY()*0.5*childCellGhost->getSizeY() );
                             cellInterfacePosition.setZ( cellInterfacePosition.getZ()+ face->getNormal().getZ()*0.5*childCellGhost->getSizeZ() );
-                            m_cellInterfacesChildren.back()->face->setPos(cellInterfacePosition);
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->setPos(cellInterfacePosition.getX(),cellInterfacePosition.getY(),cellInterfacePosition.getZ());
 
                             auto FaceSize=face->getSize();
                             FaceSize.setX( FaceSize.getX()*0.5  );
                             FaceSize.setY( FaceSize.getY()*0.5  );
                             FaceSize.setZ( FaceSize.getZ()*0.5  );
-                            m_cellInterfacesChildren.back()->face->setSize(FaceSize);
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->setSize(FaceSize);
 
                             if(GhostCellIsLeft)
                             {
-                                m_cellInterfacesChildren.back()->initializeGauche(childCellGhost);
-                                m_cellInterfacesChildren.back()->initializeDroite(GhostCellNeighbor);
+                                m_cellInterfaces[b]->getCellInterfaceChildBack()->initializeGauche(childCellGhost);
+                                m_cellInterfaces[b]->getCellInterfaceChildBack()->initializeDroite(GhostCellNeighbor);
                             }
                             else
                             {
-                                m_cellInterfacesChildren.back()->initializeDroite(childCellGhost);
-                                m_cellInterfacesChildren.back()->initializeGauche(GhostCellNeighbor);
+                                m_cellInterfaces[b]->getCellInterfaceChildBack()->initializeDroite(childCellGhost);
+                                m_cellInterfaces[b]->getCellInterfaceChildBack()->initializeGauche(GhostCellNeighbor);
                             }
 
-                            childCellGhost->addCellInterface(m_cellInterfacesChildren.back());
-                            GhostCellNeighbor->addCellInterface(m_cellInterfacesChildren.back());
+                            childCellGhost->addCellInterface(m_cellInterfaces[b]->getCellInterfaceChildBack());
+                            GhostCellNeighbor->addCellInterface(m_cellInterfaces[b]->getCellInterfaceChildBack());
 
                             //Association du model et des slopes
                             //-----------------------------------
-                            m_cellInterfacesChildren.back()->associeModel(m_mod);
-                            m_cellInterfacesChildren.back()->allocateSlopes(this->getNumberPhases(), this->getNumberTransports(), allocateSlopeLocal);
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->associeModel(model);
+                            m_cellInterfaces[b]->getCellInterfaceChildBack()->allocateSlopes(this->getNumberPhases(), this->getNumberTransports(), allocateSlopeLocal);
                         }
                         else  // different level 
                         {
@@ -2181,6 +2181,10 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
             }
         }
 	}
+    //FIXME: Sort the children according the flattended index, x-being the fastet varying.
+    //       Communication AMR:
+    //          Update fillBufferAMR to check send elements
+    //                  => has ghostneighbor instead of index
 }
 
 //FIXME:
