@@ -158,6 +158,12 @@ Element* ElementCartesian::getElementChild(const int &numberChild)
 
 //****************************************************************************
 
+Element* ElementCartesian::getElementChildBack()
+{
+  return m_elementsChildren.back();
+}
+//****************************************************************************
+
 void ElementCartesian::finalizeElementsChildren()
 {
   for (unsigned int i = 0; i < m_elementsChildren.size(); i++) {

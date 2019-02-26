@@ -61,6 +61,7 @@ public:
   //Pour methode AMR
   virtual void creerElementChild();
   virtual Element* getElementChild(const int &numberChild);
+  virtual Element* getElementChildBack();
   virtual void finalizeElementsChildren();
 
 protected:

@@ -101,6 +101,7 @@ public:
   //Pour methode AMR
   virtual void creerElementChild() { Errors::errorMessage("creerElementsChildren not available for requested element"); };
   virtual Element* getElementChild(const int &numberChild) { Errors::errorMessage("getElementChild not available for requested element"); return 0; };
+  virtual Element* getElementChildBack() { Errors::errorMessage("getElementChild not available for requested element"); return 0; };
   virtual void finalizeElementsChildren() { Errors::errorMessage("finalizeElementsChildren not available for requested element"); };
 
   //For parallel load balancing

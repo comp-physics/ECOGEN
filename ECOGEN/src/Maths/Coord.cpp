@@ -74,12 +74,13 @@ void Coord::setZ(const double &z){m_z = z;}
 
 //*********************************************************************
 
-void Coord::set(const double &val, i )
+void Coord::set(const double &val, int i )
 {
     if(i==0){ m_x=val; } 
-    else if (i==1){m_y=val'}
-    else if (i==2){m_y=val'}
+    else if (i==1){m_y=val;}
+    else if (i==2){m_z=val;}
 }
+
 //*********************************************************************
 
 double Coord::getX() const
@@ -101,6 +102,14 @@ double Coord::getZ() const
   return m_z;
 }
 
+//*********************************************************************
+
+double Coord::get(int i) const
+{
+    if(i==0){ return m_x;} 
+    else if (i==1){return m_y;}
+    else if (i==2){return m_z;}
+}
 //*********************************************************************
 
 double Coord::norm() const
