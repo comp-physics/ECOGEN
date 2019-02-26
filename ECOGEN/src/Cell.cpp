@@ -1120,6 +1120,17 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
     posZChild = posZCellParent + dimZ*dZParent*(double)(-0.25 + 0.5 * ((i / 4) % 2));
     m_childrenCells[i]->getElement()->setPos(posXChild, posYChild, posZChild);
 
+    //Set the key for the child
+    //-----------------------
+    const auto child_key_0= this->getElement()->getKey().child(0);
+    auto coord_i= child_key_0.coordinate();
+    coord_i.x()+=(i % 2);
+    coord_i.y()+=((i / 2) % 2);
+    coord_i.z()+=((i / 4) % 2);
+    const decomposition::Key<3> child_key( coord_i,child_key_0.level());
+    m_childrenCells[i]->getElement()->setKey(child_key);
+
+
     //Initialization of main arrays according to model and number of phases
     //+ physical initialization: physical data for children cells
     //---------------------------------------------------------------------
@@ -1971,9 +1982,9 @@ void Cell::chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ,	
 //FIXME:
 void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
 {
-	//--------------------------------------
-	//Initializations (children and dimension)
-	//--------------------------------------
+    //--------------------------------------
+    //Initializations (children and dimension)
+    //--------------------------------------
 
   //Notice that the children number of ghost cells is different than for internal cells
 	double dimX(1.), dimY(0.), dimZ(0.);
@@ -2014,6 +2025,124 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
     double volumeCellParent, lCFLCellParent;
     volumeCellParent = m_element->getVolume();
 	lCFLCellParent = m_element->getLCFL();
+
+
+	for (unsigned int b = 0; b < m_cellInterfaces.size(); b++)     
+    {
+        if(m_cellInterfaces[b]->whoAmI()==0) //Inner face 
+        {
+            if (!m_cellInterfaces[b]->getSplit()) //Not split
+            {
+
+                auto const key=this->getElement()->getKey();
+                if(this==m_cellInterfaces[b]->getCellGauche())
+                {
+                    //I am left, add the  normal 
+                    const right=m_cellInterfaces[b]->getCellDroite();
+                    auto rightKey=right->getElement().getKey();
+
+                        if(right->getLevel()==m_lvl)
+                        {
+                            auto child_coord=key.child(0).coordinate();
+                            child_coord[0]+= m_cellInterfaces[b]->getFace()->getNormal().getX();
+                            child_coord[0]+= m_cellInterfaces[b]->getFace()->getNormal().getY();
+                            child_coord[0]+= m_cellInterfaces[b]->getFace()->getNormal().getZ();
+
+                            //Iterate over directions other than normal
+                            int idx=0;
+                            if( std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getY()-1.0) < 1e-10 )
+                                idx=1;
+                            if( std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()-1.0) < 1e-10 )
+                                idx=2;
+
+                            if(dim==3)
+                            {
+                                for(int i =0; i<2; ++i)
+                                {
+                                    for(int j =0; j<2; ++j)
+                                    {
+                                        auto next= child_coord[(idx+1)%dim]+i;
+                                        next[(idx+2)%dim]+=j;
+                                        decomposition::Key<3> next_key(next,key->level()+1);
+
+                                        bool exists=false;
+                                        for (int c = 0; c < m_childrenCells.size(); c++) 
+                                        {
+                                            if(m_childrenCells[c]->getElement()->getKey()==next_key)
+                                            {
+                                                exists=true;
+
+                                                //Update pointer with current cell ans aplit face
+                                                m_cellInterfaces[b]->initialize( this,m_childrenCells[c]);
+                                                const auto face= m_cellInterfaces[b]->getFace();
+                                                const double surfaceChild(std::pow(0.5, dim - 1.)*face->getSurface());
+
+                                                //Push back faces
+                                                this->creerCellInterfaceChild();
+                                                Face f = new FaceCartesian;
+
+                                                m_cellInterfacesChildren.back().setFace(f);
+
+                                                //face properties
+                                                m_cellInterfacesChildren.back()->face->initializeAutres(surfaceChild, face->getNormal(), face->getTangent(), face->getBinormal());
+
+                                                //FIXME: from here 
+
+                                                m_cellInterfacesChildren.back()->face->setPos(face->getPos().getX(), face->getPos().getY() + 0.25*dYParent, face->getPos().getZ());
+
+                                                
+
+                                                m_cellInterfacesChildren.back()->initializeGauche(m_cellLeft);
+                                                m_cellInterfacesChildren.back()->initializeDroite(cellRef->getCellChild(1));
+                                                m_cellLeft->addCellInterface(m_cellInterfacesChildren[i]);
+                                                cellRef->getCellChild(1)->addCellInterface(m_cellInterfacesChildren[i]);
+                                                m_cellInterfacesChildren[i]->face->setSize(0., 0.5*face->getSizeY(), face->getSizeZ());
+
+                                                //Association du model et des slopes
+                                                //-----------------------------------
+                                                for (int i = 0; i < 2; i++) {
+                                                    m_cellInterfacesChildren[i]->associeModel(m_mod);
+                                                    m_cellInterfacesChildren[i]->allocateSlopes(cellRef->getNumberPhases(), cellRef->getNumberTransports(), allocateSlopeLocal);
+                                                }
+
+                                                break;
+                                            } //found existing cell 
+                                        }
+
+                                        //Create the cell
+                                        if(!exists)
+                                        {
+
+                                        }
+                                    }
+                                }
+                            }
+                            else if(dim ==2)
+                            {
+                                for(int i =0; i<2; ++i)
+                                {
+                                    auto next= child_coord[(idx+1)%dim]+i;
+                                }
+
+                            }
+                        }
+                        else //same level 
+                        {
+
+                        }
+
+
+                }
+                else
+                {
+                    //I am right, dont add the  normal 
+                    const left=m_cellInterfaces[b]->getCellGauche();
+
+                }
+                //m_cellInterfaces[b]->raffineCellInterfaceExterneGhost(nbCellsY, nbCellsZ, dXParent, dYParent, dZParent, this, dim); 
+            }
+        }
+	}
 
 	for (int i = 0; i < numberCellsChildren; i++) 
     {
