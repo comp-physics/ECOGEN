@@ -35,7 +35,7 @@
 //! \version   1.0
 //! \date      December 20 2017
 
-#include "../CellInterface.h"
+#include "../Order1/CellInterface.h"
 
 //class CellInterfaceO2; //Predeclaration de la classe CellInterfaceO2 pour pouvoir inclure CellO2.h
 //

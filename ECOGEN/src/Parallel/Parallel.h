@@ -38,7 +38,7 @@
 #include <mpi.h>
 #include "../Tools.h"
 #include "../Models/Phase.h"
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 
 class Parallel
 {
@@ -47,9 +47,12 @@ public:
   virtual ~Parallel();
 
   void initialization(int &argc, char *argv[]);
-  virtual void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour);
+  virtual void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour); //KS//BD// Get ride of the virtual if ParallelAMR not used
   virtual void setElementsToSend(int neighbour, Cell* cell);
   virtual void setElementsToReceive(int neighbour, Cell* cell);
+  const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
+  TypeMeshContainer<Cell*> &getElementsToSend(int neighbour);
+  TypeMeshContainer<Cell*> &getElementsToReceive(int neighbour);
   void initializePersistentCommunications(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim);
   void computeDt(double &dt);
   void computePMax(double &pMax, double &pMaxWall);

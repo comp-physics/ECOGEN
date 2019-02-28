@@ -37,7 +37,7 @@
 
 #include <iostream>
 
-#include "../CellInterface.h"
+#include "../Order1/CellInterface.h"
 #include "../Order2/CellInterfaceO2.h" //Ajouter pour l'AMR, a priori ne pose pas de probleme
 #include "../libTierces/tinyxml2.h"
 #include "../Errors.h"

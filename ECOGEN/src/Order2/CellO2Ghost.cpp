@@ -36,11 +36,11 @@
 
 //***********************************************************************
 
-CellO2Ghost::CellO2Ghost() : CellO2(), m_vecPhasesSlopesGhost(0), m_mixtureSlopesGhost(0), m_vecTransportsSlopesGhost(0) {}
+CellO2Ghost::CellO2Ghost() : CellO2(), m_rankOfNeighborCPU(0), m_vecPhasesSlopesGhost(0), m_mixtureSlopesGhost(0), m_vecTransportsSlopesGhost(0) {}
 
 //***********************************************************************
 
-CellO2Ghost::CellO2Ghost(int lvl) : CellO2(lvl), m_vecPhasesSlopesGhost(0), m_mixtureSlopesGhost(0), m_vecTransportsSlopesGhost(0) {}
+CellO2Ghost::CellO2Ghost(int lvl) : CellO2(lvl), m_rankOfNeighborCPU(0), m_vecPhasesSlopesGhost(0), m_mixtureSlopesGhost(0), m_vecTransportsSlopesGhost(0) {}
 
 //***********************************************************************
 
@@ -93,6 +93,20 @@ void CellO2Ghost::allocate(const int &numberPhases, const int &numberTransports,
 		m_vecTransportsSlopesGhost[k] = 0.;
 	}
   m_model = model;
+}
+
+//***************************************************************************
+
+int CellO2Ghost::getRankOfNeighborCPU() const
+{
+  return m_rankOfNeighborCPU;
+}
+
+//***************************************************************************
+
+void CellO2Ghost::setRankOfNeighborCPU(const int &rank)
+{
+  m_rankOfNeighborCPU = rank;
 }
 
 //***********************************************************************
@@ -157,6 +171,7 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 void CellO2Ghost::createChildCell(const int &num, const int &lvl)
 {
 	m_childrenCells.push_back(new CellO2Ghost(lvl + 1));
+	m_childrenCells.back()->setRankOfNeighborCPU(m_rankOfNeighborCPU);
 }
 
 //***********************************************************************

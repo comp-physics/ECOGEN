@@ -45,17 +45,20 @@ public:
 	virtual ~CellO2Ghost();
 
 	virtual void allocate(const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model);
+	int getRankOfNeighborCPU() const;
+    void setRankOfNeighborCPU(const int &rank);
 	virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface);
 	virtual void createChildCell(const int &num, const int &lvl);
 	virtual void getBufferSlopes(double *buffer, int &counter);
 	virtual void getBufferSlopesAMR(double *buffer, int &counter, const int &lvl);
-	virtual bool isCellO2Ghost() const { return true; };
+	virtual bool isCellGhost() const { return true; };
 
 protected:
+	int m_rankOfNeighborCPU;                /*!< Rank of the neighbor CPU corresponding to this ghost cell */
 	Phase **m_vecPhasesSlopesGhost;         /*!< pour stocker les slopes des phases */
 	Mixture *m_mixtureSlopesGhost;          /*!< pour stocker les slopes de mixture */
 	double *m_vecTransportsSlopesGhost;	    /*!< pour stocker les slopes des transports */
-  double m_alphaCellAfterOppositeSide;    /*!< pour stocker la fraction volumique apres la cellule fantome */
+	double m_alphaCellAfterOppositeSide;    /*!< pour stocker la fraction volumique apres la cellule fantome */
 	
 private:
 };

@@ -119,7 +119,7 @@ void Run::initialize(int argc, char* argv[])
   //--------------------------------------------------------------------
 	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cells, m_order);
   if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
-
+  
 	//9) AMR initialization
 	//---------------------
   m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_cells, m_eos, m_resumeSimulation);

@@ -35,7 +35,7 @@
 //! \version   1.0
 //! \date      July 30 2018
 
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 #include "CellInterfaceO2.h"
 
 class CellO2 : public Cell
@@ -69,8 +69,8 @@ class CellO2 : public Cell
         //Pour methode AMR
         virtual void createChildCell(const int &num, const int &lvl);                                              /*!< Creer une cell enfant (non initializee) */
 
-				//Pour methodes ordre 2 parallele
-				virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const;
+        //Pour methodes ordre 2 parallele
+        virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const;
         virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
 
     protected:

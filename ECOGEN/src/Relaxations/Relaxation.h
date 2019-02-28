@@ -41,7 +41,7 @@ class Relaxation; //Predeclaration of class Relaxation to include Cell.h
 #include "../libTierces/tinyxml2.h"
 #include "../Errors.h"
 #include "../Tools.h"
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 
 //! \class     Relaxation
 //! \brief     Abstract class for Relaxations

@@ -36,7 +36,7 @@
 //! \date      February 15 2018
 
 #include "../Model.h"
-#include "../../Cell.h"
+#include "../../Order1/Cell.h"
 #include "MixEulerHomogeneous.h"
 
 class ModEulerHomogeneous;

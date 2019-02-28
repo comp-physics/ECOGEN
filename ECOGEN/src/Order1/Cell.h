@@ -37,20 +37,20 @@
 
 #include <vector>
 #include <fstream>
-#include "Models/Phase.h"
-#include "Maths/Coord.h"
-#include "Transport/Transport.h"
+#include "../Models/Phase.h"
+#include "../Maths/Coord.h"
+#include "../Transport/Transport.h"
 
 class Cell; //Predeclaration of class to include following .h
 
-#include "Models/Mixture.h"
-#include "AdditionalPhysics/QuantitiesAddPhys.h"
+#include "../Models/Mixture.h"
+#include "../AdditionalPhysics/QuantitiesAddPhys.h"
 #include "CellInterface.h"
-#include "Models/Model.h"
-#include "Models/Flux.h"
-#include "Meshes/Element.h"
-#include "Geometries/GeometricalDomain.h"
-#include "Symmetries/Symmetry.h"
+#include "../Models/Model.h"
+#include "../Models/Flux.h"
+#include "../Meshes/Element.h"
+#include "../Geometries/GeometricalDomain.h"
+#include "../Symmetries/Symmetry.h"
 
 //! \class     Cell
 //! \brief     Base class for a mesh cell
@@ -119,7 +119,7 @@ class Cell
         void setGradTk(int &numPhase, int &numAddPhys, double *buffer, int &counter);
         void addNonConsAddPhys(const int &numberPhases, AddPhys &addPhys, Symmetry *symmetry);
 
-				void reinitializeColorFunction(const int &numTransport, const int &numPhase); //!< Re-initialize the color function (transport) with alpha
+        void reinitializeColorFunction(const int &numTransport, const int &numPhase); //!< Re-initialize the color function (transport) with alpha
         
         //Accessors
         //---------
@@ -211,6 +211,8 @@ class Cell
 
         //For parallel computing (no AMR)
         //-------------------------------
+        int getRankOfNeighborCPU() const { return -1; };
+        void setRankOfNeighborCPU(const int &rank) {};
         void fillBufferPrimitives(double *buffer, int &counter, Prim type = vecPhases) const;
         void getBufferPrimitives(double *buffer, int &counter, Eos **eos, Prim type = vecPhases);
         virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const {};  /*!< Do nothing for first order cells */
@@ -219,7 +221,8 @@ class Cell
         void getBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1);
         void fillBufferTransports(double *buffer, int &counter) const;
         void getBufferTransports(double *buffer, int &counter);
-        virtual bool isCellO2Ghost() const { return false; };
+        virtual bool isCellGhost() const { return false; };
+        bool hasNeighboringGhostCellOfCPUneighbor() const;                                 /*!< Return a bool that is true if the cell has a neighboring ghost cell */
 
         //For parallel AMR computing
         //--------------------------
@@ -231,10 +234,9 @@ class Cell
         void getBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
         void fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
         void getBufferTransportsAMR(double *buffer, int &counter, const int &lvl);
-        void chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost);           /*!< Choice for refinement, unrefinement of the ghost parent cell + Update of ghost cell vector for lvl+1 */
-        void refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
-        void refineCellAndCellInterfacesGhost2(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
-        void unrefineCellAndCellInterfacesGhost();                                                               /*!< Unrefinement of parent ghost cell by destruction of children ghost cells */
+        void chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost); /*!< Choice for refinement, unrefinement of the ghost parent cell + Update of ghost cell vector for lvl+1 */
+        void refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
+        void unrefineCellAndCellInterfacesGhost();                                                                                      /*!< Unrefinement of parent ghost cell by destruction of children ghost cells */
         void fillBufferXi(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
         void getBufferXi(double *buffer, int &counter, const int &lvl);
         void fillBufferSplit(bool *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
@@ -260,7 +262,7 @@ class Cell
       double m_consXi;                                            /*!< Buffer variable for Xi fluxes */
 	  bool m_split;                                               /*!< Indicator for splitted cell (Do I possess children ?) */
       std::vector<Cell*> m_childrenCells;                         /*!< Vector of children cells pointers */
-      std::vector<CellInterface*> m_childrenInternalCellInterfaces;   /*!< Vector of Internal children cell-interface pointers of the cell */
+      std::vector<CellInterface*> m_childrenInternalCellInterfaces; /*!< Vector of Internal children cell-interface pointers of the cell */
 
     private:
 };

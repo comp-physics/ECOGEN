@@ -36,7 +36,7 @@
 //! \date      December 20 2017
 
 #include "../Model.h"
-#include "../../Cell.h"
+#include "../../Order1/Cell.h"
 #include "MixKapila.h"
 
 class ModKapila;

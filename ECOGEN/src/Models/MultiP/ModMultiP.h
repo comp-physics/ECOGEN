@@ -36,7 +36,7 @@
 //! \date      June 5 2018
 
 #include "../Model.h"
-#include "../../Cell.h"
+#include "../../Order1/Cell.h"
 #include "MixMultiP.h"
 
 class ModMultiP;

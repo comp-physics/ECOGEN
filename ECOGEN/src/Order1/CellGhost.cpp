@@ -27,36 +27,45 @@
 //  along with ECOGEN (file LICENSE).  
 //  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SOURCE_H
-#define SOURCE_H
-
-//! \file      Source.h
-//! \author    F. Petitpas, K. Schmidmayer
+//! \file      CellGhost.cpp
+//! \author    K. Schmidmayer
 //! \version   1.0
-//! \date      January 10 2018
+//! \date      February 27 2019
 
-#include <string>
-#include "../libTierces/tinyxml2.h"
-#include "../Errors.h"
-#include "../Tools.h"
-#include "../Order1/Cell.h"
+#include "CellGhost.h"
 
-//! \class     Source
-//! \brief     Abstract class for source terms
-class Source
+//***********************************************************************
+
+CellGhost::CellGhost() : Cell(), m_rankOfNeighborCPU(0) {}
+
+//***********************************************************************
+
+CellGhost::CellGhost(int lvl) : Cell(lvl), m_rankOfNeighborCPU(0) {}
+
+//***********************************************************************
+
+CellGhost::~CellGhost() {}
+
+//***********************************************************************
+
+void CellGhost::createChildCell(const int &num, const int &lvl)
 {
-  public:
-    Source();
-    virtual ~Source();
+  m_childrenCells.push_back(new CellGhost(lvl + 1));
+  m_childrenCells.back()->setRankOfNeighborCPU(m_rankOfNeighborCPU);
+}
 
-    //! \brief     Source terms integration on conservative quantities
-    //! \param     cell           cell for source term integration
-    //! \param     numberPhases   number of phases
-    //! \param     dt             explicit integration time step
-    virtual void integrateSourceTerms(Cell *cell, const int &numberPhases, const double &dt){ Errors::errorMessage("integrateSourceTerms not available for required source"); };
-    virtual void sourceEvolution(const double &time) {};
+//***************************************************************************
 
-    virtual Coord computeAbsVelocity(const Coord relVelocity, const Coord position) { Errors::errorMessage("computeAbsVelocity not available for required source"); return 0.; };
-};
+int CellGhost::getRankOfNeighborCPU() const
+{
+  return m_rankOfNeighborCPU;
+}
 
-#endif // SOURCE_H
+//***************************************************************************
+
+void CellGhost::setRankOfNeighborCPU(const int &rank)
+{
+  m_rankOfNeighborCPU = rank;
+}
+
+//***************************************************************************

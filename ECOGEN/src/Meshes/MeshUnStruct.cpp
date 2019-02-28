@@ -931,7 +931,7 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
     }
     for (int v = 0; v < Ncpu; v++)
     {
-      std::string whichCpuAmIForNeighbour("");
+      std::string whichCpuAmIForNeighbour(""); //KS//BD// Not necessary, to delete at some point...
       if (numberElementsAEnvoyer[v] != 0) parallel->setNeighbour(v, whichCpuAmIForNeighbour);
       //parallel->setElementsToSend(v, buffer, numberElementsAEnvoyer[v]);
       for(int i=0;i<numberElementsAEnvoyer[v];++i)

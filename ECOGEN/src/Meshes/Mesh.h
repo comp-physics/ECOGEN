@@ -40,7 +40,8 @@
 #include <vector>
 #include <list>
 #include "../libTierces/tinyxml2.h"
-#include "../CellInterface.h"
+#include "../Order1/CellGhost.h"
+#include "../Order1/CellInterface.h"
 #include "../Order2/CellInterfaceO2.h"
 #include "../Order2/CellO2.h"
 #include "../Order2/CellO2Ghost.h"

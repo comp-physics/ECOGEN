@@ -117,27 +117,32 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
   createCellInterfacesFacesAndGhostCells(cells, cellInterfaces, ordreCalcul, &decomp);
   m_numberCellsTotal = cells.size(); //KS//BD// Update this after balancing
   m_numberFacesTotal = cellInterfaces.size(); //KS//BD// Update this after balancing
+
   std::cout
     << "numberCellsCalcul "<<m_numberCellsCalcul<<" "
     << "m_numberCellsTotal "<<m_numberCellsTotal<<" "
     << "m_numberFacesTotal "<<m_numberFacesTotal<<" "
     <<std::endl; //KS//BD// Erase 3D faces for 1D and 2D simulations
+
+  // for(unsigned int i = 0; i < m_numberCellsCalcul; ++i) {
+  //   for(int b = 0; b < cells[i]->getCellInterfacesSize(); ++b) {
+  //     if(cells[i]->getCellInterface(b)->whoAmI() == 0) {
+  //       std::cout<<"rank  "<<rankCpu;
+  //       std::cout<<"  cell  "<<cells[i]->getElement()->getKey().coordinate();
+  //       std::cout<<"  leftCell  "<<cells[i]->getCellInterface(b)->getCellGauche()->getElement()->getKey().coordinate();
+  //       std::cout<<"  rightCell  "<<cells[i]->getCellInterface(b)->getCellDroite()->getElement()->getKey().coordinate();
+  //       std::cout<<"  normal  "<<cells[i]->getCellInterface(b)->getFace()->getNormal().getX()<<" "<<cells[i]->getCellInterface(b)->getFace()->getNormal().getY()<<std::endl;
+  //     }
+  //   }
+  // }
 }
 
 //***********************************************************************
 
-void 
-MeshCartesianAMR::
-createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells,     
+void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells,     
 TypeMeshContainer<CellInterface*>& cellInterfaces, 
 std::string ordreCalcul, decomposition::Decomposition* decomp)
 {
-   Cell* cellTmp;
-   if (ordreCalcul == "FIRSTORDER") { cellTmp = new Cell; }
-   else { cellTmp = new CellO2; }
-   ElementCartesian elemTmp;
-   cellTmp->setElement(&elemTmp,0);
-
    using coordinate_type = decomposition::Key<3>::coordinate_type;
    std::array<decomposition::Key<3>::coordinate_type,6> offsets;
    std::fill(offsets.begin(), offsets.end(), coordinate_type(0));
@@ -203,7 +208,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
            }
 
            auto neighborCell = cells[i]->getElement()->getKey().coordinate() + offset;
-           if (!decomp->is_inside(neighborCell)) //Boundary
+           if (!decomp->is_inside(neighborCell)) //Offset is at a physical boundary
            {
                //Create boundary cell interface
                if (offset[0] == 1) //xDir=N
@@ -243,13 +248,15 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                m_faces.back()->setPos(posX, posY, posZ);
 
            }
-           else //Internal cells
+           else //Offset is an internal cell (ghost or not)
            {
+               //Get neighbor key
+               auto nKey = cells[i]->getElement()->getKey().neighbor(offset);
+
                if (offset[0]>0 || offset[1]>0 || offset[2]>0) //Positive offset
                {
                    //Create cell interface
-                   if (ordreCalcul == "FIRSTORDER") { 
-                       cellInterfaces.push_back(new CellInterface); }
+                   if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
                    else { cellInterfaces.push_back(new CellInterfaceO2); }     
 
                    m_faces.push_back(new FaceCartesian());
@@ -272,87 +279,155 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                    }
                    m_faces.back()->setPos(posX, posY, posZ);
 
+                   //Try to find the neighbor cell into the non-ghost cells
+                   auto it = std::find_if(cells.begin(), cells.begin()+sizeNonGhostCells,
+                           [&nKey](Cell* _k0){ 
+                           return _k0->getElement()->getKey() == nKey;
+                            });
 
-                   //Get neighbor key
-                   auto nKey = cells[i]->getElement()->getKey().neighbor(offset);
-
-                   //Find the neighbor cell with nKey:
-                   cellTmp->getElement()->setKey(nKey);
-                   auto it = std::lower_bound(cells.begin(), cells.end(), cellTmp, 
-                           [](Cell* _k0, Cell* _k1){ 
-                           return _k0->getElement()->getKey() < 
-                           _k1->getElement()->getKey(); });
-
-                   if (it != cells.end())
+                   if (it != cells.begin()+sizeNonGhostCells) //Neighbor cell is a non-ghost cell
                    {
                        //Update cell interface
-                       cellInterfaces.back()->initialize(cells[i],*it );
+                       cellInterfaces.back()->initialize(cells[i], *it);
                        cells[i]->addCellInterface(cellInterfaces.back());
                        (*it)->addCellInterface(cellInterfaces.back());
                    }
-                   else
+                   else //Neighbor cell is a ghost cell
                    {
-                       //Create ghost cell and update cell interface
-                       if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
-                       else { cells.push_back(new CellO2Ghost); }
-                       m_elements.push_back(new ElementCartesian());
-                       m_elements.back()->setKey(nKey);
-                       cells.back()->setElement(m_elements.back(), cells.size()-1);
+                       //Try to find the neighbor cell into the already created ghost cells
+                       auto it2 = std::find_if(cells.begin()+sizeNonGhostCells, cells.end(),
+                         [&nKey](Cell* _k0){ 
+                         return _k0->getElement()->getKey() == nKey;
+                          });
 
-                       if(Ncpu>1)
+                       if (it2 == cells.end()) //Ghost cell does not exist //KS//BD// Changed
                        {
-                           parallel->setElementsToSend(decomp->get_rank(cells[i]->getElement()->getKey()),cells[i]);
-                           parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                          //Create ghost cell and update cell interface
+                         if (ordreCalcul == "FIRSTORDER") { cells.push_back(new CellGhost); }
+                         else { cells.push_back(new CellO2Ghost); }
+                         m_elements.push_back(new ElementCartesian());
+                         m_elements.back()->setKey(nKey);
+                         cells.back()->setElement(m_elements.back(), cells.size()-1);
+
+                         //Update parallel communications
+                         parallel->setNeighbour(decomp->get_rank(nKey), "");
+                         //Try to find the current cell into the already added cells to send
+                         auto cKey = cells[i]->getElement()->getKey();
+                         auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
+                           [&cKey](Cell* _k0){ 
+                           return _k0->getElement()->getKey() == cKey;
+                            });
+                         if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
+                         {
+                           parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                         }
+                         parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+
+                         const auto coord = nKey.coordinate();
+                         const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
+
+                         const double volume = m_dXi[nix] * m_dYj[niy] * m_dZk[niz];
+                         cells.back()->getElement()->setVolume(volume);
+
+                         double lCFL(1.e10);
+                         if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[nix]); }
+                         if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[niy]); }
+                         if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[niz]); }
+                         if (m_geometrie > 1) lCFL *= 0.6;
+
+                         cells.back()->getElement()->setLCFL(lCFL);
+                         cells.back()->getElement()->setPos(m_posXi[nix], m_posYj[niy], m_posZk[niz]);
+                         cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
+
+                         //Update pointers cells <-> cell interfaces
+                         cellInterfaces.back()->initialize(cells[i], cells.back());
+                         cells[i]->addCellInterface(cellInterfaces.back());
+                         cells.back()->addCellInterface(cellInterfaces.back());
                        }
+                       else { //Ghost cell exists
+                         //Update parallel communications
+                         //parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Changed
+                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                         //parallel->setElementsToReceive(decomp->get_rank(nKey), *it2); //KS//BD// Need to be commented
 
-                       const auto coord = nKey.coordinate();
-                       const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
-
-                       const double volume = m_dXi[nix] * m_dYj[niy] * m_dZk[niz];
-                       cells.back()->getElement()->setVolume(volume);
-
-                       double lCFL(1.e10);
-                       if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[nix]); }
-                       if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[niy]); }
-                       if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[niz]); }
-                       if (m_geometrie > 1) lCFL *= 0.6;
-
-                       cells.back()->getElement()->setLCFL(lCFL);
-                       cells.back()->getElement()->setPos(m_posXi[nix], m_posYj[niy], m_posZk[niz]);
-                       cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
-
-                       cellInterfaces.back()->initialize(cells[i],cells.back() );
-                       cells[i]->addCellInterface(cellInterfaces.back());
-                       cells.back()->addCellInterface(cellInterfaces.back());
-
+                         //Update pointers cells <-> cell interfaces
+                         cellInterfaces.back()->initialize(cells[i], *it2);
+                         cells[i]->addCellInterface(cellInterfaces.back());
+                         (*it2)->addCellInterface(cellInterfaces.back());
+                       }
                    }
                }
                else //Negative offset
                {
-                   //Get neighbor key
-                   auto nKey = cells[i]->getElement()->getKey().neighbor(offset);
+                   //Try to find the neighbor cell into the non-ghost cells
+                   auto it = std::find_if(cells.begin(), cells.begin()+sizeNonGhostCells,
+                                             [&nKey](Cell* _k0){ 
+                                             return _k0->getElement()->getKey() == nKey;
+                                              });
 
-                   //Find the neighbor cell with nKey:
-                   cellTmp->getElement()->setKey(nKey);
-                   auto it = std::lower_bound(cells.begin(), cells.end(), cellTmp, 
-                           [](Cell* _k0, Cell* _k1){ 
-                           return _k0->getElement()->getKey() < 
-                           _k1->getElement()->getKey(); });
-
-                   if (it == cells.end())
+                   if (it == cells.begin()+sizeNonGhostCells) //Neighbor cell is a ghost cell
                    {
+                     //Create cell interface related to the ghost cell //KS//BD// Changed
+                     if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
+                     else { cellInterfaces.push_back(new CellInterfaceO2); }     
+
+                     m_faces.push_back(new FaceCartesian());
+                     cellInterfaces.back()->setFace(m_faces.back());
+
+                     if (offset[0])
+                     {
+                         normal.setXYZ( 1.,0.,0.); 
+                         tangent.setXYZ( 0.,1.,0.); 
+                         binormal.setXYZ(0.,0.,1.); 
+                         m_faces.back()->setSize(0.0, m_dYj[iy], m_dZk[iz]);
+                         m_faces.back()->initializeAutres(m_dYj[iy] * m_dZk[iz], normal, tangent, binormal);
+                     }
+                     if (offset[1])
+                     {
+                         normal.setXYZ( 0.,1.,0.); 
+                         tangent.setXYZ( -1.,0.,0.); 
+                         binormal.setXYZ(0.,0.,1.); 
+                         m_faces.back()->setSize(m_dXi[ix], 0.0, m_dZk[iz]);
+                         m_faces.back()->initializeAutres(m_dXi[ix] * m_dZk[iz], normal, tangent, binormal);
+                     }
+                     if (offset[2])
+                     {
+                         normal.setXYZ( 0.,0.,1.); 
+                         tangent.setXYZ( 1.,0.,0.); 
+                         binormal.setXYZ(0.,1.,0.); 
+                         m_faces.back()->setSize(m_dXi[ix], m_dYj[iy], 0.0);
+                         m_faces.back()->initializeAutres(m_dYj[iy] * m_dXi[ix], normal, tangent, binormal);
+                     }
+                     m_faces.back()->setPos(posX, posY, posZ);
+
+                     //Try to find the neighbor cell into the already created ghost cells
+                     auto it2 = std::find_if(cells.begin()+sizeNonGhostCells, cells.end(),
+                                            [&nKey](Cell* _k0){ 
+                                            return _k0->getElement()->getKey() == nKey;
+                                             });
+
+                     if (it2 == cells.end()) //Ghost cell does not exist //KS//BD// Changed
+                     {
                        //Create ghost cell
-                       if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+                       if (ordreCalcul == "FIRSTORDER") { cells.push_back(new CellGhost); }
                        else { cells.push_back(new CellO2Ghost); }
                        m_elements.push_back(new ElementCartesian());
                        m_elements.back()->setKey(nKey);
                        cells.back()->setElement(m_elements.back(), cells.size()-1);
 
-                       if(Ncpu>1)
+                       //Update parallel communications
+                       parallel->setNeighbour(decomp->get_rank(nKey), "");
+                       //Try to find the current cell into the already added cells to send
+                       auto cKey = cells[i]->getElement()->getKey();
+                       auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
+                         [&cKey](Cell* _k0){ 
+                         return _k0->getElement()->getKey() == cKey;
+                          });
+                       if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
                        {
-                           parallel->setElementsToSend(decomp->get_rank(cells[i]->getElement()->getKey()),cells[i]);
-                           parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
                        }
+                       parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
 
                        const auto coord = nKey.coordinate();
                        const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
@@ -370,41 +445,42 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        cells.back()->getElement()->setPos(m_posXi[nix], m_posYj[niy], m_posZk[niz]);
                        cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
 
-
-                       //Create cell interface related to the ghost cell
-                       if (ordreCalcul == "FIRSTORDER") { 
-                           cellInterfaces.push_back(new CellInterface); }
-                       else { cellInterfaces.push_back(new CellInterfaceO2); }     
-
-                       m_faces.push_back(new FaceCartesian());
-                       cellInterfaces.back()->setFace(m_faces.back());
-
-                       if (offset[0])
-                       {
-                           m_faces.back()->setSize(0.0, m_dYj[iy], m_dZk[iz]);
-                           m_faces.back()->initializeAutres(m_dYj[iy] * m_dZk[iz], normal, tangent, binormal);
-                       }
-                       if (offset[1])
-                       {
-                           m_faces.back()->setSize(m_dXi[ix], 0.0, m_dZk[iz]);
-                           m_faces.back()->initializeAutres(m_dXi[ix] * m_dZk[iz], normal, tangent, binormal);
-                       }
-                       if (offset[2])
-                       {
-                           m_faces.back()->setSize(m_dXi[ix], m_dYj[iy], 0.0);
-                           m_faces.back()->initializeAutres(m_dYj[iy] * m_dXi[ix], normal, tangent, binormal);
-                       }
-                       m_faces.back()->setPos(posX, posY, posZ);
-
-                       cellInterfaces.back()->initialize(cells[i],cells.back() );
+                       //Update pointers cells <-> cell interfaces
+                       cellInterfaces.back()->initialize(cells.back(), cells[i]); //KS//BD// Changed
                        cells[i]->addCellInterface(cellInterfaces.back());
                        cells.back()->addCellInterface(cellInterfaces.back());
+                     }
+                     else //Ghost cell exists
+                     {
+                       //Update parallel communications
+                       //parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Changed
+                       parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                       //parallel->setElementsToReceive(decomp->get_rank(nKey), *it2); //KS//BD// Need to be commented
 
+                       //Update pointers cells <-> cell interfaces
+                       cellInterfaces.back()->initialize(*it2, cells[i]); //KS//BD// Changed
+                       cells[i]->addCellInterface(cellInterfaces.back());
+                       (*it2)->addCellInterface(cellInterfaces.back());
+                     }
                    }
-               } //negative
-           } //internal cells
-       } //offset
-   } //cells
+               } //Negative offset
+           } //Offset is an internal cell (ghost or not)
+       } //Offsets
+   } //Internal, non-ghost cells
+   if (Ncpu > 1) {
+     for(int i=0;i<Ncpu;++i)
+     {
+      //KS//BD// Maybe comment sorted for send
+      std::sort(parallel->getElementsToSend(i).begin(),parallel->getElementsToSend(i).end(),[&]( Cell* child0, Cell* child1 )
+      {
+        return child0->getElement()->getKey()< child1->getElement()->getKey();
+      });
+      std::sort(parallel->getElementsToReceive(i).begin(),parallel->getElementsToReceive(i).end(),[&]( Cell* child0, Cell* child1 )
+      {
+        return child0->getElement()->getKey()< child1->getElement()->getKey();
+      });
+     }
+   }
 }
 
 //***********************************************************************

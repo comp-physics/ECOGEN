@@ -38,8 +38,8 @@
 #include <mpi.h>
 #include "../Tools.h"
 #include "../Models/Phase.h"
-#include "../Cell.h"
-
+#include "../Order1/Cell.h"
+//KS//BD// Not used for now, see if we can conserve it or erase it
 class ParallelAMR : public Parallel 
 {
 public:

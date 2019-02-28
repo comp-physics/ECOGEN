@@ -38,7 +38,7 @@
 class Flux; //Predeclaration of class Flux to include Cell.h
 
 #include "Phase.h"
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 #include "../Tools.h"
 
 //! \class     Flux

@@ -38,8 +38,8 @@
 class AddPhys; //Predeclaration of the AddPhys class to include Cell.h and CellInterface.h
 
 #include "../Errors.h"
-#include "../Cell.h"
-#include "../CellInterface.h"
+#include "../Order1/Cell.h"
+#include "../Order1/CellInterface.h"
 #include "QuantitiesAddPhys.h"
 #include "../Parallel/Parallel.h"
 

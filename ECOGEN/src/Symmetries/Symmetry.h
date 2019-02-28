@@ -41,7 +41,7 @@
 #include "../Tools.h"
 
 class Symmetry; //Predeclaration of the class Symmetry to include Cell.h
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 
 //! \class     Symmetry
 //! \brief     General class for axial symmetries

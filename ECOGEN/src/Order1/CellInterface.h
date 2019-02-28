@@ -38,12 +38,12 @@
 class CellInterface; //Predeclaration de la classe CellInterface pour pouvoir inclure Cell.h
 
 #include "Cell.h"
-#include "Models/Model.h"
-#include "Models/Flux.h"
-#include "Maths/Coord.h"
-#include "Meshes/Face.h"
-#include "Meshes/FaceCartesian.h"
-#include "AdditionalPhysics/AddPhys.h"
+#include "../Models/Model.h"
+#include "../Models/Flux.h"
+#include "../Maths/Coord.h"
+#include "../Meshes/Face.h"
+#include "../Meshes/FaceCartesian.h"
+#include "../AdditionalPhysics/AddPhys.h"
 
 enum BO2 { BG1M, BG2M, BG3M, BG1P, BG2P, BG3P, BD1M, BD2M, BD3M, BD1P, BD2P, BD3P };
 enum betaO2 { betaG1M, betaG2M, betaG3M, betaG1P, betaG2P, betaG3P, betaD1M, betaD2M, betaD3M, betaD1P, betaD2P, betaD3P };
@@ -74,7 +74,7 @@ class CellInterface
 
     void associeModel(Model *mod);
 
-		virtual int whoAmI() const {	return 0; };
+    virtual int whoAmI() const { return 0; };
 
     //Inutilise pour cell interfaces ordre 1
     virtual void allocateSlopes(const int &numberPhases, const int &numberTransports, int &allocateSlopeLocal) {};   /*!< Ne fait rien pour des cell interfaces ordre 1 */
@@ -106,8 +106,6 @@ class CellInterface
     virtual void creerCellInterfaceChildInterne(const int &lvl, std::vector<CellInterface*> *childrenInternalCellInterfaces); /*!< Creer un intern child cell interface (non initialize) */
     void creerFaceChild(CellInterface *cellInterfaceParent);             /*!< Creer une face enfant (non initialize) */
     virtual void raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent, const double &dZParent, Cell *cellRef, const int &dim);      /*!< Raffinement du extern cell interface en creant si besoin des children cell interfaces + liaisons cells/cell interfaces */
-		void raffineCellInterfaceExterneGhost(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent, const double &dZParent, Cell *cellRef, const int &dim);      /*!< Raffinement du extern cell interface pour les cells fantomes en creant si besoin des children cell interfaces + liaisons cells/cell interfaces */
-		void raffineCellInterfaceExterneGhost2(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent, const double &dZParent, Cell *cellRef, const int &dim);      /*!< Raffinement du extern cell interface pour les cells fantomes en creant si besoin des children cell interfaces + liaisons cells/cell interfaces */
     virtual void deraffineCellInterfaceExterne(Cell *cellRef);        /*!< Deraffinement du extern cell interface en supprimant si besoin ses children cell interfaces + liaisons cells/cell interfaces */
     void finalizeFace();                                        /*!< Supprime la face correspondante au cell interface */
     void deraffineCellInterfacesChildren();                               /*!< Supprime les children cell interfaces */

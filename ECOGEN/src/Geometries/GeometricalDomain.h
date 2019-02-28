@@ -45,7 +45,7 @@
 #include "../Tools.h"
 
 class GeometricalDomain; //pre-declaration of GeometricalDomain class needed for Cell.h inclusion
-#include "../Cell.h"
+#include "../Order1/Cell.h"
 
 //! \class     GeometricalDomain
 //! \brief     General class for geometrical domain

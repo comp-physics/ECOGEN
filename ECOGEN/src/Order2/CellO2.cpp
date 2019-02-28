@@ -620,6 +620,7 @@ void CellO2::createChildCell(const int &num, const int &lvl)
 //********************** Methode Ordre 2 Parallele ***************************
 //****************************************************************************
 
+//KS//BD// This guy is the only one where "whichCpuAmIForNeighbour" is used out of AMR: Need to do it differently (check ghost neighbor)
 void CellO2::fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const
 {
   //Mise a zero de la slope locale a transmettre

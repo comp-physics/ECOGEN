@@ -145,23 +145,44 @@ void Parallel::initialization(int &argc, char* argv[])
 void Parallel::setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour)
 { 
   m_isNeighbour[neighbour] = true;
-  m_whichCpuAmIForNeighbour[neighbour] = whichCpuAmIForNeighbour;
+  m_whichCpuAmIForNeighbour[neighbour] = whichCpuAmIForNeighbour; //KS//BD// Not necessary, to delete at some point...
 }
 
 //***********************************************************************
 
-void Parallel::setElementsToSend(int neighbour, Cell* _cell)
+void Parallel::setElementsToSend(int neighbour, Cell* cell)
 {
-    m_elementsToSend[neighbour].push_back(_cell);
+    m_elementsToSend[neighbour].push_back(cell);
     m_numberElementsToSendToNeighbour[neighbour]=m_elementsToSend[neighbour].size();
 }
 
 //***********************************************************************
 
-void Parallel::setElementsToReceive(int neighbour, Cell* _cell)
+void Parallel::setElementsToReceive(int neighbour, Cell* cell)
 {
-    m_elementsToReceive[neighbour].push_back(_cell);
+    m_elementsToReceive[neighbour].push_back(cell);
     m_numberElementsToReceiveFromNeighbour[neighbour]=m_elementsToReceive[neighbour].size();
+}
+
+//***********************************************************************
+
+const TypeMeshContainer<Cell*> &Parallel::getElementsToSend(int neighbour) const
+{
+    return m_elementsToSend[neighbour];
+}
+
+//***********************************************************************
+
+TypeMeshContainer<Cell*> &Parallel::getElementsToSend(int neighbour)
+{
+    return m_elementsToSend[neighbour];
+}
+
+//***********************************************************************
+
+TypeMeshContainer<Cell*> &Parallel::getElementsToReceive(int neighbour)
+{
+    return m_elementsToReceive[neighbour];
 }
 
 //***********************************************************************
@@ -1212,6 +1233,7 @@ void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
         m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], type);
       }
+//std::cout<<"rank  "<<rankCpu<<"  send  "<<m_numberElementsToSendToNeighbour[neighbour]<<"  rec  "<<m_numberElementsToReceiveFromNeighbour[neighbour]<<std::endl;//KS//BD//
 
 			//Sending request
 			MPI_Start(m_reqSend[lvl][neighbour]);
@@ -1220,7 +1242,7 @@ void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type
 			//Waiting
 			MPI_Wait(m_reqSend[lvl][neighbour], &status);
 			MPI_Wait(m_reqReceive[lvl][neighbour], &status);
-      
+
 			//Receivings
 			count = -1;
 			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {

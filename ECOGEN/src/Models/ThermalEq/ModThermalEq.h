@@ -36,7 +36,7 @@
 //! \date      May 04 2018
 
 #include "../Model.h"
-#include "../../Cell.h"
+#include "../../Order1/Cell.h"
 #include "FluxThermalEq.h"
 #include "MixThermalEq.h"
 

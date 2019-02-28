@@ -27,36 +27,36 @@
 //  along with ECOGEN (file LICENSE).  
 //  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SOURCE_H
-#define SOURCE_H
+#ifndef CELLGHOST_H
+#define CELLGHOST_H
 
-//! \file      Source.h
-//! \author    F. Petitpas, K. Schmidmayer
+//! \file      CellGhost.h
+//! \author    K. Schmidmayer
 //! \version   1.0
-//! \date      January 10 2018
+//! \date      February 27 2019
 
-#include <string>
-#include "../libTierces/tinyxml2.h"
-#include "../Errors.h"
-#include "../Tools.h"
-#include "../Order1/Cell.h"
+#include "Cell.h"
 
-//! \class     Source
-//! \brief     Abstract class for source terms
-class Source
+//! \class     CellGhost
+//! \brief     Child class for a ghost mesh cell
+class CellGhost : public Cell
 {
-  public:
-    Source();
-    virtual ~Source();
+    public:
+        //! \brief     Ghost cell constructor for a non AMR cell
+        CellGhost();
+        //! \brief     Ghost cell constructor for an AMR cell
+        //! \param     lvl    level of current AMR cell
+        CellGhost(int lvl); //Pour AMR
+        virtual ~CellGhost();
 
-    //! \brief     Source terms integration on conservative quantities
-    //! \param     cell           cell for source term integration
-    //! \param     numberPhases   number of phases
-    //! \param     dt             explicit integration time step
-    virtual void integrateSourceTerms(Cell *cell, const int &numberPhases, const double &dt){ Errors::errorMessage("integrateSourceTerms not available for required source"); };
-    virtual void sourceEvolution(const double &time) {};
+        int getRankOfNeighborCPU() const;
+        void setRankOfNeighborCPU(const int &rank);
+        virtual void createChildCell(const int &num, const int &lvl);
 
-    virtual Coord computeAbsVelocity(const Coord relVelocity, const Coord position) { Errors::errorMessage("computeAbsVelocity not available for required source"); return 0.; };
+    protected:
+      int m_rankOfNeighborCPU; /*!< Rank of the neighbor CPU corresponding to this ghost cell */
+
+    private:
 };
 
-#endif // SOURCE_H
+#endif // CELLGHOST_H
