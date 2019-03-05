@@ -1233,7 +1233,8 @@ void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
         m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], type);
       }
-//std::cout<<"rank  "<<rankCpu<<"  send  "<<m_numberElementsToSendToNeighbour[neighbour]<<"  rec  "<<m_numberElementsToReceiveFromNeighbour[neighbour]<<std::endl;//KS//BD//
+//KS//BD//
+//std::cout<<"rank  "<<rankCpu<<"  to  "<<neighbour<<"  send  "<<m_numberElementsToSendToNeighbour[neighbour]<<"  rec  "<<m_numberElementsToReceiveFromNeighbour[neighbour]<<std::endl;
 
 			//Sending request
 			MPI_Start(m_reqSend[lvl][neighbour]);

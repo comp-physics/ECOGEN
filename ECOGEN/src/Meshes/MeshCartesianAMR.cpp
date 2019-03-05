@@ -69,7 +69,6 @@ int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, Type
 void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
 {
   int ix, iy, iz;
-  int compteMaillesParallele(0); //KS//BD// Not used for now, to update or delete at some point
 
   m_numberCellsX = m_numberCellsXGlobal;
   m_numberCellsY = m_numberCellsYGlobal;
@@ -300,7 +299,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                          return _k0->getElement()->getKey() == nKey;
                           });
 
-                       if (it2 == cells.end()) //Ghost cell does not exist //KS//BD// Changed
+                       if (it2 == cells.end()) //Ghost cell does not exist
                        {
                           //Create ghost cell and update cell interface
                          if (ordreCalcul == "FIRSTORDER") { cells.push_back(new CellGhost); }
@@ -346,9 +345,16 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        }
                        else { //Ghost cell exists
                          //Update parallel communications
-                         //parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Changed
-                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
-                         //parallel->setElementsToReceive(decomp->get_rank(nKey), *it2); //KS//BD// Need to be commented
+                         //Try to find the current cell into the already added cells to send
+                         auto cKey = cells[i]->getElement()->getKey();
+                         auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
+                           [&cKey](Cell* _k0){ 
+                           return _k0->getElement()->getKey() == cKey;
+                            });
+                         if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
+                         {
+                           parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                         }
 
                          //Update pointers cells <-> cell interfaces
                          cellInterfaces.back()->initialize(cells[i], *it2);
@@ -367,7 +373,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
 
                    if (it == cells.begin()+sizeNonGhostCells) //Neighbor cell is a ghost cell
                    {
-                     //Create cell interface related to the ghost cell //KS//BD// Changed
+                     //Create cell interface related to the ghost cell
                      if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
                      else { cellInterfaces.push_back(new CellInterfaceO2); }     
 
@@ -406,7 +412,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                                             return _k0->getElement()->getKey() == nKey;
                                              });
 
-                     if (it2 == cells.end()) //Ghost cell does not exist //KS//BD// Changed
+                     if (it2 == cells.end()) //Ghost cell does not exist
                      {
                        //Create ghost cell
                        if (ordreCalcul == "FIRSTORDER") { cells.push_back(new CellGhost); }
@@ -446,19 +452,26 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        cells.back()->getElement()->setSize(m_dXi[nix], m_dYj[niy], m_dZk[niz]);
 
                        //Update pointers cells <-> cell interfaces
-                       cellInterfaces.back()->initialize(cells.back(), cells[i]); //KS//BD// Changed
+                       cellInterfaces.back()->initialize(cells.back(), cells[i]);
                        cells[i]->addCellInterface(cellInterfaces.back());
                        cells.back()->addCellInterface(cellInterfaces.back());
                      }
                      else //Ghost cell exists
                      {
                        //Update parallel communications
-                       //parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Changed
-                       parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
-                       //parallel->setElementsToReceive(decomp->get_rank(nKey), *it2); //KS//BD// Need to be commented
+                       //Try to find the current cell into the already added cells to send
+                       auto cKey = cells[i]->getElement()->getKey();
+                       auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
+                         [&cKey](Cell* _k0){ 
+                         return _k0->getElement()->getKey() == cKey;
+                          });
+                       if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
+                       {
+                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                       }
 
                        //Update pointers cells <-> cell interfaces
-                       cellInterfaces.back()->initialize(*it2, cells[i]); //KS//BD// Changed
+                       cellInterfaces.back()->initialize(*it2, cells[i]);
                        cells[i]->addCellInterface(cellInterfaces.back());
                        (*it2)->addCellInterface(cellInterfaces.back());
                      }
@@ -470,11 +483,10 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
    if (Ncpu > 1) {
      for(int i=0;i<Ncpu;++i)
      {
-      //KS//BD// Maybe comment sorted for send
-      std::sort(parallel->getElementsToSend(i).begin(),parallel->getElementsToSend(i).end(),[&]( Cell* child0, Cell* child1 )
-      {
-        return child0->getElement()->getKey()< child1->getElement()->getKey();
-      });
+      // std::sort(parallel->getElementsToSend(i).begin(),parallel->getElementsToSend(i).end(),[&]( Cell* child0, Cell* child1 ) //KS//BD//
+      // {
+      //   return child0->getElement()->getKey()< child1->getElement()->getKey();
+      // });
       std::sort(parallel->getElementsToReceive(i).begin(),parallel->getElementsToReceive(i).end(),[&]( Cell* child0, Cell* child1 )
       {
         return child0->getElement()->getKey()< child1->getElement()->getKey();
