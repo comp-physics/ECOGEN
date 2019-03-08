@@ -47,7 +47,7 @@ ParallelAMR::~ParallelAMR(){}
 
 //***********************************************************************
 
-//void ParallelAMR::setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour)
+//void ParallelAMR::setNeighbour(const int neighbour)
 //{
 //  m_isNeighbour[neighbour] = true;
 //}

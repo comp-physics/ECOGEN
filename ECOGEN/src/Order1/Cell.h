@@ -152,14 +152,14 @@ class Cell
 
         //Not used for first order cells
         //------------------------------
-        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface) {};  /*!< Do nothing for first order cells */
-        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter) {};  /*!< Do nothing for first order cells */
-        virtual void computeMultiSlope(const int &numberPhases, CellInterface *cellInterface, Limiter *globalLimiter) {};                            /*!< Do nothing for first order cells */
-        virtual Phase* getSlopes(const int &phaseNumber) const { return 0; };                                                               /*!< Do nothing for first order cells */
-        virtual Transport* getSlopesTransport(const int &numberTransport) const { return 0; };                                              /*!< Do nothing for first order cells */
-        virtual void saveCons(const int &numberPhases, const int &numberTransports) {};                                                     /*!< Do nothing for first order cells */
-        virtual void recuperationCons(const int &numberPhases, const int &numberTransports) {};                                             /*!< Do nothing for first order cells */
-        virtual void predictionOrdre2(const double &dt, const int &numberPhases, const int &numberTransports, Symmetry *symmetry) {};       /*!< Do nothing for first order cells */
+        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface) {};  /*!< Does nothing for first order cells */
+        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter) {};  /*!< Does nothing for first order cells */
+        virtual void computeMultiSlope(const int &numberPhases, CellInterface *cellInterface, Limiter *globalLimiter) {};                   /*!< Does nothing for first order cells */
+        virtual Phase* getSlopes(const int &phaseNumber) const { return 0; };                                                               /*!< Does nothing for first order cells */
+        virtual Transport* getSlopesTransport(const int &numberTransport) const { return 0; };                                              /*!< Does nothing for first order cells */
+        virtual void saveCons(const int &numberPhases, const int &numberTransports) {};                                                     /*!< Does nothing for first order cells */
+        virtual void recuperationCons(const int &numberPhases, const int &numberTransports) {};                                             /*!< Does nothing for first order cells */
+        virtual void predictionOrdre2(const double &dt, const int &numberPhases, const int &numberTransports, Symmetry *symmetry) {};       /*!< Does nothing for first order cells */
 
         //CellInterface *getCellInterface(); //FP//TODO// A FAIRE...
 
@@ -194,7 +194,7 @@ class Cell
         void chooseUnrefine(const double &xiJoin, int &nbCellsTotalAMR); /*!< Choice for unrefinement of parent cell */
         void refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);           /*!< Refine parent cell by creation of children cells */
         virtual void createChildCell(const int &num, const int &lvl);    /*!< Create a child cell (not initialized) */
-        void unrefineCellAndCellInterfaces();                                /*!< Unrefine parent cell by destruction of children cells */
+        void unrefineCellAndCellInterfaces();                            /*!< Unrefine parent cell by destruction of children cells */
         void averageChildrenInParent();                                  /*!< Average variables of children cells in the parent cell, needed for computation of xi. */
         bool lvlNeighborTooHigh();                                       /*!< Look for AMR level of neighboring cells if too high to unrefine*/
         bool lvlNeighborTooLow();                                        /*!< Look for AMR level of neighboring cells if too low to refine*/
@@ -207,29 +207,31 @@ class Cell
         void subtractFluxXi(double value);                               /*!< Substract xi cell flux */
         int getNumberCellsChildren();                                    /*!< Return the number of children cells */
         Cell* getCellChild(const int &num);                              /*!< Return pointer to the corresponding child cell number */
-        std::vector<Cell *>* getChildVector();                           /*!< Return pointer to chil vector */
+        std::vector<Cell *>* getChildVector();                           /*!< Return pointer to child vector */
 
         //For parallel computing (no AMR)
         //-------------------------------
-        int getRankOfNeighborCPU() const { return -1; };
-        void setRankOfNeighborCPU(const int &rank) {};
+        virtual void pushBackSlope() {};                                 /*!< Does nothing for non-ghost O2 cells */
+        virtual int getRankOfNeighborCPU() const { return -1; };
+        virtual void setRankOfNeighborCPU(int rank) {};                  /*!< Does nothing for non-ghost cells */
         void fillBufferPrimitives(double *buffer, int &counter, Prim type = vecPhases) const;
         void getBufferPrimitives(double *buffer, int &counter, Eos **eos, Prim type = vecPhases);
-        virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const {};  /*!< Do nothing for first order cells */
-        virtual void getBufferSlopes(double *buffer, int &counter) {};                                              /*!< Do nothing for first order cells */
+        virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const {};  /*!< Does nothing for first order cells */
+        virtual void getBufferSlopes(double *buffer, int &counter) {};                                              /*!< Does nothing for first order cells */
         void fillBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
         void getBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1);
         void fillBufferTransports(double *buffer, int &counter) const;
         void getBufferTransports(double *buffer, int &counter);
         virtual bool isCellGhost() const { return false; };
-        bool hasNeighboringGhostCellOfCPUneighbor() const;                                 /*!< Return a bool that is true if the cell has a neighboring ghost cell */
+        bool hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;                      /*!< Return a bool that is true if the cell has a neighboring ghost cell corresponding to CPU "neighbour" */
+        CellInterface* whichCellInterfaceHasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;    /*!< Return the pointer to the cell interface that has a neighboring ghost cell corresponding to CPU "neighbour" */
 
         //For parallel AMR computing
         //--------------------------
         void fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, Prim type = vecPhases) const;
         void getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type = vecPhases);
-        virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const {};   /*!< Do nothing for first order cells */
-        virtual void getBufferSlopesAMR(double *buffer, int &counter, const int &lvl) {};                                               /*!< Do nothing for first order cells */
+        virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const {};   /*!< Does nothing for first order cells */
+        virtual void getBufferSlopesAMR(double *buffer, int &counter, const int &lvl) {};                                               /*!< Does nothing for first order cells */
         void fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
         void getBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
         void fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;

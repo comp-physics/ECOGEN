@@ -81,7 +81,7 @@ void Run::initialize(int argc, char* argv[])
   catch (ErrorECOGEN &) { throw; }
   int numberCells = m_mesh->getNumberCells();
   int numberCellsTotales(numberCells);
-  if (Ncpu>1) numberCellsTotales = m_mesh->getNumberCellsTotal(); //KS//BD// Need to set these guys
+  if (Ncpu>1) numberCellsTotales = m_mesh->getNumberCellsTotal();
 
   //4) Main array initialization using model and phase number
   //---------------------------------------------------------

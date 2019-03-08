@@ -1099,6 +1099,7 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
         else { cells.push_back(new CellO2Ghost); }
         m_elements.push_back(new ElementCartesian());
         cells[i]->setElement(m_elements[i], i);
+        cells[i]->pushBackSlope();
     }
 
     ////***************Table de connectivite**********
@@ -1237,6 +1238,7 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
         else { cells.push_back(new CellO2Ghost); }
         m_elements.push_back(new ElementCartesian());
         cells[i]->setElement(m_elements[i], i);
+        cells[i]->pushBackSlope();
     }
 
     //Connectivity table
@@ -1452,6 +1454,7 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
         else { cells.push_back(new CellO2Ghost); }
         m_elements.push_back(new ElementCartesian());
         cells[i]->setElement(m_elements[i], i);
+        cells[i]->pushBackSlope();
     }
 
     //Connectivity table

@@ -117,7 +117,7 @@ void Mesh::initializePersistentCommunications(const int numberPhases, const int 
     int numberSlopesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedSlopes();
     numberSlopesPhaseATransmettre *= m_numberPhases;
     int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
-    m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1; //+1 for the interface detection
+    m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel->initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);
 }

@@ -49,9 +49,10 @@ class CellGhost : public Cell
         CellGhost(int lvl); //Pour AMR
         virtual ~CellGhost();
 
-        int getRankOfNeighborCPU() const;
-        void setRankOfNeighborCPU(const int &rank);
+        virtual int getRankOfNeighborCPU() const;
+        virtual void setRankOfNeighborCPU(int rank);
         virtual void createChildCell(const int &num, const int &lvl);
+        virtual bool isCellGhost() const { return true; };
 
     protected:
       int m_rankOfNeighborCPU; /*!< Rank of the neighbor CPU corresponding to this ghost cell */

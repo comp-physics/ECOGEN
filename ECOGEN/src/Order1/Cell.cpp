@@ -1753,20 +1753,59 @@ void Cell::getBufferTransports(double *buffer, int &counter)
 
 //***********************************************************************
 
-bool Cell::hasNeighboringGhostCellOfCPUneighbor() const
+bool Cell::hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const //KS//BD// To see if this one if usefull
 {
-  bool hasGhostNeighbor(false);
+  bool hasGhostNeighbour(false);
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
-    if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face 
+    if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face
       if (this == m_cellInterfaces[b]->getCellGauche()) {
-        if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) { hasGhostNeighbor = true; break; }
+        if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
+          if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
+            hasGhostNeighbour = true;
+            break;
+          }
+        }
       }
       else {
-        if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) { hasGhostNeighbor = true; break; }
+        if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
+          if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
+            hasGhostNeighbour = true;
+            break;
+          }
+        }
       }
     }
   }
-  return hasGhostNeighbor;
+  return hasGhostNeighbour;
+}
+
+//***********************************************************************
+
+CellInterface* Cell::whichCellInterfaceHasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const
+{
+  //KS//BD// to clean if not necessary
+  int ref(0);
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+    if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face
+      if (this == m_cellInterfaces[b]->getCellGauche()) {
+        if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
+          if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
+            ref = b;
+            break;
+          }
+        }
+      }
+      else {
+        if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
+          if (m_cellInterfaces[b]->getCellGauche()->getRankOfNeighborCPU() == neighbour) {
+            ref = b;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return m_cellInterfaces[ref];
 }
 
 //****************************************************************************
@@ -1982,14 +2021,11 @@ void Cell::getBufferTransportsAMR(double *buffer, int &counter, const int &lvl)
 void Cell::chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ,	const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost)
 {
   if (m_split) {
-    //std::cout << "cpu " << rankCpu << " split" << std::endl;
     if (m_childrenCells.size() == 0) { this->refineCellAndCellInterfacesGhost(nbCellsY, nbCellsZ, addPhys, model); }
   }
   else {
-    //std::cout << "cpu " << rankCpu << " non-split" << std::endl;
     if (m_childrenCells.size() > 0) { this->unrefineCellAndCellInterfacesGhost(); }
   }
-  //std::cout << "cpu " << rankCpu << " push-back" << std::endl;
   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
     cellsLvlGhost[m_lvl + 1].push_back(m_childrenCells[i]);
   }

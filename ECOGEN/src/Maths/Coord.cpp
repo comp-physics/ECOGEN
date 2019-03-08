@@ -96,7 +96,6 @@ double Coord::getZ() const
 
 //*********************************************************************
 
-
 double Coord::norm() const
 {
   return sqrt(m_x*m_x+m_y*m_y+m_z*m_z);
@@ -107,6 +106,17 @@ double Coord::norm() const
 double Coord::squaredNorm() const
 {
   return m_x*m_x + m_y*m_y + m_z*m_z;
+}
+
+//*********************************************************************
+
+Coord Coord::abs() const
+{
+  Coord vec;
+  vec.m_x = std::fabs(m_x);
+  vec.m_y = std::fabs(m_y);
+  vec.m_z = std::fabs(m_z);
+  return vec;
 }
 
 //*********************************************************************

@@ -50,6 +50,8 @@ public:
   virtual void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour); //KS//BD// Get ride of the virtual if ParallelAMR not used
   virtual void setElementsToSend(int neighbour, Cell* cell);
   virtual void setElementsToReceive(int neighbour, Cell* cell);
+  void addSlopesToSend(int neighbour);
+  void addSlopesToReceive(int neighbour);
   const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
   TypeMeshContainer<Cell*> &getElementsToSend(int neighbour);
   TypeMeshContainer<Cell*> &getElementsToReceive(int neighbour);
@@ -112,12 +114,12 @@ private:
   int m_stateCPU;
   bool *m_isNeighbour;
   std::string *m_whichCpuAmIForNeighbour;
-  //int ** m_elementsToSend;
-  //int ** m_elementsToReceive;
   std::vector<TypeMeshContainer<Cell*>> m_elementsToSend;
   std::vector<TypeMeshContainer<Cell*>> m_elementsToReceive;
   int * m_numberElementsToSendToNeighbour;
   int * m_numberElementsToReceiveFromNeighbour;
+  int * m_numberSlopesToSendToNeighbour;
+  int * m_numberSlopesToReceiveFromNeighbour;
   int m_numberPrimitiveVariables;          /*Number of primitive variables to send (phases + mixture + transports)*/
   int m_numberSlopeVariables;              /*Number of slope variables to send (phases + mixture + transports)*/
   int m_numberTransportVariables;          /*Number of transport variables to send*/
@@ -138,6 +140,8 @@ private:
   std::vector<bool **> m_bufferSendSplit;
   int * m_bufferNumberElementsToSendToNeighbor;
   int * m_bufferNumberElementsToReceiveFromNeighbour;
+  int * m_bufferNumberSlopesToSendToNeighbor;
+  int * m_bufferNumberSlopesToReceiveFromNeighbour;
   
   std::vector<MPI_Request **> m_reqSend;
   std::vector<MPI_Request **> m_reqReceive;

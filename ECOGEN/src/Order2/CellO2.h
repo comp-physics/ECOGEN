@@ -71,7 +71,7 @@ class CellO2 : public Cell
 
         //Pour methodes ordre 2 parallele
         virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const;
-        virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
+        virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
 
     protected:
         Phase **m_vecPhasesO2;                  /*!< pour stocker les values predites a l ordre 2 */

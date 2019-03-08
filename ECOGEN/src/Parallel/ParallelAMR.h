@@ -46,7 +46,7 @@ public:
   ParallelAMR();
   virtual ~ParallelAMR();
 
-  //void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour);
+  //void setNeighbour(const int neighbour);
   //void setElementsToSend(const int neighbour, int* numberElement, const int &numberElements);
   //void setElementsToReceive(const int neighbour, int* numberElement, const int &numberElements);
 

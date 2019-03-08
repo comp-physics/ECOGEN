@@ -46,53 +46,64 @@ CellO2Ghost::CellO2Ghost(int lvl) : CellO2(lvl), m_rankOfNeighborCPU(0), m_vecPh
 
 CellO2Ghost::~CellO2Ghost()
 {
-	for (int k = 0; k < m_numberPhases; k++) {
-		delete m_vecPhasesSlopesGhost[k];
+	for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
+		for (int k = 0; k < m_numberPhases; k++) {
+			delete m_vecPhasesSlopesGhost[s][k];
+		}
+		delete[] m_vecPhasesSlopesGhost[s];
+		delete m_mixtureSlopesGhost[s];
+		delete[] m_vecTransportsSlopesGhost[s];
 	}
-	delete[] m_vecPhasesSlopesGhost;
-	delete m_mixtureSlopesGhost;
-	delete[] m_vecTransportsSlopesGhost;
+}
+
+//***********************************************************************
+
+void CellO2Ghost::pushBackSlope()
+{
+  m_indexCellInterface.push_back(0);
+  m_vecPhasesSlopesGhost.push_back(nullptr);
+  m_mixtureSlopesGhost.push_back(nullptr);
+  m_vecTransportsSlopesGhost.push_back(nullptr);
+  m_alphaCellAfterOppositeSide.push_back(0.);
 }
 
 //***********************************************************************
 
 void CellO2Ghost::allocate(const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model)
 {
-	m_numberPhases = numberPhases;
-	m_numberTransports = numberTransports;
-	m_vecPhases = new Phase*[numberPhases];
-	m_vecPhasesO2 = new Phase*[numberPhases];
-	for (int k = 0; k < numberPhases; k++) {
-		model->allocatePhase(&m_vecPhases[k]);
-		model->allocatePhase(&m_vecPhasesO2[k]);
-	}
-	model->allocateMixture(&m_mixture);
-	model->allocateMixture(&m_mixtureO2);
-	model->allocateCons(&m_cons, numberPhases);
-	model->allocateCons(&m_consSauvegarde, numberPhases);
-	if (numberTransports > 0) {
-		m_vecTransports = new Transport[numberTransports];
-		m_consTransports = new Transport[numberTransports];
-		m_consTransportsSauvegarde = new Transport[numberTransports];
-		m_vecTransportsO2 = new Transport[numberTransports];
-	}
-	for (unsigned int k = 0; k < addPhys.size(); k++) {
-    addPhys[k]->addQuantityAddPhys(this);
-	}
-
-	//Allocation des slopes fantomes, specifique aux limites paralleles
-	m_vecPhasesSlopesGhost = new Phase*[numberPhases];
-	for (int k = 0; k < numberPhases; k++) {
-		model->allocatePhase(&m_vecPhasesSlopesGhost[k]);
-		m_vecPhasesSlopesGhost[k]->setToZero();
-	}
-	model->allocateMixture(&m_mixtureSlopesGhost);
-	m_mixtureSlopesGhost->setToZero();
-	m_vecTransportsSlopesGhost = new double[numberTransports];
-	for (int k = 0; k < numberTransports; k++) {
-		m_vecTransportsSlopesGhost[k] = 0.;
-	}
+  m_numberPhases = numberPhases;
+  m_numberTransports = numberTransports;
+  m_vecPhases = new Phase*[numberPhases];
+  m_vecPhasesO2 = new Phase*[numberPhases];
+  for (int k = 0; k < numberPhases; k++) {
+    model->allocatePhase(&m_vecPhases[k]);
+    model->allocatePhase(&m_vecPhasesO2[k]);
+  }
+  model->allocateMixture(&m_mixture);
+  model->allocateMixture(&m_mixtureO2);
+  model->allocateCons(&m_cons, numberPhases);
+  model->allocateCons(&m_consSauvegarde, numberPhases);
+  if (numberTransports > 0) {
+    m_vecTransports = new Transport[numberTransports];
+    m_consTransports = new Transport[numberTransports];
+    m_consTransportsSauvegarde = new Transport[numberTransports];
+    m_vecTransportsO2 = new Transport[numberTransports];
+  }
+  for (unsigned int k = 0; k < addPhys.size(); k++) { addPhys[k]->addQuantityAddPhys(this); }
   m_model = model;
+
+  //Allocation des slopes fantomes, specifique aux limites paralleles
+  for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
+    m_vecPhasesSlopesGhost[s] = new Phase*[numberPhases];
+    for (int k = 0; k < numberPhases; k++) {
+      model->allocatePhase(&m_vecPhasesSlopesGhost[s][k]);
+      m_vecPhasesSlopesGhost[s][k]->setToZero();
+    }
+    model->allocateMixture(&m_mixtureSlopesGhost[s]);
+    m_mixtureSlopesGhost[s]->setToZero();
+    m_vecTransportsSlopesGhost[s] = new double[numberTransports];
+    for (int k = 0; k < numberTransports; k++) { m_vecTransportsSlopesGhost[s][k] = 0.; }
+  }
 }
 
 //***************************************************************************
@@ -104,7 +115,7 @@ int CellO2Ghost::getRankOfNeighborCPU() const
 
 //***************************************************************************
 
-void CellO2Ghost::setRankOfNeighborCPU(const int &rank)
+void CellO2Ghost::setRankOfNeighborCPU(int rank)
 {
   m_rankOfNeighborCPU = rank;
 }
@@ -113,6 +124,28 @@ void CellO2Ghost::setRankOfNeighborCPU(const int &rank)
 
 void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface)
 {
+	//Find the corresponding slopes store inside this ghost cell
+	//----------------------------------------------------------
+	int s(0);
+	int refIndex=-1;
+	if (m_indexCellInterface.size() != 1) {
+		if      (cellInterfaceRef.getFace()->getNormal().getX() > 0.5) { refIndex = 0; }
+		else if (cellInterfaceRef.getFace()->getNormal().getY() > 0.5) { refIndex = 2; }
+		else                                                           { refIndex = 4; }
+		//std::cout<<rankCpu<<" index "<<refIndex<<std::endl; //KS//BD//
+		for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) {
+			std::cout<<rankCpu<<"  nbIndex  "<<m_indexCellInterface.size()<<"  refIndex  "<<refIndex<<"  index  "<<m_indexCellInterface[b]<<std::endl; //KS//BD//
+			if ((m_indexCellInterface[b] == refIndex) || (m_indexCellInterface[b] == refIndex + 1)) {
+				s = b;
+				//std::cout<<rankCpu<<" index "<<m_indexCellInterface[b]<<std::endl; //KS//BD//
+				break;
+			}
+		}
+	}
+std::cout<<rankCpu<<"  posFace  "<<cellInterfaceRef.getFace()->getPos().getX()<<" "<<cellInterfaceRef.getFace()->getPos().getY()
+<<"  posCell  "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
+<<"  nbIndex  "<<m_indexCellInterface.size()
+<<"  index  "<<m_indexCellInterface[s]<<"  s  "<<s<<"  refIndex  "<<refIndex<<std::endl; //KS//BD//
 	//Mise a zero des slopes locales
 	//------------------------------
 	double sommeCoeff(0.);
@@ -145,25 +178,26 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
   
 	//Limitations des slopes
 	//----------------------
-  alphaCellAfterOppositeSide = m_alphaCellAfterOppositeSide; //Detection of the interface and THINC method are simplified in parallel
-  if ((alphaCell >= epsInterface) && (alphaCell <= 1. - epsInterface) && ((alphaCellOtherInterfaceSide - alphaCell)*(alphaCell - alphaCellAfterOppositeSide) >= 1.e-8)) {
-    for (int k = 0; k < numberPhases; k++) {
-      slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[k], interfaceLimiter, interfaceVolumeFractionLimiter);
-    }
-    slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost, interfaceLimiter);
-    for (int k = 0; k < numberTransports; k++) {
-      slopesTransportLocal1[k] = interfaceVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[k]);
-    }
-  }
-  else {
-    for (int k = 0; k < numberPhases; k++) {
-      slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[k], globalLimiter, globalVolumeFractionLimiter);
-    }
-    slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost, globalLimiter);
-    for (int k = 0; k < numberTransports; k++) {
-      slopesTransportLocal1[k] = globalVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[k]);
-    }
-  }
+	alphaCellAfterOppositeSide = m_alphaCellAfterOppositeSide[s]; //Detection of the interface and THINC method are simplified in parallel
+	if ((alphaCell >= epsInterface) && (alphaCell <= 1. - epsInterface) &&
+	   ((alphaCellOtherInterfaceSide - alphaCell)*(alphaCell - alphaCellAfterOppositeSide) >= 1.e-8)) {
+		for (int k = 0; k < numberPhases; k++) {
+			slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], interfaceLimiter, interfaceVolumeFractionLimiter);
+		}
+		slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], interfaceLimiter);
+		for (int k = 0; k < numberTransports; k++) {
+			slopesTransportLocal1[k] = interfaceVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
+		}
+		}
+		else {
+		for (int k = 0; k < numberPhases; k++) {
+			slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], globalLimiter, globalVolumeFractionLimiter);
+		}
+		slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], globalLimiter);
+		for (int k = 0; k < numberTransports; k++) {
+			slopesTransportLocal1[k] = globalVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
+		}
+	}
 }
 
 //***********************************************************************
@@ -172,20 +206,23 @@ void CellO2Ghost::createChildCell(const int &num, const int &lvl)
 {
 	m_childrenCells.push_back(new CellO2Ghost(lvl + 1));
 	m_childrenCells.back()->setRankOfNeighborCPU(m_rankOfNeighborCPU);
+	//KS//BD// Don't forget for this guy that we have to add the slopes
 }
 
 //***********************************************************************
 
 void CellO2Ghost::getBufferSlopes(double *buffer, int &counter)
 {
+	int s = 0;
 	for (int k = 0; k < m_numberPhases; k++) {
-		m_vecPhasesSlopesGhost[k]->getBufferSlopes(buffer, counter);
+		m_vecPhasesSlopesGhost[s][k]->getBufferSlopes(buffer, counter);
 	}
-	m_mixtureSlopesGhost->getBufferSlopes(buffer, counter);
+	m_mixtureSlopesGhost[s]->getBufferSlopes(buffer, counter);
 	for (int k = 0; k < m_numberTransports; k++) {
-		m_vecTransportsSlopesGhost[k] = buffer[++counter];
+		m_vecTransportsSlopesGhost[s][k] = buffer[++counter];
 	}
-  m_alphaCellAfterOppositeSide = buffer[++counter];
+	m_alphaCellAfterOppositeSide[s] = buffer[++counter];
+	m_indexCellInterface[s] = buffer[++counter]; //KS//BD// See to delete this function (generalize everything)
 }
 
 //***********************************************************************
@@ -193,14 +230,19 @@ void CellO2Ghost::getBufferSlopes(double *buffer, int &counter)
 void CellO2Ghost::getBufferSlopesAMR(double *buffer, int &counter, const int &lvl)
 {
 	if (m_lvl == lvl) {
-		for (int k = 0; k < m_numberPhases; k++) {
-			m_vecPhasesSlopesGhost[k]->getBufferSlopes(buffer, counter);
-		}
-		m_mixtureSlopesGhost->getBufferSlopes(buffer, counter);
-		for (int k = 0; k < m_numberTransports; k++) {
-			m_vecTransportsSlopesGhost[k] = buffer[++counter];
-		}
-    m_alphaCellAfterOppositeSide = buffer[++counter];
+		for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
+			for (int k = 0; k < m_numberPhases; k++) {
+				m_vecPhasesSlopesGhost[s][k]->getBufferSlopes(buffer, counter);
+			}
+			m_mixtureSlopesGhost[s]->getBufferSlopes(buffer, counter);
+			for (int k = 0; k < m_numberTransports; k++) {
+				m_vecTransportsSlopesGhost[s][k] = buffer[++counter];
+			}
+	    	m_alphaCellAfterOppositeSide[s] = buffer[++counter];
+	    	m_indexCellInterface[s] = static_cast<int>(std::round(buffer[++counter]));
+	    	std::cout<<rankCpu<<"  rec nbIndex  "<<m_indexCellInterface.size()<<"  index  "<<m_indexCellInterface[s]
+	    	<<"  buffer  "<<buffer[counter]<<std::endl; //KS//BD//
+	    }
 	}
 	else {
 		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {

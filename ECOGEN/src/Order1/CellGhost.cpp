@@ -63,7 +63,7 @@ int CellGhost::getRankOfNeighborCPU() const
 
 //***************************************************************************
 
-void CellGhost::setRankOfNeighborCPU(const int &rank)
+void CellGhost::setRankOfNeighborCPU(int rank)
 {
   m_rankOfNeighborCPU = rank;
 }

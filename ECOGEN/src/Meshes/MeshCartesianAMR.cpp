@@ -159,8 +159,10 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
    {
        const auto coord = cells[i]->getElement()->getKey().coordinate();
        const auto ix = coord.x(), iy = coord.y(), iz = coord.z();
-       for(auto& offset : offsets) 
+       for(int idx = 0; idx < offsets.size(); idx++)
        {
+           const auto offset=offsets[idx];
+
            posX = m_posXi[ix] + 0.5*m_dXi[ix]*offset[0];
            posY = m_posYj[iy] + 0.5*m_dYj[iy]*offset[1];
            posZ = m_posZk[iz] + 0.5*m_dZk[iz]*offset[2];
@@ -307,6 +309,9 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                          m_elements.push_back(new ElementCartesian());
                          m_elements.back()->setKey(nKey);
                          cells.back()->setElement(m_elements.back(), cells.size()-1);
+                         cells.back()->pushBackSlope();
+                         parallel->addSlopesToSend(decomp->get_rank(nKey));
+                         parallel->addSlopesToReceive(decomp->get_rank(nKey));
 
                          //Update parallel communications
                          parallel->setNeighbour(decomp->get_rank(nKey), "");
@@ -321,6 +326,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                            parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
                          }
                          parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                         cells.back()->setRankOfNeighborCPU(decomp->get_rank(nKey));
 
                          const auto coord = nKey.coordinate();
                          const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
@@ -360,6 +366,9 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                          cellInterfaces.back()->initialize(cells[i], *it2);
                          cells[i]->addCellInterface(cellInterfaces.back());
                          (*it2)->addCellInterface(cellInterfaces.back());
+                         (*it2)->pushBackSlope();
+                         parallel->addSlopesToSend(decomp->get_rank(nKey));
+                         parallel->addSlopesToReceive(decomp->get_rank(nKey));
                        }
                    }
                }
@@ -420,9 +429,12 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        m_elements.push_back(new ElementCartesian());
                        m_elements.back()->setKey(nKey);
                        cells.back()->setElement(m_elements.back(), cells.size()-1);
+                       cells.back()->pushBackSlope();
+                       parallel->addSlopesToSend(decomp->get_rank(nKey));
+                       parallel->addSlopesToReceive(decomp->get_rank(nKey));
 
                        //Update parallel communications
-                       parallel->setNeighbour(decomp->get_rank(nKey), "");
+                       parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Do: neighbour = decomp->get_rank(nKey);
                        //Try to find the current cell into the already added cells to send
                        auto cKey = cells[i]->getElement()->getKey();
                        auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
@@ -434,6 +446,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                          parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
                        }
                        parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                       cells.back()->setRankOfNeighborCPU(decomp->get_rank(nKey));
 
                        const auto coord = nKey.coordinate();
                        const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
@@ -474,6 +487,9 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        cellInterfaces.back()->initialize(*it2, cells[i]);
                        cells[i]->addCellInterface(cellInterfaces.back());
                        (*it2)->addCellInterface(cellInterfaces.back());
+                       (*it2)->pushBackSlope();
+                       parallel->addSlopesToSend(decomp->get_rank(nKey));
+                       parallel->addSlopesToReceive(decomp->get_rank(nKey));
                      }
                    }
                } //Negative offset
@@ -875,7 +891,7 @@ void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases
     int numberSlopesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedSlopes();
     numberSlopesPhaseATransmettre *= m_numberPhases;
     int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
-    m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1; //+1 for the interface detection
+    m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel->initializePersistentCommunicationsAMR(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie, m_lvlMax);
 }

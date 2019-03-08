@@ -71,6 +71,8 @@ public:
   double norm() const;
   //! \brief     Return the value of the squared norm of the Coord object
   double squaredNorm() const;
+  //! \brief     Return a Coord object with absolute values of each component
+  Coord abs() const;
 
   //! \brief     Scalar product between the present vector and vector a
   //! \param     a                    vector (Coord)
