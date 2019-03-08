@@ -1984,6 +1984,8 @@ void MeshCartesian::recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<d
           else if (phase == -2) { jeuDonnees.push_back(cellsLvl[0][numCell]->getTransport(var - 1).getValue()); }
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[0][numCell]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[0][numCell]->getGradient()); }
+          else if (phase == -5) { jeuDonnees.push_back(cellsLvl[0][numCell]->getPmax()); }
+          else if (phase == -6) { jeuDonnees.push_back(cellsLvl[0][numCell]->getTpMax()); }
           else { Errors::errorMessage("MeshCartesian::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles

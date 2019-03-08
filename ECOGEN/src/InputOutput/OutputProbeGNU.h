@@ -67,7 +67,7 @@ public:
   virtual void ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl);
 
   virtual void prepareOutputInfos() {}; //nothing to print
-  virtual void ecritInfos() {};
+  virtual void ecritInfos(double integration) {};
 
   //Accessors
   virtual double getNextTime() { return m_nextAcq; };

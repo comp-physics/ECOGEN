@@ -53,6 +53,8 @@ void Mixture::printMixture(std::ofstream &fileStream) const
   //Vector variables
   for (int var = 1; var <= this->getNumberVectors(); var++) {
     fileStream << this->returnVector(var).norm() << " ";
+    fileStream << this->returnVector(var).getX() << " "; //KS//TT//
+    fileStream << this->returnVector(var).getY() << " "; //KS//TT//
   } 
 }
 

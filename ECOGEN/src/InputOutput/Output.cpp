@@ -206,12 +206,12 @@ void Output::readTree(Mesh *mesh, std::vector<Cell *> *cellsLvl, std::vector<Cel
 
 //***********************************************************************
 
-void Output::ecritInfos()
+void Output::ecritInfos(double integration)
 {
   if (m_run->m_iteration > 0) {
     afficheInfoEcriture();
   }
-  saveInfos();
+  saveInfos(integration);
   saveInfosMailles();
   std::cout << "T" << m_run->m_numTest << " | printing file number : " << m_numFichier << "... ";
 }
@@ -337,7 +337,7 @@ void Output::afficheInfoEcriture() const
 
 //***********************************************************************
 
-void Output::saveInfos() const
+void Output::saveInfos(double integration) const
 {
   std::ofstream fileStream;
   if (m_precision!=0) fileStream.precision(m_precision);
@@ -349,13 +349,7 @@ void Output::saveInfos() const
     //Additional output with purpose to track the radius of a bubble over time and the maximum pressures.
     //To comment if not needed. Be carefull when using it, integration for bubble radius and maximum pressure at the wall are not generalized.
     //-----
-    // if (m_run->m_numberPhases > 1) {
-    //  double integration(0.);
-    //  for (unsigned int c = 0; c < m_run->m_cellsLvl[0].size(); c++) {
-    //    m_run->m_cellsLvl[0][c]->computeIntegration(integration);
-    //  }
-    //  fileStream << " " << integration;
-    // }
+    fileStream << " " << integration;
     // // fileStream << " " << m_run->m_pMax[0] << " " << m_run->m_pMax[1] << " " << m_run->m_pMax[2] << " " << m_run->m_pMax[3];
     // // fileStream << " " << m_run->m_pMaxWall[0] << " " << m_run->m_pMaxWall[1] << " " << m_run->m_pMaxWall[2] << " " << m_run->m_pMaxWall[3];
     // // fileStream << " " << m_run->m_pMax[0];

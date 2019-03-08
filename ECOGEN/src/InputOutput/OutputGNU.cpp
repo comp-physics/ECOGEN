@@ -171,7 +171,7 @@ void OutputGNU::printBlocGnuplot(std::ofstream &fileStream, int &index, const in
     for (int t = 0; t <= m_numFichier; t++) {
       for (int p = 0; p < Ncpu; p++) {
         fileStream << " \"";
-        if(dim==0){ fileStream << "datasets/" + creationNameFichierGNU(m_fileNameResults.c_str(), -1, -1, -1); }
+        if(dim==0){ fileStream << "datasets/" + creationNameFichierGNU(m_fileNameResults.c_str(), -1, -1, -1); } //KS// To modify "datasets" with variable, because it's also used for Probe and Cut
         else { fileStream << "datasets/" + creationNameFichierGNU(m_fileNameResults.c_str(), -1, p, t); }
         fileStream << "\"";
         if (dim <= 1) { fileStream << " u 1:" << index; }

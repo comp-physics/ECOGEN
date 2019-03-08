@@ -150,9 +150,17 @@ void Run::initialize(int argc, char* argv[])
       //m_pMaxWall[0] = 0.;
       //for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->lookForPmax(m_pMax, m_pMaxWall); }
       //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
+      double integration(0.);
+      if (m_numberPhases > 1) {
+       for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
+         m_cellsLvl[0][c]->computeIntegration(integration);
+       }
+       double integration_temp(integration);
+       MPI_Allreduce(&integration_temp, &integration, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+      }
       //-----
       m_outPut->prepareOutputInfos();
-      if (rankCpu == 0) m_outPut->ecritInfos();
+      if (rankCpu == 0) m_outPut->ecritInfos(integration);
       if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);
       for (unsigned int c = 0; c < m_cuts.size(); c++) m_cuts[c]->ecritSolution(m_mesh, m_cellsLvl);
       for (unsigned int p = 0; p < m_probes.size(); p++) { if (m_probes[p]->possesses()) m_probes[p]->ecritSolution(m_mesh, m_cellsLvl); }
@@ -260,8 +268,17 @@ void Run::solver()
       //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
+      double integration(0.);
+      if (m_numberPhases > 1) {
+       for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
+         m_cellsLvl[0][c]->computeIntegration(integration);
+         m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
+       }
+       double integration_temp(integration);
+       MPI_Allreduce(&integration_temp, &integration, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+      }
       //-----
-      if (rankCpu == 0) m_outPut->ecritInfos();
+      if (rankCpu == 0) m_outPut->ecritInfos(integration);
       if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);
       for (unsigned int c = 0; c < m_cuts.size(); c++) { m_cuts[c]->ecritSolution(m_mesh, m_cellsLvl); }
       m_outPut->ecritSolution(m_mesh, m_cellsLvl);

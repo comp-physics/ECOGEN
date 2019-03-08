@@ -482,6 +482,29 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
     else { fileStream << "\"/>" << std::endl; }
   }
 
+  //KS//TT//
+  //7) Write pMax
+  //-------------
+  int pMax(-5), tPmax(-6);
+  fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"pMax\"";
+  if (!parallel) {
+    fileStream << " format=\"" << format << "\">" << std::endl;
+    mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, pMax);
+    this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
+    fileStream << std::endl;
+    fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  }
+  else { fileStream << "\"/>" << std::endl; }
+  fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"tPmax\"";
+  if (!parallel) {
+    fileStream << " format=\"" << format << "\">" << std::endl;
+    mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, tPmax);
+    this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
+    fileStream << std::endl;
+    fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  }
+  else { fileStream << "\"/>" << std::endl; }
+
   //Fin
   fileStream << "      </" << prefix << "CellData>" << std::endl;
 }

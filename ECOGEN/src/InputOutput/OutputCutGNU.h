@@ -49,7 +49,7 @@ public:
   virtual void ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl);
 
   virtual void prepareOutputInfos() {}; //Aucune infos a ecrire
-  virtual void ecritInfos() {};
+  virtual void ecritInfos(double integration) {};
 
 private:
   GeometricObject *m_objet; //droite ou plan de cut

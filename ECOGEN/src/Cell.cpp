@@ -41,6 +41,8 @@ Cell::Cell() : m_vecPhases(0), m_mixture(0), m_cons(0), m_vecTransports(0), m_co
   m_lvl = 0;
   m_xi = 0.;
 	m_split = false;
+  m_pMax = 0.; //KS//TT//
+  m_tPmax = 0.;
 }
 
 //***********************************************************************
@@ -50,6 +52,8 @@ Cell::Cell(int lvl) : m_vecPhases(0), m_mixture(0), m_cons(0), m_vecTransports(0
   m_lvl = lvl;
   m_xi = 0.;
 	m_split = false;
+  m_pMax = 0.; //KS//TT//
+  m_tPmax = 0.;
 }
 
 //***********************************************************************
@@ -272,9 +276,9 @@ void Cell::correctionEnergy(const int &numberPhases)
 
 void Cell::printPhasesMixture(const int &numberPhases, const int &numberTransports, std::ofstream &fileStream) const
 {
-  for (int k = 0; k < numberPhases; k++) { m_vecPhases[k]->printPhase(fileStream); }
+  //for (int k = 0; k < numberPhases; k++) { m_vecPhases[k]->printPhase(fileStream); } //KS//TT//
   m_mixture->printMixture(fileStream);
-  for (int k = 0; k < numberTransports; k++) { fileStream << m_vecTransports[k].getValue() << " "; }
+  //for (int k = 0; k < numberTransports; k++) { fileStream << m_vecTransports[k].getValue() << " "; } //KS//TT//
 }
 
 //***********************************************************************
@@ -1554,9 +1558,9 @@ bool Cell::printGnuplotAMR(std::ofstream &fileStream, const int &dim, GeometricO
       //CAUTION: the order has to be kept for conformity reasons with gnuplot scripts
       if (dimension >= 1) fileStream << position.getX() << " ";
       if (dimension >= 2) fileStream << position.getY() << " ";
-      if (dimension == 3)fileStream << position.getZ() << " ";
+      if (dimension == 3) fileStream << position.getZ() << " ";
       this->printPhasesMixture(m_numberPhases, m_numberTransports, fileStream);
-      fileStream << m_lvl << " " << m_xi << " ";
+      //fileStream << m_lvl << " " << m_xi << " "; //KS//TT//
       fileStream << std::endl;
       if (objet != 0) { if (objet->getType() == 0) return true; } //probe specificity, unique.
     }
@@ -1582,6 +1586,37 @@ void Cell::computeIntegration(double &integration)
       m_childrenCells[i]->computeIntegration(integration);
     }
   }
+}
+
+//***********************************************************************
+
+void Cell::computePmax(double time)
+{
+  if (!m_split) {
+    if (m_mixture->getPressure() > m_pMax) {
+      m_pMax = m_mixture->getPressure();
+      m_tPmax = time;
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->computePmax(time);
+    }
+  }
+}
+
+//***********************************************************************
+
+double Cell::getPmax()
+{
+  return m_pMax;
+}
+
+//***********************************************************************
+
+double Cell::getTpMax()
+{
+  return m_tPmax;
 }
 
 //***********************************************************************

@@ -71,7 +71,7 @@ class Output
     virtual void prepareOutputInfos();
     virtual void ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl) { try { throw ErrorECOGEN("ecritSolution not available for requested output format"); } catch (ErrorECOGEN &) { throw; }};
     void printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl);
-    virtual void ecritInfos();
+    virtual void ecritInfos(double integration);
 
     virtual void prepareSortieSpecifique() { try { throw ErrorECOGEN("prepareSortieSpecifique not available for requested output format"); } catch (ErrorECOGEN &) { throw; } };
 
@@ -88,7 +88,7 @@ class Output
 
     //Donnees generales
     void afficheInfoEcriture() const;
-    void saveInfos() const;
+    void saveInfos(double integration) const;
     void saveInfosMailles() const;
     std::string creationNameFichier(const char* name, int lvl = -1, int proc = -1, int numFichier = -1) const;
 

@@ -182,6 +182,9 @@ class Cell
         //--------
         bool printGnuplotAMR(std::ofstream &fileStream, const int &dim, GeometricObject *objet = 0);
         void computeIntegration(double &integration);
+        void computePmax(double time);
+        double getPmax();                                                   /*!< Return pMax cell value */
+        double getTpMax();                                                  /*!< Return tPmax cell value */
         void lookForPmax(double *pMax, double *pMaxWall);
 
         //Specific for AMR method
@@ -260,6 +263,9 @@ class Cell
 	  bool m_split;                                               /*!< Indicator for splitted cell (Do I possess children ?) */
       std::vector<Cell*> m_childrenCells;                         /*!< Vector of children cells pointers */
       std::vector<CellInterface*> m_childrenInternalCellInterfaces;   /*!< Vector of Internal children cell-interface pointers of the cell */
+
+      double m_pMax; //KS//TT//
+      double m_tPmax;
 
     private:
 };

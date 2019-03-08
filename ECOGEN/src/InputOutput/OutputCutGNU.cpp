@@ -118,7 +118,7 @@ void OutputCutGNU::ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl)
     }
   }
   catch (ErrorECOGEN &) { throw; }
-  //m_numFichier++; //KS//FP// Deja fait dans ecritSolution du XML
+  m_numFichier++;
 }
 
 //***************************************************************

@@ -2,7 +2,7 @@
 <computationParam>
 	<run>bubbleCone</run>
 	<outputMode format="XML" binary="true" precision="10"/>
-	<timeControlMode iterations="true">
+	<timeControlMode iterations="false">
 		<iterations number="3" iterFreq="1"/>
 		<physicalTime totalTime="7.e-7" timeFreq="7.e-9"/>
 	</timeControlMode>
@@ -12,5 +12,9 @@
 		<globalVolumeFractionLimiter>thinc</globalVolumeFractionLimiter>
     	<interfaceVolumeFractionLimiter>thinc</interfaceVolumeFractionLimiter>
 	</secondOrder>
+	<probe name="capteur1">
+	  <vertex x="0.5e-6" y="32.e-6" z="0."/>
+	  <timeControl acqFreq="-1."/>       <!-- if negative or nul, recording at each time step -->
+	</probe>
 	<!-- <resumeSimulation fileNumber="5"/> -->
 </computationParam>
