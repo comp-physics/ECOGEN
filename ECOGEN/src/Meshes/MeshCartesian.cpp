@@ -310,6 +310,13 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
           iMailleD = iMailleG;
           cellInterfaces[iFace]->initialize(cells[iMailleG], cells[iMailleD]);
           cells[iMailleG]->addCellInterface(cellInterfaces[iFace]);
+          if ((cells[iMailleD]->getPosition().getY() < yThreshold) && 
+            (cells[iMailleD]->getPosition().getY() - slope*cells[iMailleG]->getPosition().getX() +  yThreshold2 > 0.)) {
+            std::cout << "<probe name='x"<<cells[iMailleG]->getPosition().getX()*1e6<<"y"<<cells[iMailleG]->getPosition().getY()*1e6<<"'>"<< std::endl;
+            std::cout << "  <vertex x='"<<cells[iMailleG]->getPosition().getX()<<"' y='"<<cells[iMailleG]->getPosition().getY()<<"' z='0.51'/>"<< std::endl;
+            std::cout << "  <timeControl acqFreq='-1.'/>"<< std::endl;   
+            std::cout << "</probe>"<< std::endl;  
+          }
         }
         else {
           //Normal inner faces
