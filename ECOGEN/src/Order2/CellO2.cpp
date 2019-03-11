@@ -826,10 +826,6 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, c
                   else if (coordBuffer.getY() >  epsilon) slopeIndex=3;
                   else if (coordBuffer.getZ() < -epsilon) slopeIndex=4;
                   else                                    slopeIndex=5;
-                  std::cout<<rankCpu<<" coordBuffer "<<coordBuffer.getX()<<" "<<coordBuffer.getY()
-                  <<"  posCell  "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
-                  <<"  cellInterfacesWithNeighboringGhostCell.size()  "<<cellInterfacesWithNeighboringGhostCell.size()
-                  <<" index "<<slopeIndex<<std::endl; //KS//BD//
                 }
               }
             }
@@ -857,8 +853,6 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, c
   		}
       buffer[++counter] = alphaCellAfterOppositeSide;
       buffer[++counter] = static_cast<double>(slopeIndex);
-      std::cout<<rankCpu<<"  send nbIndex  "<<cellInterfacesWithNeighboringGhostCell.size()<<"  index  "<<slopeIndex
-        <<"  buffer  "<<buffer[counter]<<std::endl; //KS//BD//
     }
 	}
 
