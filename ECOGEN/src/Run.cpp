@@ -260,6 +260,10 @@ void Run::solver()
 
     //------------------------ OUTPUT FILES PRINTING -------------------------
     nbCellsTotalAMRMax = std::max(nbCellsTotalAMRMax, m_nbCellsTotalAMR);
+
+     for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
+       m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
+     }
     if (print) {
       m_stat.updateComputationTime();
       //General printings
@@ -272,7 +276,7 @@ void Run::solver()
       if (m_numberPhases > 1) {
        for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
          m_cellsLvl[0][c]->computeIntegration(integration);
-         m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
+         // m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
        }
        double integration_temp(integration);
        MPI_Allreduce(&integration_temp, &integration, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
