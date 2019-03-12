@@ -54,6 +54,7 @@ Output::Output(std::string casTest, std::string nameRun, XMLElement *element, st
   //Names communs
   //------------
   m_infoCalcul = "infoCalcul.out";
+  m_infoIntegration = "infoIntegration.out";
   m_infoMesh = "infoMesh";
   m_treeStructure = "treeStructure";
   m_fileNameResults = "result";
@@ -356,6 +357,21 @@ void Output::saveInfos(double integration) const
     // // fileStream << " " << m_run->m_pMaxWall[0];
     //-----
 
+    fileStream << std::endl;
+    fileStream.close();
+  }
+}
+
+//***********************************************************************
+
+void Output::ecritIntegration(double integration) const
+{
+  std::ofstream fileStream;
+  if (m_precision!=0) fileStream.precision(m_precision);
+  if (rankCpu == 0) {
+    fileStream.open((m_folderOutput + m_infoIntegration).c_str(), std::ios::app);
+    fileStream << m_run->m_physicalTime << " ";
+    fileStream << " " << integration;
     fileStream << std::endl;
     fileStream.close();
   }

@@ -261,9 +261,16 @@ void Run::solver()
     //------------------------ OUTPUT FILES PRINTING -------------------------
     nbCellsTotalAMRMax = std::max(nbCellsTotalAMRMax, m_nbCellsTotalAMR);
 
+    double integration(0.);
+    if (m_numberPhases > 1) {
      for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
+       m_cellsLvl[0][c]->computeIntegration(integration);
        m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
      }
+     double integration_temp(integration);
+     MPI_Allreduce(&integration_temp, &integration, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    }
+    m_outPut->ecritIntegration(integration);
     if (print) {
       m_stat.updateComputationTime();
       //General printings
@@ -272,15 +279,6 @@ void Run::solver()
       //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
-      double integration(0.);
-      if (m_numberPhases > 1) {
-       for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) {
-         m_cellsLvl[0][c]->computeIntegration(integration);
-         // m_cellsLvl[0][c]->computePmax(m_physicalTime); //KS//TT//
-       }
-       double integration_temp(integration);
-       MPI_Allreduce(&integration_temp, &integration, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-      }
       //-----
       if (rankCpu == 0) m_outPut->ecritInfos(integration);
       if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);

@@ -72,6 +72,7 @@ class Output
     virtual void ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl) { try { throw ErrorECOGEN("ecritSolution not available for requested output format"); } catch (ErrorECOGEN &) { throw; }};
     void printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl);
     virtual void ecritInfos(double integration);
+    void ecritIntegration(double integration) const;
 
     virtual void prepareSortieSpecifique() { try { throw ErrorECOGEN("prepareSortieSpecifique not available for requested output format"); } catch (ErrorECOGEN &) { throw; } };
 
@@ -101,6 +102,7 @@ class Output
     //attribut name fichiers/dossiers
     std::string m_simulationName;                                             //!<Name du cas test (defini dans "main.xml")
     std::string m_infoCalcul;                                         //!<Name file pour saver les infos utiles du compute
+    std::string m_infoIntegration;
     std::string m_infoMesh;                                         //!<Name fichiers pour stocker les infos de mesh
     std::string m_treeStructure;                                       //!<File name for tree structure backup
     std::string m_fileNameResults;                                 //!<Name du file de sortie resultat
