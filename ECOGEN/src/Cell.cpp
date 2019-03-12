@@ -1579,7 +1579,7 @@ bool Cell::printGnuplotAMR(std::ofstream &fileStream, const int &dim, GeometricO
 void Cell::computeIntegration(double &integration)
 {
   if (!m_split) {
-    integration += m_element->getVolume()*m_vecPhases[1]->getAlpha();
+    integration += m_element->getVolume()*m_vecPhases[0]->getAlpha();
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
