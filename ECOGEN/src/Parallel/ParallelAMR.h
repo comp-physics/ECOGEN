@@ -47,8 +47,8 @@ public:
   virtual ~ParallelAMR();
 
   //void setNeighbour(const int neighbour);
-  //void setElementsToSend(const int neighbour, int* numberElement, const int &numberElements);
-  //void setElementsToReceive(const int neighbour, int* numberElement, const int &numberElements);
+  //void addElementToSend(const int neighbour, int* numberElement, const int &numberElements);
+  //void addElementToReceive(const int neighbour, int* numberElement, const int &numberElements);
 
 };
 

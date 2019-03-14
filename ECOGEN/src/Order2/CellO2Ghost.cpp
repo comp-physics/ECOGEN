@@ -215,23 +215,7 @@ void CellO2Ghost::createChildCell(const int &num, const int &lvl)
 
 //***********************************************************************
 
-void CellO2Ghost::getBufferSlopes(double *buffer, int &counter)
-{
-	int s = 0;
-	for (int k = 0; k < m_numberPhases; k++) {
-		m_vecPhasesSlopesGhost[s][k]->getBufferSlopes(buffer, counter);
-	}
-	m_mixtureSlopesGhost[s]->getBufferSlopes(buffer, counter);
-	for (int k = 0; k < m_numberTransports; k++) {
-		m_vecTransportsSlopesGhost[s][k] = buffer[++counter];
-	}
-	m_alphaCellAfterOppositeSide[s] = buffer[++counter];
-	//m_indexCellInterface[s] = buffer[++counter]; //KS//BD// See to delete this function (generalize everything)
-}
-
-//***********************************************************************
-
-void CellO2Ghost::getBufferSlopesAMR(double *buffer, int &counter, const int &lvl)
+void CellO2Ghost::getBufferSlopes(double *buffer, int &counter, const int &lvl)
 {
 	if (m_lvl == lvl) {
 		for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
@@ -247,8 +231,8 @@ void CellO2Ghost::getBufferSlopesAMR(double *buffer, int &counter, const int &lv
 	    }
 	}
 	else {
-		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-			m_childrenCells[i]->getBufferSlopesAMR(buffer, counter, lvl);
+		for (unsigned int i = 0; i < m_childrenCells.size(); i++) { //KS//BD// To modify for AMR communications
+			m_childrenCells[i]->getBufferSlopes(buffer, counter, lvl);
 		}
 	}
 }

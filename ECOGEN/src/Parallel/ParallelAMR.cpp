@@ -52,12 +52,12 @@ ParallelAMR::~ParallelAMR(){}
 //  m_isNeighbour[neighbour] = true;
 //}
 ////***********************************************************************
-//void ParallelAMR::setElementsToSend(const int neighbour, int* numberElement, const int &numberElements)
+//void ParallelAMR::addElementToSend(const int neighbour, int* numberElement, const int &numberElements)
 //{
 //
 //}
 ////***********************************************************************
-//void ParallelAMR::setElementsToReceive(const int neighbour, int* numberElement, const int &numberElements)
+//void ParallelAMR::addElementToReceive(const int neighbour, int* numberElement, const int &numberElements)
 //{
 //
 //}

@@ -216,8 +216,8 @@ class Cell
         virtual void setRankOfNeighborCPU(int rank) {};                  /*!< Does nothing for non-ghost cells */
         void fillBufferPrimitives(double *buffer, int &counter, Prim type = vecPhases) const;
         void getBufferPrimitives(double *buffer, int &counter, Eos **eos, Prim type = vecPhases);
-        virtual void fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const {};  /*!< Does nothing for first order cells */
-        virtual void getBufferSlopes(double *buffer, int &counter) {};                                              /*!< Does nothing for first order cells */
+        virtual void fillBufferSlopes(double *buffer, int &counter, const int &lvl, const int &neighbour) const {}; /*!< Does nothing for first order cells */
+        virtual void getBufferSlopes(double *buffer, int &counter, const int &lvl) {};                              /*!< Does nothing for first order cells */
         void fillBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
         void getBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1);
         void fillBufferTransports(double *buffer, int &counter) const;
@@ -228,22 +228,20 @@ class Cell
 
         //For parallel AMR computing
         //--------------------------
-        void fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, Prim type = vecPhases) const;
+        void fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type = vecPhases) const;
         void getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type = vecPhases);
-        virtual void fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const {};   /*!< Does nothing for first order cells */
-        virtual void getBufferSlopesAMR(double *buffer, int &counter, const int &lvl) {};                                               /*!< Does nothing for first order cells */
-        void fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
+        void fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
         void getBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
-        void fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
+        void fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferTransportsAMR(double *buffer, int &counter, const int &lvl);
         void chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost); /*!< Choice for refinement, unrefinement of the ghost parent cell + Update of ghost cell vector for lvl+1 */
         void refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
         void unrefineCellAndCellInterfacesGhost();                                                                                      /*!< Unrefinement of parent ghost cell by destruction of children ghost cells */
-        void fillBufferXi(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
+        void fillBufferXi(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferXi(double *buffer, int &counter, const int &lvl);
-        void fillBufferSplit(bool *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const;
+        void fillBufferSplit(bool *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferSplit(bool *buffer, int &counter, const int &lvl);
-        void fillNumberElementsToSendToNeighbour(int &numberNumberElementsToSendToNeighbor, const int &lvl, std::string whichCpuAmIForNeighbour);
+        void fillNumberElementsToSendToNeighbour(int &numberNumberElementsToSendToNeighbor, const int &lvl, const int &neighbour);
 
     protected:
       int m_numberPhases;

@@ -56,7 +56,6 @@ void Parallel::initialization(int &argc, char* argv[])
   if (Ncpu == 1) return; //The following is not necessary in the case of monoCPU
 
   m_isNeighbour = new bool[Ncpu];
-  m_whichCpuAmIForNeighbour = new std::string[Ncpu];
   m_elementsToSend.resize(Ncpu);
   m_elementsToReceive.resize(Ncpu);
   m_numberElementsToSendToNeighbour = new int[Ncpu];
@@ -102,7 +101,6 @@ void Parallel::initialization(int &argc, char* argv[])
 
   for (int i = 0; i < Ncpu; i++) {
       m_isNeighbour[i] = false;
-      m_whichCpuAmIForNeighbour[i] = "";
       m_numberElementsToSendToNeighbour[i] = 0;
       m_numberElementsToReceiveFromNeighbour[i] = 0;
       m_numberSlopesToSendToNeighbour[i] = 0;
@@ -146,15 +144,14 @@ void Parallel::initialization(int &argc, char* argv[])
 
 //***********************************************************************
 
-void Parallel::setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour)
+void Parallel::setNeighbour(const int neighbour)
 { 
   m_isNeighbour[neighbour] = true;
-  m_whichCpuAmIForNeighbour[neighbour] = whichCpuAmIForNeighbour; //KS//BD// Not necessary, to delete at some point...
 }
 
 //***********************************************************************
 
-void Parallel::setElementsToSend(int neighbour, Cell* cell)
+void Parallel::addElementToSend(int neighbour, Cell* cell)
 {
     m_elementsToSend[neighbour].push_back(cell);
     m_numberElementsToSendToNeighbour[neighbour]=m_elementsToSend[neighbour].size();
@@ -162,7 +159,7 @@ void Parallel::setElementsToSend(int neighbour, Cell* cell)
 
 //***********************************************************************
 
-void Parallel::setElementsToReceive(int neighbour, Cell* cell)
+void Parallel::addElementToReceive(int neighbour, Cell* cell)
 {
     m_elementsToReceive[neighbour].push_back(cell);
     m_numberElementsToReceiveFromNeighbour[neighbour]=m_elementsToReceive[neighbour].size();
@@ -341,10 +338,6 @@ void Parallel::communicationsPrimitives(Eos **eos, Prim type)
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				m_elementsToSend[neighbour][i]->fillBufferPrimitives(m_bufferSend[0][neighbour], count, type);
       }
-      //std::cout
-      //<<" rank "<<rankCpu<<" "
-      //<<"count "<<count<<" "
-      //<<std::endl;
 
       //Sending request
       MPI_Start(m_reqSend[0][neighbour]);
@@ -416,34 +409,34 @@ void Parallel::finalizePersistentCommunicationsSlopes(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSlopes()
+void Parallel::communicationsSlopes(const int &lvl)
 {
-	int count(0);
-	MPI_Status status;
+  int count(0);
+  MPI_Status status;
 
-	for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
-		if (m_isNeighbour[neighbour]) {
-			//Prepation of sendings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				m_elementsToSend[neighbour][i]->fillBufferSlopes(m_bufferSendSlopes[0][neighbour], count, m_whichCpuAmIForNeighbour[neighbour]);
-			}
-      
-			//Sending request
-			MPI_Start(m_reqSendSlopes[0][neighbour]);
-			//Receiving request
-			MPI_Start(m_reqReceiveSlopes[0][neighbour]);
-			//Waiting
-			MPI_Wait(m_reqSendSlopes[0][neighbour], &status);
-			MPI_Wait(m_reqReceiveSlopes[0][neighbour], &status);
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
+      //Prepation of sendings
+      count = -1;
+      for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
+        m_elementsToSend[neighbour][i]->fillBufferSlopes(m_bufferSendSlopes[lvl][neighbour], count, lvl, neighbour);
+      }
 
-			//Receivings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				m_elementsToReceive[neighbour][i]->getBufferSlopes(m_bufferReceiveSlopes[0][neighbour], count);
-			}
-		}
-	}
+      //Sending request
+      MPI_Start(m_reqSendSlopes[lvl][neighbour]);
+      //Receiving request
+      MPI_Start(m_reqReceiveSlopes[lvl][neighbour]);
+      //Waiting
+      MPI_Wait(m_reqSendSlopes[lvl][neighbour], &status);
+      MPI_Wait(m_reqReceiveSlopes[lvl][neighbour], &status);
+
+      //Receivings
+      count = -1;
+      for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
+        m_elementsToReceive[neighbour][i]->getBufferSlopes(m_bufferReceiveSlopes[lvl][neighbour], count, lvl);
+      }
+    }
+  }
 }
 
 //****************************************************************************
@@ -1059,7 +1052,7 @@ void Parallel::communicationsXi(const int &lvl)
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendXi
-				m_elementsToSend[neighbour][i]->fillBufferXi(m_bufferSendXi[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferXi(m_bufferSendXi[lvl][neighbour], count, lvl, neighbour);
 			}
 
 			//Sending request
@@ -1133,7 +1126,7 @@ void Parallel::finalizePersistentCommunicationsSplit(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSplit( const int &lvl)
+void Parallel::communicationsSplit(const int &lvl)
 {
 	int count(0);
 	MPI_Status status;
@@ -1144,7 +1137,7 @@ void Parallel::communicationsSplit( const int &lvl)
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendSplit
-				m_elementsToSend[neighbour][i]->fillBufferSplit(m_bufferSendSplit[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillBufferSplit(m_bufferSendSplit[lvl][neighbour], count, lvl, neighbour);
 			}
       
 			//Sending request
@@ -1210,7 +1203,7 @@ void Parallel::finalizePersistentCommunicationsNumberGhostCells()
 
 //***********************************************************************
 
-void Parallel::communicationsNumberGhostCells( const int &lvl)
+void Parallel::communicationsNumberGhostCells(const int &lvl)
 {
 	MPI_Status status;
 
@@ -1221,7 +1214,7 @@ void Parallel::communicationsNumberGhostCells( const int &lvl)
 			m_bufferNumberElementsToSendToNeighbor[neighbour] = 0;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendSplit
-				m_elementsToSend[neighbour][i]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], lvl, m_whichCpuAmIForNeighbour[neighbour]);
+				m_elementsToSend[neighbour][i]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], lvl, neighbour);
 			}
 
 
@@ -1241,7 +1234,7 @@ void Parallel::communicationsNumberGhostCells( const int &lvl)
 
 //***********************************************************************
 
-void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type)
+void Parallel::communicationsPrimitivesAMR(Eos **eos, const int &lvl, Prim type)
 {
 	int count(0);
 	MPI_Status status;
@@ -1251,7 +1244,7 @@ void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type
 			//Prepation of sendings
 			count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], type);
+        m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, neighbour, type);
       }
 
 			//Sending request
@@ -1273,39 +1266,7 @@ void Parallel::communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type
 
 //***********************************************************************
 
-void Parallel::communicationsSlopesAMR( const int &lvl)
-{
-	int count(0);
-	MPI_Status status;
-
-	for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
-		if (m_isNeighbour[neighbour]) {
-			//Prepation of sendings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				m_elementsToSend[neighbour][i]->fillBufferSlopesAMR(m_bufferSendSlopes[lvl][neighbour], count, lvl, neighbour);
-			}
-
-			//Sending request
-			MPI_Start(m_reqSendSlopes[lvl][neighbour]);
-			//Receiving request
-			MPI_Start(m_reqReceiveSlopes[lvl][neighbour]);
-			//Waiting
-			MPI_Wait(m_reqSendSlopes[lvl][neighbour], &status);
-			MPI_Wait(m_reqReceiveSlopes[lvl][neighbour], &status);
-
-			//Receivings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				m_elementsToReceive[neighbour][i]->getBufferSlopesAMR(m_bufferReceiveSlopes[lvl][neighbour], count, lvl);
-			}
-		}
-	}
-}
-
-//***********************************************************************
-
-void Parallel::communicationsVectorAMR( std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void Parallel::communicationsVectorAMR(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
 	int count(0);
 	MPI_Status status;
@@ -1316,7 +1277,7 @@ void Parallel::communicationsVectorAMR( std::string nameVector, const int &dim, 
 			count = -1;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
 				//Automatic filing of m_bufferSendVector function of gradient coordinates
-				m_elementsToSend[neighbour][i]->fillBufferVectorAMR(m_bufferSendVector[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour], dim, nameVector, num, index);
+				m_elementsToSend[neighbour][i]->fillBufferVectorAMR(m_bufferSendVector[lvl][neighbour], count, lvl, neighbour, dim, nameVector, num, index);
 			}
 
 			//Sending request
@@ -1338,7 +1299,7 @@ void Parallel::communicationsVectorAMR( std::string nameVector, const int &dim, 
 
 //***********************************************************************
 
-void Parallel::communicationsTransportsAMR( const int &lvl)
+void Parallel::communicationsTransportsAMR(const int &lvl)
 {
   int count(0);
   MPI_Status status;
@@ -1348,7 +1309,7 @@ void Parallel::communicationsTransportsAMR( const int &lvl)
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        m_elementsToSend[neighbour][i]->fillBufferTransportsAMR(m_bufferSendTransports[lvl][neighbour], count, lvl, m_whichCpuAmIForNeighbour[neighbour]);
+        m_elementsToSend[neighbour][i]->fillBufferTransportsAMR(m_bufferSendTransports[lvl][neighbour], count, lvl, neighbour);
       }
 
       //Sending request

@@ -314,7 +314,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                          parallel->addSlopesToReceive(decomp->get_rank(nKey));
 
                          //Update parallel communications
-                         parallel->setNeighbour(decomp->get_rank(nKey), "");
+                         parallel->setNeighbour(decomp->get_rank(nKey));
                          //Try to find the current cell into the already added cells to send
                          auto cKey = cells[i]->getElement()->getKey();
                          auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
@@ -323,9 +323,9 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                             });
                          if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
                          {
-                           parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                           parallel->addElementToSend(decomp->get_rank(nKey),cells[i]);
                          }
-                         parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                         parallel->addElementToReceive(decomp->get_rank(nKey), cells.back());
                          cells.back()->setRankOfNeighborCPU(decomp->get_rank(nKey));
 
                          const auto coord = nKey.coordinate();
@@ -359,7 +359,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                             });
                          if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
                          {
-                           parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                           parallel->addElementToSend(decomp->get_rank(nKey),cells[i]);
                          }
 
                          //Update pointers cells <-> cell interfaces
@@ -434,7 +434,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                        parallel->addSlopesToReceive(decomp->get_rank(nKey));
 
                        //Update parallel communications
-                       parallel->setNeighbour(decomp->get_rank(nKey), ""); //KS//BD// Do: neighbour = decomp->get_rank(nKey);
+                       parallel->setNeighbour(decomp->get_rank(nKey)); //KS//BD// Do: neighbour = decomp->get_rank(nKey);
                        //Try to find the current cell into the already added cells to send
                        auto cKey = cells[i]->getElement()->getKey();
                        auto it3 = std::find_if(parallel->getElementsToSend(decomp->get_rank(nKey)).begin(), parallel->getElementsToSend(decomp->get_rank(nKey)).end(),
@@ -443,9 +443,9 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                           });
                        if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
                        {
-                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                         parallel->addElementToSend(decomp->get_rank(nKey),cells[i]);
                        }
-                       parallel->setElementsToReceive(decomp->get_rank(nKey), cells.back());
+                       parallel->addElementToReceive(decomp->get_rank(nKey), cells.back());
                        cells.back()->setRankOfNeighborCPU(decomp->get_rank(nKey));
 
                        const auto coord = nKey.coordinate();
@@ -480,7 +480,7 @@ std::string ordreCalcul, decomposition::Decomposition* decomp)
                           });
                        if (it3 == parallel->getElementsToSend(decomp->get_rank(nKey)).end()) //Current cell not added in send vector
                        {
-                         parallel->setElementsToSend(decomp->get_rank(nKey),cells[i]);
+                         parallel->addElementToSend(decomp->get_rank(nKey),cells[i]);
                        }
 
                        //Update pointers cells <-> cell interfaces
@@ -898,23 +898,16 @@ void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsPrimitives( Eos **eos, const int &lvl, Prim type)
+void MeshCartesianAMR::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
 {
-	parallel->communicationsPrimitivesAMR( eos, lvl, type);
-}
-
-//***********************************************************************
-
-void MeshCartesianAMR::communicationsSlopes( const int &lvl)
-{
-	parallel->communicationsSlopesAMR( lvl);
+	parallel->communicationsPrimitivesAMR(eos, lvl, type);
 }
 
 //***********************************************************************
 
 void MeshCartesianAMR::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	parallel->communicationsVectorAMR( nameVector, m_geometrie, lvl, num, index);
+	parallel->communicationsVectorAMR(nameVector, m_geometrie, lvl, num, index);
 }
 
 //***********************************************************************
@@ -926,7 +919,7 @@ void MeshCartesianAMR::communicationsAddPhys(const std::vector<AddPhys*> &addPhy
 
 //***********************************************************************
 
-void MeshCartesianAMR::communicationsTransports( const int &lvl)
+void MeshCartesianAMR::communicationsTransports(const int &lvl)
 {
   parallel->communicationsTransportsAMR( lvl);
 }

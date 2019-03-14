@@ -74,11 +74,10 @@ public:
 
 	//Pour parallele
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
-  virtual void communicationsPrimitives( Eos **eos, const int &lvl, Prim type = vecPhases);
-  virtual void communicationsSlopes( const int &lvl);
-  virtual void communicationsVector( std::string nameVector, const int &dim, const int &lvl, int num, int index);
+  virtual void communicationsPrimitives(Eos **eos, const int &lvl, Prim type = vecPhases);
+  virtual void communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index);
   virtual void communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const int &lvl);
-  virtual void communicationsTransports( const int &lvl);
+  virtual void communicationsTransports(const int &lvl);
   virtual void finalizeParallele(const int &lvlMax);
 
 private:

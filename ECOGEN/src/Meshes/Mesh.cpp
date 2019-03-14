@@ -131,16 +131,16 @@ void Mesh::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
 
 //***********************************************************************
 
-void Mesh::communicationsSlopes( const int &lvl)
+void Mesh::communicationsSlopes(const int &lvl)
 {
-	parallel->communicationsSlopes();
+	parallel->communicationsSlopes(lvl);
 }
 
 //***********************************************************************
 
-void Mesh::communicationsVector( std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void Mesh::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	parallel->communicationsVector( nameVector, m_geometrie, num, index);
+	parallel->communicationsVector(nameVector, m_geometrie, num, index);
 }
 
 //***********************************************************************

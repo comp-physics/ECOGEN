@@ -47,9 +47,9 @@ public:
   virtual ~Parallel();
 
   void initialization(int &argc, char *argv[]);
-  virtual void setNeighbour(const int neighbour, std::string whichCpuAmIForNeighbour); //KS//BD// Get ride of the virtual if ParallelAMR not used
-  virtual void setElementsToSend(int neighbour, Cell* cell);
-  virtual void setElementsToReceive(int neighbour, Cell* cell);
+  virtual void setNeighbour(const int neighbour); //KS//BD// Get ride of the virtual if ParallelAMR not used
+  virtual void addElementToSend(int neighbour, Cell* cell);
+  virtual void addElementToReceive(int neighbour, Cell* cell);
   void addSlopesToSend(int neighbour);
   void addSlopesToReceive(int neighbour);
   const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
@@ -70,7 +70,7 @@ public:
   //Methodes pour toutes les slopes
   void initializePersistentCommunicationsSlopes();
   void finalizePersistentCommunicationsSlopes(const int &lvlMax);
-  void communicationsSlopes();
+  void communicationsSlopes(const int &lvl);
 
   //Methodes pour une variable scalar
   void initializePersistentCommunicationsScalar();
@@ -104,16 +104,14 @@ public:
   void finalizePersistentCommunicationsNumberGhostCells();
   void communicationsNumberGhostCells( const int &lvl);
 
-  void communicationsPrimitivesAMR( Eos **eos, const int &lvl, Prim type = vecPhases);
-  void communicationsSlopesAMR( const int &lvl);
-  void communicationsVectorAMR( std::string nameVector, const int &dim, const int &lvl, int num = 0, int index = -1);
+  void communicationsPrimitivesAMR(Eos **eos, const int &lvl, Prim type = vecPhases);
+  void communicationsVectorAMR(std::string nameVector, const int &dim, const int &lvl, int num = 0, int index = -1);
   void communicationsTransportsAMR( const int &lvl);
 
 private:
     
   int m_stateCPU;
   bool *m_isNeighbour;
-  std::string *m_whichCpuAmIForNeighbour;
   std::vector<TypeMeshContainer<Cell*>> m_elementsToSend;
   std::vector<TypeMeshContainer<Cell*>> m_elementsToReceive;
   int * m_numberElementsToSendToNeighbour;

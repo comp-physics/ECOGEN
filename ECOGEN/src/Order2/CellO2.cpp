@@ -620,146 +620,7 @@ void CellO2::createChildCell(const int &num, const int &lvl)
 //********************** Methode Ordre 2 Parallele ***************************
 //****************************************************************************
 
-//KS//BD// This guy is the only one where "whichCpuAmIForNeighbour" is used out of AMR: Need to do it differently (check ghost neighbor)
-void CellO2::fillBufferSlopes(double *buffer, int &counter, std::string whichCpuAmIForNeighbour) const
-{
-  //Mise a zero de la slope locale a transmettre
-  //--------------------------------------------
-  double epsilon(1.e-15), sommeCoeff(0.);
-  for (int k = 0; k < m_numberPhases; k++) {
-    slopesPhasesLocal1[k]->setToZero();
-  }
-  slopesMixtureLocal1->setToZero();
-  for (int k = 0; k < m_numberTransports; k++) {
-    slopesTransportLocal1[k] = 0.;
-  }
-
-  //Boucle sur les cell interfaces pour la determination de la slope a transmettre
-  //------------------------------------------------------------------------------
-  int phase0(0);
-  double alphaCellAfterOppositeSide(0.);
-  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
-    if (!m_cellInterfaces[b]->getSplit()) {
-      //Normal of the face in the x-direction
-      if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getX()) > 0.99) {
-        //I am left CPU, I send the average slope of the left side of the right cells
-        if (whichCpuAmIForNeighbour == "LEFT") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getX() + epsilon) < m_element->getPosition().getX()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-        //I am right CPU, I send the average slope of the right side of the left cells
-        else if (whichCpuAmIForNeighbour == "RIGHT") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getX() - epsilon) > m_element->getPosition().getX()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-      }
-      //Normal of the face in the y-direction
-      else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getY()) > 0.99) {
-        //I am bottom CPU, I send the average slope of the bottom side of the top cells
-        if (whichCpuAmIForNeighbour == "BOTTOM") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getY() + epsilon) < m_element->getPosition().getY()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-        //I am top CPU, I send the average slope of the top side of the bottom cells
-        else if (whichCpuAmIForNeighbour == "TOP") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getY() - epsilon) > m_element->getPosition().getY()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-      }
-      //Normal of the face in the z-direction
-      else if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()) > 0.99) {
-        //I am back CPU, I send the average slope of the back side of the front cells
-        if (whichCpuAmIForNeighbour == "BACK") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getZ() + epsilon) < m_element->getPosition().getZ()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-        //I am front CPU, I send the average slope of the front side of the back cells
-        else if (whichCpuAmIForNeighbour == "FRONT") {
-          if ((m_cellInterfaces[b]->getFace()->getPos().getZ() - epsilon) > m_element->getPosition().getZ()) {
-            for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesPhase(k), 1.); }
-            slopesMixtureLocal1->multiplyAndAdd(*m_cellInterfaces[b]->getSlopesMixture(), 1.);
-            for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] += (m_cellInterfaces[b]->getSlopesTransport(k)->getValue()); }
-            sommeCoeff += 1.;
-            if (m_cellInterfaces[b]->getCellGauche() == this) {
-              if (m_cellInterfaces[b]->whoAmI() == 0) { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellDroite()->getPhase(phase0)->getAlpha(); }
-              else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-            }
-            else { alphaCellAfterOppositeSide += m_cellInterfaces[b]->getCellGauche()->getPhase(phase0)->getAlpha(); }
-          }
-        }
-      }
-    }
-  }
-
-  //Normalisation de la slope
-  //-------------------------
-  if (sommeCoeff > 1.e-5) {
-    for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->divide(sommeCoeff); }
-    slopesMixtureLocal1->divide(sommeCoeff);
-    for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] /= sommeCoeff; }
-    alphaCellAfterOppositeSide /= sommeCoeff;
-  }
-
-  //Rempli buffer pour envoi
-  //------------------------
-  for (int k = 0; k < m_numberPhases; k++) {
-    slopesPhasesLocal1[k]->fillBufferSlopes(buffer, counter);
-  }
-  slopesMixtureLocal1->fillBufferSlopes(buffer, counter);
-  for (int k = 0; k < m_numberTransports; k++) {
-    buffer[++counter] = slopesTransportLocal1[k];
-  }
-  buffer[++counter] = alphaCellAfterOppositeSide;
-}
-
-//***********************************************************************
-
-void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const
+void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, const int &neighbour) const
 {
 	if (m_lvl == lvl) {
     std::vector<CellInterface*> cellInterfacesWithNeighboringGhostCell;
@@ -857,44 +718,11 @@ void CellO2::fillBufferSlopesAMR(double *buffer, int &counter, const int &lvl, c
 	}
 
 	else {
-    //KS//BD//
-
-    // if (whichCpuAmIForNeighbour == "LEFT") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am left CPU, I send the average slope of the left side of the right cells
-    //     if ((i % 2) == 1) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
-    // else if (whichCpuAmIForNeighbour == "RIGHT") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am right CPU, I send the average slope of the right side of the left cells
-    //     if ((i % 2) == 0) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
-    // else if (whichCpuAmIForNeighbour == "BOTTOM") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am bottom CPU, I send the average slope of the bottom side of the top cells
-    //     if ((i % 4) > 1) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
-    // else if (whichCpuAmIForNeighbour == "TOP") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am top CPU, I send the average slope of the top side of the bottom cells
-    //     if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
-    // else if (whichCpuAmIForNeighbour == "BACK") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am back CPU, I send the average slope of the back side of the front cells
-    //     if (i > 3) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
-    // else if (whichCpuAmIForNeighbour == "FRONT") {
-    //   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    //     //I am front CPU, I send the average slope of the front side of the back cells
-    //     if (i <= 3) { m_childrenCells[i]->fillBufferSlopesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-    //   }
-    // }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferSlopes(buffer, counter, lvl, neighbour);
+      }
+    }
 	}
 }
 

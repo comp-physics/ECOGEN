@@ -931,17 +931,16 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
     }
     for (int v = 0; v < Ncpu; v++)
     {
-      std::string whichCpuAmIForNeighbour(""); //KS//BD// Not necessary, to delete at some point...
-      if (numberElementsAEnvoyer[v] != 0) parallel->setNeighbour(v, whichCpuAmIForNeighbour);
-      //parallel->setElementsToSend(v, buffer, numberElementsAEnvoyer[v]);
+      if (numberElementsAEnvoyer[v] != 0) parallel->setNeighbour(v);
+      //parallel->addElementToSend(v, buffer, numberElementsAEnvoyer[v]);
       for(int i=0;i<numberElementsAEnvoyer[v];++i)
       {
           const auto buffer = elementsAEnvoyer[v][i] - m_numberFacesLimites;
-          parallel->setElementsToSend(v,cells[buffer]);
+          parallel->addElementToSend(v,cells[buffer]);
       }
       for (int i = 0; i < numberElementsARecevoir[v]; i++) { 
           const auto buffer= elementsARecevoir[v][i] - m_numberFacesLimites;
-          parallel->setElementsToReceive(v, cells[buffer]);
+          parallel->addElementToReceive(v, cells[buffer]);
        }
     }
     MPI_Barrier(MPI_COMM_WORLD);

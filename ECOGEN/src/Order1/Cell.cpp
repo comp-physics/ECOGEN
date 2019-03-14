@@ -1811,8 +1811,8 @@ CellInterface* Cell::whichCellInterfaceHasNeighboringGhostCellOfCPUneighbour(con
 //****************************************************************************
 //**************************** AMR Parallel **********************************
 //****************************************************************************
-
-void Cell::fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, Prim type) const
+//KS//BD// See at some point if we can get rid of all the fillBuffer specific to AMR (generalize for AMR and non-AMR)
+void Cell::fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type) const
 {
   if (m_lvl == lvl) {
     for (int k = 0; k < m_numberPhases; k++) {
@@ -1824,40 +1824,9 @@ void Cell::fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl,
     }
   }
   else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, type); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, neighbour, type);
       }
     }
   }
@@ -1886,7 +1855,7 @@ void Cell::getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, 
 
 //***********************************************************************
 
-void Cell::fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour, const int &dim, std::string nameVector, int num, int index) const
+void Cell::fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num, int index) const
 {
 	if (m_lvl == lvl) {
 		buffer[++counter] = this->selectVector(nameVector, num, index).getX();
@@ -1894,40 +1863,9 @@ void Cell::fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, std
 		if (dim > 2) buffer[++counter] = this->selectVector(nameVector, num, index).getZ();
 	}
 	else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, whichCpuAmIForNeighbour, dim, nameVector, num, index); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, neighbour, dim, nameVector, num, index);
       }
     }
 	}
@@ -1953,7 +1891,7 @@ void Cell::getBufferVectorAMR(double *buffer, int &counter, const int &lvl, cons
 
 //***********************************************************************
 
-void Cell::fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const
+void Cell::fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const
 {
   if (m_lvl == lvl) {
     for (int k = 0; k < m_numberTransports; k++) {
@@ -1961,40 +1899,9 @@ void Cell::fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl,
     }
   }
   else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, whichCpuAmIForNeighbour); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, neighbour);
       }
     }
   }
@@ -2269,46 +2176,15 @@ void Cell::unrefineCellAndCellInterfacesGhost()
 
 //***********************************************************************
 
-void Cell::fillBufferXi(double *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const
+void Cell::fillBufferXi(double *buffer, int &counter, const int &lvl, const int &neighbour) const
 {
 	if (m_lvl == lvl) {
 		buffer[++counter] = m_xi;
 	}
 	else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, whichCpuAmIForNeighbour); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferXi(buffer, counter, lvl, neighbour);
       }
     }
 	}
@@ -2330,46 +2206,15 @@ void Cell::getBufferXi(double *buffer, int &counter, const int &lvl)
 
 //***********************************************************************
 
-void Cell::fillBufferSplit(bool *buffer, int &counter, const int &lvl, std::string whichCpuAmIForNeighbour) const
+void Cell::fillBufferSplit(bool *buffer, int &counter, const int &lvl, const int &neighbour) const
 {
 	if (m_lvl == lvl) {
 		buffer[++counter] = m_split;
 	}
 	else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, whichCpuAmIForNeighbour); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferSplit(buffer, counter, lvl, neighbour);
       }
     }
 	}
@@ -2391,46 +2236,15 @@ void Cell::getBufferSplit(bool *buffer, int &counter, const int &lvl)
 
 //***********************************************************************
 
-void Cell::fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, const int &lvl, std::string whichCpuAmIForNeighbour)
+void Cell::fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, const int &lvl, const int &neighbour)
 {
 	if (m_lvl == lvl) {
 		numberElementsToSendToNeighbor++;
 	}
 	else {
-    if (whichCpuAmIForNeighbour == "LEFT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am left CPU, I send all right cells
-        if ((i % 2) == 1) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "RIGHT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am right CPU, I send all left cells
-        if ((i % 2) == 0) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BOTTOM") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am bottom CPU, I send all top cells
-        if ((i % 4) > 1) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "TOP") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am top CPU, I send all bottom cells
-        if ((i % 4) <= 1) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "BACK") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am back CPU, I send all front cells
-        if (i > 3) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
-      }
-    }
-    else if (whichCpuAmIForNeighbour == "FRONT") {
-      for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-        //I am front CPU, I send all back cells
-        if (i <= 3) { m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, whichCpuAmIForNeighbour); }
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, neighbour);
       }
     }
 	}
