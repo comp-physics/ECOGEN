@@ -297,18 +297,18 @@ void APKViscosity::addNonCons(Cell *cell, const int &numberPhases)
 
 void APKViscosity::communicationsAddPhys(int numberPhases, const int &dim)
 {
-  parallel->communicationsVector("QPA", dim, m_numQPA, 1); //m_gradU
-  parallel->communicationsVector("QPA", dim, m_numQPA, 2); //m_gradV
-  parallel->communicationsVector("QPA", dim, m_numQPA, 3); //m_gradW
+  parallel.communicationsVector("QPA", dim, m_numQPA, 1); //m_gradU
+  parallel.communicationsVector("QPA", dim, m_numQPA, 2); //m_gradV
+  parallel.communicationsVector("QPA", dim, m_numQPA, 3); //m_gradW
 }
 
 //***********************************************************************
 
 void APKViscosity::communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl)
 {
-	parallel->communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 1); //m_gradU
-	parallel->communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 2); //m_gradV
-	parallel->communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 3); //m_gradW
+	parallel.communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 1); //m_gradU
+	parallel.communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 2); //m_gradV
+	parallel.communicationsVectorAMR("QPA", dim, lvl, m_numQPA, 3); //m_gradW
 }
 
 //***********************************************************************

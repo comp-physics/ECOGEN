@@ -36,7 +36,7 @@
 #include "../Eos/Eos.h"
 
 //Variables linked to parallel computation
-Parallel* parallel;
+Parallel parallel;
 int rankCpu, Ncpu;
 
 //***********************************************************************
@@ -209,13 +209,13 @@ void Parallel::initializePersistentCommunications(const int &numberPrimitiveVari
     m_numberSlopeVariables = numberSlopeVariables;
     m_numberTransportVariables = numberTransportVariables;
     //Initialization of communications of primitive variables from resolved model
-    parallel->initializePersistentCommunicationsPrimitives();
+    parallel.initializePersistentCommunicationsPrimitives();
     //Initialization of communications of slopes for second order
-    parallel->initializePersistentCommunicationsSlopes();
+    parallel.initializePersistentCommunicationsSlopes();
     //Initialization of communications necessary for additional physics (vectors of dim=3)
-    parallel->initializePersistentCommunicationsVector(dim);
+    parallel.initializePersistentCommunicationsVector(dim);
     //Initialization of communications of transported variables
-    parallel->initializePersistentCommunicationsTransports();
+    parallel.initializePersistentCommunicationsTransports();
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -673,19 +673,19 @@ void Parallel::initializePersistentCommunicationsAMR(const int &numberPrimitiveV
 		m_numberSlopeVariables = numberSlopeVariables;
     m_numberTransportVariables = numberTransportVariables;
 		//Initialization of communications of primitive variables from resolved model
-		parallel->initializePersistentCommunicationsPrimitives();
+		parallel.initializePersistentCommunicationsPrimitives();
 		//Initialization of communications of slopes for second order
-		parallel->initializePersistentCommunicationsSlopes();
+		parallel.initializePersistentCommunicationsSlopes();
 		//Initialization of communications necessary for additional physics (vectors of dim=3)
-		parallel->initializePersistentCommunicationsVector(dim);
+		parallel.initializePersistentCommunicationsVector(dim);
         //Initialization of communications of transported variables
-        parallel->initializePersistentCommunicationsTransports();
+        parallel.initializePersistentCommunicationsTransports();
         //Initialization of communications for AMR variables
-        parallel->initializePersistentCommunicationsXi();
-        parallel->initializePersistentCommunicationsSplit();
-        parallel->initializePersistentCommunicationsNumberGhostCells();
+        parallel.initializePersistentCommunicationsXi();
+        parallel.initializePersistentCommunicationsSplit();
+        parallel.initializePersistentCommunicationsNumberGhostCells();
         //Initialization of communications for the levels superior to 0
-        parallel->initializePersistentCommunicationsLvlAMR(lvlMax);
+        parallel.initializePersistentCommunicationsLvlAMR(lvlMax);
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);

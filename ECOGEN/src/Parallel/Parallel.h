@@ -47,9 +47,9 @@ public:
   virtual ~Parallel();
 
   void initialization(int &argc, char *argv[]);
-  virtual void setNeighbour(const int neighbour); //KS//BD// Get ride of the virtual if ParallelAMR not used
-  virtual void addElementToSend(int neighbour, Cell* cell);
-  virtual void addElementToReceive(int neighbour, Cell* cell);
+  void setNeighbour(const int neighbour);
+  void addElementToSend(int neighbour, Cell* cell);
+  void addElementToReceive(int neighbour, Cell* cell);
   void addSlopesToSend(int neighbour);
   void addSlopesToReceive(int neighbour);
   const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
@@ -160,7 +160,7 @@ private:
 
 };
 
-extern Parallel* parallel;
+extern Parallel parallel;
 extern int rankCpu;
 extern int Ncpu;
 

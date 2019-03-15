@@ -66,7 +66,7 @@ void Run::initialize(int argc, char* argv[])
 
   //1) Initialization of parallel computing (also needed for 1 CPU!)
   //----------------------------------------------------------------
-  parallel->initialization(argc, argv);
+  parallel.initialization(argc, argv);
   if (Ncpu > 1){
     MPI_Barrier(MPI_COMM_WORLD);
     if (rankCpu == 0) std::cout << "T" << m_numTest << " | Number of CPU : " << Ncpu << std::endl;
@@ -150,7 +150,7 @@ void Run::initialize(int argc, char* argv[])
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
       //for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->lookForPmax(m_pMax, m_pMaxWall); }
-      //if (Ncpu > 1) { parallel->computePMax(m_pMax[0], m_pMaxWall[0]); }
+      //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
       //-----
       m_outPut->prepareOutputInfos();
       if (rankCpu == 0) m_outPut->ecritInfos();
@@ -187,7 +187,7 @@ void Run::resumeSimulation()
 
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-      //if (Ncpu > 1) { parallel->communicationsPrimitivesAMR(cells, eos, lvl); }
+      //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(cells, eos, lvl); }
       for (unsigned int i = 0; i < m_cellsLvl[lvl + 1].size(); i++) {
         m_cellsLvl[lvl + 1][i]->completeFulfillState(resume);
       }
@@ -258,7 +258,7 @@ void Run::solver()
       //General printings
       //Only for few test case
       //-----
-      //if (Ncpu > 1) { parallel->computePMax(m_pMax[0], m_pMaxWall[0]); }
+      //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
       //-----
@@ -277,7 +277,7 @@ void Run::solver()
     //-------------------------- TIME STEP UPDATING --------------------------
 
     m_dt = m_cfl * dtMax;
-    if (Ncpu > 1) { parallel->computeDt(m_dt); }
+    if (Ncpu > 1) { parallel.computeDt(m_dt); }
 
   } //time iterative loop end
   if (rankCpu == 0) std::cout << "T" << m_numTest << " | ---------------------------------------" << std::endl;
@@ -498,7 +498,7 @@ void Run::verifyErrors() const
 {
   try {
     if (Ncpu > 1) {
-      parallel->verifyStateCPUs();
+      parallel.verifyStateCPUs();
     }
     else if (errors.size() != 0) {
       for (unsigned int e = 0; e < errors.size(); e++) {

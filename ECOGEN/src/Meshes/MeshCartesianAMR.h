@@ -36,7 +36,6 @@
 //! \date      February 19 2019
 
 #include "MeshCartesian.h"
-#include "../Parallel/ParallelAMR.h"
 
 class MeshCartesianAMR : public MeshCartesian
 {

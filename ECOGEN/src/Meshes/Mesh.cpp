@@ -43,10 +43,7 @@ Mesh::Mesh() :
 
 //***********************************************************************
 
-Mesh::~Mesh()
-{
-    delete parallel;
-}
+Mesh::~Mesh() {}
 
 //***********************************************************************
 
@@ -119,28 +116,28 @@ void Mesh::initializePersistentCommunications(const int numberPhases, const int 
     int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
-	parallel->initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);
+	parallel.initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);
 }
 
 //***********************************************************************
 
 void Mesh::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
 {
-	parallel->communicationsPrimitives( eos, type);
+	parallel.communicationsPrimitives( eos, type);
 }
 
 //***********************************************************************
 
 void Mesh::communicationsSlopes(const int &lvl)
 {
-	parallel->communicationsSlopes(lvl);
+	parallel.communicationsSlopes(lvl);
 }
 
 //***********************************************************************
 
 void Mesh::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	parallel->communicationsVector(nameVector, m_geometrie, num, index);
+	parallel.communicationsVector(nameVector, m_geometrie, num, index);
 }
 
 //***********************************************************************
@@ -154,7 +151,7 @@ void Mesh::communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const in
 
 void Mesh::communicationsTransports( const int &lvl)
 {
-  parallel->communicationsTransports();
+  parallel.communicationsTransports();
 }
 
 
@@ -162,7 +159,7 @@ void Mesh::communicationsTransports( const int &lvl)
 
 void Mesh::finalizeParallele(const int &lvlMax)
 {
-	parallel->finalize(lvlMax);
+	parallel.finalize(lvlMax);
 }
 
 //***********************************************************************

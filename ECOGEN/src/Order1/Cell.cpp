@@ -1753,7 +1753,7 @@ void Cell::getBufferTransports(double *buffer, int &counter)
 
 //***********************************************************************
 
-bool Cell::hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const //KS//BD// To see if this one if usefull
+bool Cell::hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const
 {
   bool hasGhostNeighbour(false);
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
@@ -1777,35 +1777,6 @@ bool Cell::hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const //K
     }
   }
   return hasGhostNeighbour;
-}
-
-//***********************************************************************
-
-CellInterface* Cell::whichCellInterfaceHasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const
-{
-  //KS//BD// to clean if not necessary
-  int ref(0);
-  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
-    if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face
-      if (this == m_cellInterfaces[b]->getCellGauche()) {
-        if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
-          if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
-            ref = b;
-            break;
-          }
-        }
-      }
-      else {
-        if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
-          if (m_cellInterfaces[b]->getCellGauche()->getRankOfNeighborCPU() == neighbour) {
-            ref = b;
-            break;
-          }
-        }
-      }
-    }
-  }
-  return m_cellInterfaces[ref];
 }
 
 //****************************************************************************

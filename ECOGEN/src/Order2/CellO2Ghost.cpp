@@ -231,7 +231,7 @@ void CellO2Ghost::getBufferSlopes(double *buffer, int &counter, const int &lvl)
 	    }
 	}
 	else {
-		for (unsigned int i = 0; i < m_childrenCells.size(); i++) { //KS//BD// To modify for AMR communications
+		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
 			m_childrenCells[i]->getBufferSlopes(buffer, counter, lvl);
 		}
 	}

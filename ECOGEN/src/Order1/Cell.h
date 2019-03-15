@@ -224,7 +224,6 @@ class Cell
         void getBufferTransports(double *buffer, int &counter);
         virtual bool isCellGhost() const { return false; };
         bool hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;                      /*!< Return a bool that is true if the cell has a neighboring ghost cell corresponding to CPU "neighbour" */
-        CellInterface* whichCellInterfaceHasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;    /*!< Return the pointer to the cell interface that has a neighboring ghost cell corresponding to CPU "neighbour" */
 
         //For parallel AMR computing
         //--------------------------

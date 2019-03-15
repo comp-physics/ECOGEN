@@ -63,7 +63,6 @@ MeshCartesian::MeshCartesian(double lX, int numberCellsX, double lY, int numberC
   m_offsetX = 0;
   m_offsetY = 0;
   m_offsetZ = 0;
-  parallel = new Parallel;
 }
 
 //***********************************************************************
@@ -1110,17 +1109,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
     if (rankCpu > 0)
     {
       neighbour = rankCpu - 1;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1131,17 +1130,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
     if (rankCpu < Ncpu - 1)
     {
       neighbour = rankCpu + 1;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1255,17 +1254,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour = 0;
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1280,17 +1279,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour = 0;
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1306,17 +1305,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour = 0;
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iy = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1331,17 +1330,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour = 0;
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iy = m_numberCellsY - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1477,17 +1476,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = 0;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1504,17 +1503,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       ix = m_numberCellsX - 1;
       for (iy = 0; iy < m_numberCellsY; iy++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1532,17 +1531,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iy = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1559,17 +1558,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iy = m_numberCellsY - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iz = 0; iz < m_numberCellsZ; iz++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1587,17 +1586,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iz = 0;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iy = 0; iy < m_numberCellsY; iy++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;
@@ -1614,17 +1613,17 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul,TypeMeshContainer
       neighbour += neighbourCpuCoordX;
       neighbour += neighbourCpuCoordY * m_numberCpuX;
       neighbour += neighbourCpuCoordZ * m_numberCpuX*m_numberCpuY;
-      parallel->setNeighbour(neighbour);
+      parallel.setNeighbour(neighbour);
       iz = m_numberCellsZ - 1;
       for (ix = 0; ix < m_numberCellsX; ix++)
       {
         for (iy = 0; iy < m_numberCellsY; iy++)
         {
           this->construitIGlobal(ix, iy, iz, iMaille);
-          parallel->addElementToSend(neighbour, cells[iMaille]);
-          parallel->addElementToReceive(neighbour, cells[compteMaillesParallele]);
-          parallel->addSlopesToSend(neighbour);
-          parallel->addSlopesToReceive(neighbour);
+          parallel.addElementToSend(neighbour, cells[iMaille]);
+          parallel.addElementToReceive(neighbour, cells[compteMaillesParallele]);
+          parallel.addSlopesToSend(neighbour);
+          parallel.addSlopesToReceive(neighbour);
           cells[compteMaillesParallele]->setRankOfNeighborCPU(neighbour);
           ++countElements;
           ++compteMaillesParallele;

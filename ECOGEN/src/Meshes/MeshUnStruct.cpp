@@ -69,7 +69,6 @@ MeshUnStruct::MeshUnStruct(const std::string &fichierMesh) :
   m_nameMesh = m_fichierMesh;
   m_nameMesh.resize(m_nameMesh.size() - 4); //On enleve l extension
   m_type = UNS;
-  parallel = new Parallel;
 }
 
 //***********************************************************************
@@ -931,16 +930,16 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
     }
     for (int v = 0; v < Ncpu; v++)
     {
-      if (numberElementsAEnvoyer[v] != 0) parallel->setNeighbour(v);
-      //parallel->addElementToSend(v, buffer, numberElementsAEnvoyer[v]);
+      if (numberElementsAEnvoyer[v] != 0) parallel.setNeighbour(v);
+      //parallel.addElementToSend(v, buffer, numberElementsAEnvoyer[v]);
       for(int i=0;i<numberElementsAEnvoyer[v];++i)
       {
           const auto buffer = elementsAEnvoyer[v][i] - m_numberFacesLimites;
-          parallel->addElementToSend(v,cells[buffer]);
+          parallel.addElementToSend(v,cells[buffer]);
       }
       for (int i = 0; i < numberElementsARecevoir[v]; i++) { 
           const auto buffer= elementsARecevoir[v][i] - m_numberFacesLimites;
-          parallel->addElementToReceive(v, cells[buffer]);
+          parallel.addElementToReceive(v, cells[buffer]);
        }
     }
     MPI_Barrier(MPI_COMM_WORLD);
