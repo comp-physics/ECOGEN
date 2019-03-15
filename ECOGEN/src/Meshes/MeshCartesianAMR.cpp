@@ -621,11 +621,11 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
       //5) Raffinement et deraffinement des cells fantomes
       //-----------------------------------------------------
       //Communication split + Raffinement et deraffinement des cells fantomes + Reconstruction du tableau de cells fantomes de niveau lvl + 1
-      parallel->communicationsSplit( lvl);
+      parallel->communicationsSplit(lvl);
       m_cellsLvlGhost[lvlPlus1].clear();
       for (unsigned int i = 0; i < m_cellsLvlGhost[lvl].size(); i++) { m_cellsLvlGhost[lvl][i]->chooseRefineDeraffineGhost(m_numberCellsY, m_numberCellsZ, addPhys, model, m_cellsLvlGhost); }
       //Communications primitives pour mettre a jour les cells deraffinees
-      parallel->communicationsPrimitivesAMR( eos, lvl);
+      parallel->communicationsPrimitivesAMR(eos, lvl);
 
       //6) Mise a jour des communications persistantes au niveau lvl + 1
       //----------------------------------------------------------------

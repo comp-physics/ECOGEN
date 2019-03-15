@@ -2144,11 +2144,6 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
     auto dir1=child1->getElement()->getKey().coordinate()-child0Coord;
     return getIndex(dir0)< getIndex(dir1);
   });
-
-    //FIXME: 
-    //       Communication AMR:
-    //          Update fillBufferAMR to check send elements
-    //                  => has ghostneighbor instead of index
 }
 
 //***********************************************************************

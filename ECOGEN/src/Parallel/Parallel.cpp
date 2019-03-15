@@ -841,47 +841,47 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 	int numberSend(0), numberReceive(0);
 	for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
 		if (m_isNeighbour[neighbour]) {
-			//--------------------------------------------------
-			//We first empty the sending and receiving variables
-			//--------------------------------------------------
-			MPI_Request_free(m_reqSend[lvl][neighbour]);
-			MPI_Request_free(m_reqReceive[lvl][neighbour]);
-			MPI_Request_free(m_reqSendSlopes[lvl][neighbour]);
-			MPI_Request_free(m_reqReceiveSlopes[lvl][neighbour]);
-			MPI_Request_free(m_reqSendVector[lvl][neighbour]);
-            MPI_Request_free(m_reqReceiveVector[lvl][neighbour]);
-            MPI_Request_free(m_reqSendTransports[lvl][neighbour]);
-            MPI_Request_free(m_reqReceiveTransports[lvl][neighbour]);
-            MPI_Request_free(m_reqSendXi[lvl][neighbour]);
+      //--------------------------------------------------
+      //We first empty the sending and receiving variables
+      //--------------------------------------------------
+      MPI_Request_free(m_reqSend[lvl][neighbour]);
+      MPI_Request_free(m_reqReceive[lvl][neighbour]);
+      MPI_Request_free(m_reqSendSlopes[lvl][neighbour]);
+      MPI_Request_free(m_reqReceiveSlopes[lvl][neighbour]);
+      MPI_Request_free(m_reqSendVector[lvl][neighbour]);
+      MPI_Request_free(m_reqReceiveVector[lvl][neighbour]);
+      MPI_Request_free(m_reqSendTransports[lvl][neighbour]);
+      MPI_Request_free(m_reqReceiveTransports[lvl][neighbour]);
+      MPI_Request_free(m_reqSendXi[lvl][neighbour]);
 			MPI_Request_free(m_reqReceiveXi[lvl][neighbour]);
 			MPI_Request_free(m_reqSendSplit[lvl][neighbour]);
 			MPI_Request_free(m_reqReceiveSplit[lvl][neighbour]);
 
-			delete m_reqSend[lvl][neighbour];
-			delete m_reqReceive[lvl][neighbour];
-			delete m_reqSendSlopes[lvl][neighbour];
-			delete m_reqReceiveSlopes[lvl][neighbour];
-			delete m_reqSendVector[lvl][neighbour];
-            delete m_reqReceiveVector[lvl][neighbour];
-            delete m_reqSendTransports[lvl][neighbour];
-            delete m_reqReceiveTransports[lvl][neighbour];
-            delete m_reqSendXi[lvl][neighbour];
-            delete m_reqReceiveXi[lvl][neighbour];
-            delete m_reqSendSplit[lvl][neighbour];
-            delete m_reqReceiveSplit[lvl][neighbour];
+      delete m_reqSend[lvl][neighbour];
+      delete m_reqReceive[lvl][neighbour];
+      delete m_reqSendSlopes[lvl][neighbour];
+      delete m_reqReceiveSlopes[lvl][neighbour];
+      delete m_reqSendVector[lvl][neighbour];
+      delete m_reqReceiveVector[lvl][neighbour];
+      delete m_reqSendTransports[lvl][neighbour];
+      delete m_reqReceiveTransports[lvl][neighbour];
+      delete m_reqSendXi[lvl][neighbour];
+      delete m_reqReceiveXi[lvl][neighbour];
+      delete m_reqSendSplit[lvl][neighbour];
+      delete m_reqReceiveSplit[lvl][neighbour];
 
-            delete[] m_bufferSend[lvl][neighbour];
-            delete[] m_bufferReceive[lvl][neighbour];
-            delete[] m_bufferSendSlopes[lvl][neighbour];
-            delete[] m_bufferReceiveSlopes[lvl][neighbour];
-            delete[] m_bufferSendVector[lvl][neighbour];
-            delete[] m_bufferReceiveVector[lvl][neighbour];
-            delete[] m_bufferSendTransports[lvl][neighbour];
-            delete[] m_bufferReceiveTransports[lvl][neighbour];
-			delete[] m_bufferSendXi[lvl][neighbour];
-			delete[] m_bufferReceiveXi[lvl][neighbour];
-			delete[] m_bufferSendSplit[lvl][neighbour];
-			delete[] m_bufferReceiveSplit[lvl][neighbour];
+      delete[] m_bufferSend[lvl][neighbour];
+      delete[] m_bufferReceive[lvl][neighbour];
+      delete[] m_bufferSendSlopes[lvl][neighbour];
+      delete[] m_bufferReceiveSlopes[lvl][neighbour];
+      delete[] m_bufferSendVector[lvl][neighbour];
+      delete[] m_bufferReceiveVector[lvl][neighbour];
+      delete[] m_bufferSendTransports[lvl][neighbour];
+      delete[] m_bufferReceiveTransports[lvl][neighbour];
+      delete[] m_bufferSendXi[lvl][neighbour];
+      delete[] m_bufferReceiveXi[lvl][neighbour];
+      delete[] m_bufferSendSplit[lvl][neighbour];
+      delete[] m_bufferReceiveSplit[lvl][neighbour];
 
 			//------------------------------------------------
 			//We write the new sending and receiving variables
