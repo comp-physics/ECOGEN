@@ -276,7 +276,7 @@ void Cell::correctionEnergy(const int &numberPhases)
 
 void Cell::printPhasesMixture(const int &numberPhases, const int &numberTransports, std::ofstream &fileStream) const
 {
-  //for (int k = 0; k < numberPhases; k++) { m_vecPhases[k]->printPhase(fileStream); } //KS//TT//
+  for (int k = 0; k < numberPhases; k++) { m_vecPhases[k]->printPhase(fileStream); } //KS//TT//
   m_mixture->printMixture(fileStream);
   //for (int k = 0; k < numberTransports; k++) { fileStream << m_vecTransports[k].getValue() << " "; } //KS//TT//
 }

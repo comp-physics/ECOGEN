@@ -47,13 +47,12 @@ Phase::~Phase(){}
 void Phase::printPhase(std::ofstream &fileStream) const
 {
   //Scalar variables
-  for (int var = 1; var <= this->getNumberScalars(); var++) {
-    fileStream << this->returnScalar(var) << " ";
-  }
+  fileStream << this->returnScalar(1) << " ";//KS//TT//
+  fileStream << this->returnScalar(3) << " ";
   //Vector variables
-  for (int var = 1; var <= this->getNumberVectors(); var++) {
-    fileStream << this->returnVector(var).norm() << " ";
-  }
+  // for (int var = 1; var <= this->getNumberVectors(); var++) { //KS//TT//
+  //   fileStream << this->returnVector(var).norm() << " ";
+  // }
 }
 
 //***************************************************************************
