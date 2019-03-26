@@ -3,14 +3,14 @@
 	<run>kapila2DairShockHeliumBubble</run>
 	<outputMode format="XML" binary="false" precision="10"/>
 	<timeControlMode iterations="false">
-		<iterations number="1" iterFreq="1"/>
+		<iterations number="2" iterFreq="1"/>
 		<physicalTime totalTime="700.e-6" timeFreq="700.e-7"/>
 	</timeControlMode>
 	<computationControl CFL="0.8"/>
-	<!-- <secondOrder>
+	<secondOrder>
 		<globalLimiter>mc</globalLimiter>
 		<globalVolumeFractionLimiter>thinc</globalVolumeFractionLimiter>
     	<interfaceVolumeFractionLimiter>thinc</interfaceVolumeFractionLimiter>
-	</secondOrder> -->
+	</secondOrder>
 	<!-- <resumeSimulation fileNumber="5"/> -->
 </computationParam>

@@ -136,7 +136,7 @@ class Cell
         double getSizeY() const;
         double getSizeZ() const;
         void setElement(Element *element, const int &numCell);
-        Element* getElement();
+        Element* getElement() const;
         virtual void setTransport(double value, int &numTransport, Prim type = vecPhases);
         virtual Transport& getTransport(const int &numTransport, Prim type = vecPhases) const;
         virtual Transport* getTransports(Prim type = vecPhases) const;

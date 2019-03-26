@@ -1216,9 +1216,8 @@ void Parallel::communicationsNumberGhostCells(const int &lvl)
 				//Automatic filing of m_bufferSendSplit
 				m_elementsToSend[neighbour][i]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], lvl, neighbour);
 			}
-
-
-			//Sending request
+      
+      //Sending request
 			MPI_Start(m_reqNumberElementsToSendToNeighbor[neighbour]);
 			//Receiving request
 			MPI_Start(m_reqNumberElementsToReceiveFromNeighbour[neighbour]);

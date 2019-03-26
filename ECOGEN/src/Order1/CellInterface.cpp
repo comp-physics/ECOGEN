@@ -127,7 +127,7 @@ void CellInterface::solveRiemann(const int &numberPhases, const int &numberTrans
   //Projection des velocities sur repere attache a la face
   m_cellLeft->localProjection(m_face->getNormal(), m_face->getTangent(), m_face->getBinormal(), numberPhases);
   m_cellRight->localProjection(m_face->getNormal(), m_face->getTangent(), m_face->getBinormal(), numberPhases);
-
+  
   //Probleme de Riemann
   double dxLeft(m_cellLeft->getElement()->getLCFL());
   double dxRight(m_cellRight->getElement()->getLCFL());
