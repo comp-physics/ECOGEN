@@ -48,7 +48,7 @@ CellGhost::~CellGhost() {}
 
 //***********************************************************************
 
-void CellGhost::createChildCell(const int &num, const int &lvl)
+void CellGhost::createChildCell(const int &lvl)
 {
   m_childrenCells.push_back(new CellGhost(lvl + 1));
   m_childrenCells.back()->setRankOfNeighborCPU(m_rankOfNeighborCPU);

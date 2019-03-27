@@ -81,6 +81,7 @@ void CellInterfaceO2::allocateSlopes(const int &numberPhases, const int &numberT
 
   //Allocation des slopes des phases
 	m_vecPhasesSlopes = new Phase*[numberPhases];
+
   //On attribut les phases a partir de la cell a gauche (car cell a droite inexistante pour les limites)
   //Necessaire car il faut connaitre le type de phase (ex: PhaseKapila, etc.))
   //Ensuite on met a zero toutes les slopes
@@ -96,7 +97,7 @@ void CellInterfaceO2::allocateSlopes(const int &numberPhases, const int &numberT
 	for (int k = 0; k < numberTransports; k++) {
 		m_vecTransportsSlopes[k].setValue(0.);
 	}
-
+  
   //Allocation des variables externes
   if (allocateSlopeLocal < 1) {
     slopesPhasesLocal1 = new Phase*[numberPhases];

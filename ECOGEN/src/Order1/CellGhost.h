@@ -51,7 +51,7 @@ class CellGhost : public Cell
 
         virtual int getRankOfNeighborCPU() const;
         virtual void setRankOfNeighborCPU(int rank);
-        virtual void createChildCell(const int &num, const int &lvl);
+        virtual void createChildCell(const int &lvl);
         virtual bool isCellGhost() const { return true; };
 
     protected:

@@ -193,7 +193,7 @@ class Cell
           const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR); /*!< Choice for refinement of parent cell */
         void chooseUnrefine(const double &xiJoin, int &nbCellsTotalAMR); /*!< Choice for unrefinement of parent cell */
         void refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);           /*!< Refine parent cell by creation of children cells */
-        virtual void createChildCell(const int &num, const int &lvl);    /*!< Create a child cell (not initialized) */
+        virtual void createChildCell(const int &lvl);                    /*!< Create a child cell (not initialized) */
         void unrefineCellAndCellInterfaces();                            /*!< Unrefine parent cell by destruction of children cells */
         void averageChildrenInParent();                                  /*!< Average variables of children cells in the parent cell, needed for computation of xi. */
         bool lvlNeighborTooHigh();                                       /*!< Look for AMR level of neighboring cells if too high to unrefine*/
@@ -224,6 +224,7 @@ class Cell
         void getBufferTransports(double *buffer, int &counter);
         virtual bool isCellGhost() const { return false; };
         bool hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;                      /*!< Return a bool that is true if the cell has a neighboring ghost cell corresponding to CPU "neighbour" */
+        int numberOfNeighboringGhostCellsOfCPUneighbour(const int &neighbour) const;                 /*!< Return the number of neighboring ghost cells corresponding to CPU "neighbour" this cell has */
 
         //For parallel AMR computing
         //--------------------------
@@ -240,7 +241,7 @@ class Cell
         void getBufferXi(double *buffer, int &counter, const int &lvl);
         void fillBufferSplit(bool *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferSplit(bool *buffer, int &counter, const int &lvl);
-        void fillNumberElementsToSendToNeighbour(int &numberNumberElementsToSendToNeighbor, const int &lvl, const int &neighbour);
+        void fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, int &numberSlopesToSendToNeighbor, const int &lvl, const int &neighbour, int numberNeighboursOfCPUneighbour);
 
     protected:
       int m_numberPhases;

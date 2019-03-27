@@ -206,11 +206,11 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 
 //***********************************************************************
 
-void CellO2Ghost::createChildCell(const int &num, const int &lvl)
+void CellO2Ghost::createChildCell(const int &lvl)
 {
 	m_childrenCells.push_back(new CellO2Ghost(lvl + 1));
 	m_childrenCells.back()->setRankOfNeighborCPU(m_rankOfNeighborCPU);
-	//KS//BD// Don't forget for this guy that we have to add the slopes
+	m_childrenCells.back()->pushBackSlope();
 }
 
 //***********************************************************************
@@ -218,7 +218,13 @@ void CellO2Ghost::createChildCell(const int &num, const int &lvl)
 void CellO2Ghost::getBufferSlopes(double *buffer, int &counter, const int &lvl)
 {
 	if (m_lvl == lvl) {
+// std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl //KS//BD//
+// <<" m_vecPhasesSlopesGhost.size() "<<m_vecPhasesSlopesGhost.size()
+// <<std::endl;
 		for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
+// std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl //KS//BD//
+// <<" counter "<<counter
+// <<std::endl;
 			for (int k = 0; k < m_numberPhases; k++) {
 				m_vecPhasesSlopesGhost[s][k]->getBufferSlopes(buffer, counter);
 			}

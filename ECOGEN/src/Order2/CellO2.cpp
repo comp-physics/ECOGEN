@@ -611,7 +611,7 @@ void CellO2::setTransport(double value, int &numTransport, Prim type)
 //***************************** Methode AMR **********************************
 //****************************************************************************
 
-void CellO2::createChildCell(const int &num, const int &lvl)
+void CellO2::createChildCell(const int &lvl)
 {
   m_childrenCells.push_back(new CellO2(lvl + 1));
 }

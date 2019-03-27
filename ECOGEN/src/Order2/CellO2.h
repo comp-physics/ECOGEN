@@ -67,7 +67,7 @@ class CellO2 : public Cell
         virtual void setTransport(double value, int &numTransport, Prim type = vecPhases);
 
         //Pour methode AMR
-        virtual void createChildCell(const int &num, const int &lvl);                                              /*!< Creer une cell enfant (non initializee) */
+        virtual void createChildCell(const int &lvl);                                              /*!< Creer une cell enfant (non initializee) */
 
         //Pour methodes ordre 2 parallele
         virtual void fillBufferSlopes(double *buffer, int &counter, const int &lvl, const int &neighbour) const;

@@ -121,18 +121,6 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
     << "m_numberCellsTotal "<<m_numberCellsTotal<<" "
     << "m_numberFacesTotal "<<m_numberFacesTotal<<" "
     <<std::endl; //KS//BD// Erase 3D faces for 1D and 2D simulations
-
-  // for(unsigned int i = 0; i < m_numberCellsCalcul; ++i) {
-  //   for(int b = 0; b < cells[i]->getCellInterfacesSize(); ++b) {
-  //     if(cells[i]->getCellInterface(b)->whoAmI() == 0) {
-  //       std::cout<<"rank  "<<rankCpu;
-  //       std::cout<<"  cell  "<<cells[i]->getElement()->getKey().coordinate();
-  //       std::cout<<"  leftCell  "<<cells[i]->getCellInterface(b)->getCellGauche()->getElement()->getKey().coordinate();
-  //       std::cout<<"  rightCell  "<<cells[i]->getCellInterface(b)->getCellDroite()->getElement()->getKey().coordinate();
-  //       std::cout<<"  normal  "<<cells[i]->getCellInterface(b)->getFace()->getNormal().getX()<<" "<<cells[i]->getCellInterface(b)->getFace()->getNormal().getY()<<std::endl;
-  //     }
-  //   }
-  // }
 }
 
 //***********************************************************************

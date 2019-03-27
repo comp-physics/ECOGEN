@@ -157,6 +157,8 @@ private:
   std::vector<MPI_Request **> m_reqReceiveSplit;
   MPI_Request ** m_reqNumberElementsToSendToNeighbor;
   MPI_Request ** m_reqNumberElementsToReceiveFromNeighbour;
+  MPI_Request ** m_reqNumberSlopesToSendToNeighbor;
+  MPI_Request ** m_reqNumberSlopesToReceiveFromNeighbour;
 
 };
 

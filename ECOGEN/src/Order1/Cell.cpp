@@ -1117,7 +1117,7 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
 
     //Children cells creation
     //-----------------------
-    this->createChildCell(i, m_lvl);
+    this->createChildCell(m_lvl);
     m_element->creerElementChild();
     m_childrenCells[i]->setElement(m_element->getElementChild(i), i);
     m_childrenCells[i]->getElement()->setVolume(volumeCellParent / (double)numberCellsChildren);
@@ -1411,7 +1411,7 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
 
 //***********************************************************************
 
-void Cell::createChildCell(const int &num, const int &lvl)
+void Cell::createChildCell(const int &lvl)
 {
   m_childrenCells.push_back(new Cell(lvl + 1));
 }
@@ -1788,6 +1788,34 @@ bool Cell::hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const
   return hasGhostNeighbour;
 }
 
+//***********************************************************************
+
+int Cell::numberOfNeighboringGhostCellsOfCPUneighbour(const int &neighbour) const
+{
+  int hasGhostNeighbour(0);
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+    if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face
+      if (m_cellInterfaces[b]->getLvl() == m_lvl) {
+        if (this == m_cellInterfaces[b]->getCellGauche()) {
+          if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
+            if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
+              hasGhostNeighbour++;
+            }
+          }
+        }
+        else {
+          if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
+            if (m_cellInterfaces[b]->getCellGauche()->getRankOfNeighborCPU() == neighbour) {
+              hasGhostNeighbour++;
+            }
+          }
+        }
+      }
+    }
+  }
+  return hasGhostNeighbour;
+}
+
 //****************************************************************************
 //**************************** AMR Parallel **********************************
 //****************************************************************************
@@ -1973,10 +2001,11 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
   volumeCellParent = m_element->getVolume();
   lCFLCellParent = m_element->getLCFL();
 
-
-  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++)     
+  //Iterate over the cell interfaces of the parent ghost cell
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++)
   {
-    if (m_cellInterfaces[b]->getLvl() == m_lvl) //Parent cell interface
+    //Cell interface is a parent cell interface
+    if (m_cellInterfaces[b]->getLvl() == m_lvl)
     {
       auto const key = this->getElement()->getKey();
       bool GhostCellIsLeft(false);
@@ -1995,19 +2024,19 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
         GhostCellIsLeft = false;
       }
 
-      //Iterate over directions other than normal
+      //Iterate over directions other than normal to create the corresponding child ghost cells
       int idx = 0;
       if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getY()-1.0) < 1e-10 )
           idx = 1;
       if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()-1.0) < 1e-10 )
           idx = 2;
-
       int direction_j = dim==3 ? 2:1; //KS//BD// To put above inside if with dimensions (simpler)
       int direction_i = (dim==2 || dim==3) ? 2:1; 
       for (int i =0; i<direction_i; ++i) //KS//BD// Not sure about 1D test case... To look at this loop (careful on creating cells and also cell interfaces)
       {
         for (int j =0; j<direction_j; ++j)
         {
+          //Determine the coordinates of the child ghost cell
           auto coordChild = coordFirstChild;
           if (GhostCellIsLeft)
           {
@@ -2019,8 +2048,8 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
           coordChild[(idx+2)%dim] += j;
           decomposition::Key<3> keyChild(coordChild,key.level()+1);
 
+          //Try to find the child ghost cell into the already created ghost cells (inside parent ghost cell)
           Cell* childCellGhost;
-
           bool cellExists = false;
           for (int c = 0; c < m_childrenCells.size(); c++) 
           {
@@ -2029,14 +2058,13 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
               cellExists = true;
               childCellGhost = m_childrenCells[c];
               break;
-            } //found existing cell 
+            }
           }
 
-          //Create the cell
-          if (!cellExists)
+          if (!cellExists) //Child ghost cell does not exist
           {
-            //Children cells/element creation
-            this->createChildCell(i, m_lvl); //KS//BD// Delete first argument here ???
+            //Create child cell/element
+            this->createChildCell(m_lvl);
             childCellGhost = m_childrenCells.back();
             m_element->creerElementChild();
             childCellGhost->setElement(m_element->getElementChildBack(), 0);
@@ -2049,43 +2077,37 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
             childCellGhost->getElement()->setPos(posXCellParent + 0.25*(-1+2*coordChildInsideParent[0])*dimX*dXParent,
                                                  posYCellParent + 0.25*(-1+2*coordChildInsideParent[1])*dimY*dYParent,
                                                  posZCellParent + 0.25*(-1+2*coordChildInsideParent[2])*dimZ*dZParent);
-
-            //Initialization of main arrays according to model and number of phases
-            //+ physical initialization: physical data for children cells
-            childCellGhost->allocate(m_numberPhases, m_numberTransports, addPhys, model);
-            for (int k = 0; k < m_numberPhases; k++) { childCellGhost->copyPhase(k, m_vecPhases[k]); }
-            childCellGhost->copyMixture(m_mixture);
-            childCellGhost->getCons()->setToZero(m_numberPhases);
-            for (int k = 0; k < m_numberTransports; k++) { childCellGhost->setTransport(m_vecTransports[k].getValue(), k); }
-            for (int k = 0; k < m_numberTransports; k++) { childCellGhost->setConsTransport(0., k); }
-            childCellGhost->setXi(m_xi);
+          }
+          else {
+            childCellGhost->pushBackSlope();
           }
 
+          //Determine the coordinates of the child cell interface
           const auto face = m_cellInterfaces[b]->getFace();
-          Coord cellInterfacePosition;
+          Coord childCellInterfacePosition;
           if (std::fabs(childCellGhost->getPosition().getX()-face->getPos().getX()) > 1.e-15) {
-            cellInterfacePosition.setX(childCellGhost->getPosition().getX() -
+            childCellInterfacePosition.setX(childCellGhost->getPosition().getX() -
             (childCellGhost->getPosition().getX()-face->getPos().getX())/(std::fabs(childCellGhost->getPosition().getX()-face->getPos().getX()))*face->getNormal().getX()*0.5*childCellGhost->getSizeX());
           }
           else {
-            cellInterfacePosition.setX(childCellGhost->getPosition().getX());
+            childCellInterfacePosition.setX(childCellGhost->getPosition().getX());
           }
           if (std::fabs(childCellGhost->getPosition().getY()-face->getPos().getY()) > 1.e-15) {
-            cellInterfacePosition.setY(childCellGhost->getPosition().getY() -
+            childCellInterfacePosition.setY(childCellGhost->getPosition().getY() -
             (childCellGhost->getPosition().getY()-face->getPos().getY())/(std::fabs(childCellGhost->getPosition().getY()-face->getPos().getY()))*face->getNormal().getY()*0.5*childCellGhost->getSizeY());
           }
           else {
-            cellInterfacePosition.setY(childCellGhost->getPosition().getY());
+            childCellInterfacePosition.setY(childCellGhost->getPosition().getY());
           }
           if (std::fabs(childCellGhost->getPosition().getZ()-face->getPos().getZ()) > 1.e-15) {
-            cellInterfacePosition.setZ(childCellGhost->getPosition().getZ() - 
+            childCellInterfacePosition.setZ(childCellGhost->getPosition().getZ() - 
             (childCellGhost->getPosition().getZ()-face->getPos().getZ())/(std::fabs(childCellGhost->getPosition().getZ()-face->getPos().getZ()))*face->getNormal().getZ()*0.5*childCellGhost->getSizeZ());
           }
           else {
-            cellInterfacePosition.setZ(childCellGhost->getPosition().getZ());
+            childCellInterfacePosition.setZ(childCellGhost->getPosition().getZ());
           }
 
-          //Not all child faces created yet: Create the cell interface
+          //Not all child cell interfaces created yet: Create the child cell interface
           if (m_cellInterfaces[b]->getNumberCellInterfacesChildren() != static_cast<int>(std::round(std::pow(2,dim-1))))
           {
             const double surfaceChild(std::pow(0.5, dim - 1.)*face->getSurface());
@@ -2097,7 +2119,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
 
             //Face properties
             m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->initializeAutres(surfaceChild, face->getNormal(), face->getTangent(), face->getBinormal());
-            m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->setPos(cellInterfacePosition.getX(),cellInterfacePosition.getY(),cellInterfacePosition.getZ());
+            m_cellInterfaces[b]->getCellInterfaceChildBack()->getFace()->setPos(childCellInterfacePosition.getX(),childCellInterfacePosition.getY(),childCellInterfacePosition.getZ());
 
             auto FaceSize = face->getSize();
             FaceSize.setX(FaceSize.getX()*0.5);
@@ -2118,17 +2140,14 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
             }
             childCellGhost->addCellInterface(m_cellInterfaces[b]->getCellInterfaceChildBack());
             GhostCellNeighbor->addCellInterface(m_cellInterfaces[b]->getCellInterfaceChildBack());
-
-            //Association of model and slopes
-            m_cellInterfaces[b]->getCellInterfaceChildBack()->associeModel(model);
-            m_cellInterfaces[b]->getCellInterfaceChildBack()->allocateSlopes(this->getNumberPhases(), this->getNumberTransports(), allocateSlopeLocal);
           }
-          else //All child faces already created
+          else //All child cell interfaces already created
           {
+            //Update pointers cells <-> cell interfaces
             for (int bChild = 0; bChild < m_cellInterfaces[b]->getNumberCellInterfacesChildren(); bChild++) {
-              if (std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getX() - cellInterfacePosition.getX()) < 1e-15 &&
-                  std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getY() - cellInterfacePosition.getY()) < 1e-15 &&
-                  std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getZ() - cellInterfacePosition.getZ()) < 1e-15)
+              if (std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getX() - childCellInterfacePosition.getX()) < 1e-15 &&
+                  std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getY() - childCellInterfacePosition.getY()) < 1e-15 &&
+                  std::fabs(m_cellInterfaces[b]->getCellInterfaceChild(bChild)->getFace()->getPos().getZ() - childCellInterfacePosition.getZ()) < 1e-15)
               {
                 if (GhostCellIsLeft) {
                   m_cellInterfaces[b]->getCellInterfaceChild(bChild)->initializeGauche(childCellGhost);
@@ -2141,6 +2160,27 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
             }
           }
         }
+      }
+    }
+  }
+
+  //Initialization of main arrays according to model and number of phases
+  //+ physical initialization: physical data for child cells and cell interfaces
+  for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+    m_childrenCells[i]->allocate(m_numberPhases, m_numberTransports, addPhys, model);
+    for (int k = 0; k < m_numberPhases; k++) { m_childrenCells[i]->copyPhase(k, m_vecPhases[k]); }
+    m_childrenCells[i]->copyMixture(m_mixture);
+    m_childrenCells[i]->getCons()->setToZero(m_numberPhases);
+    for (int k = 0; k < m_numberTransports; k++) { m_childrenCells[i]->setTransport(m_vecTransports[k].getValue(), k); }
+    for (int k = 0; k < m_numberTransports; k++) { m_childrenCells[i]->setConsTransport(0., k); }
+    m_childrenCells[i]->setXi(m_xi);
+  }
+  //Association of model and slopes
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+    for (unsigned int i = 0; i < m_cellInterfaces[b]->getNumberCellInterfacesChildren(); i++) {
+      if (m_cellInterfaces[b]->getCellInterfaceChild(i)->getMod() == 0) {
+        m_cellInterfaces[b]->getCellInterfaceChild(i)->associeModel(model);
+        m_cellInterfaces[b]->getCellInterfaceChild(i)->allocateSlopes(this->getNumberPhases(), this->getNumberTransports(), allocateSlopeLocal);
       }
     }
   }
@@ -2241,15 +2281,17 @@ void Cell::getBufferSplit(bool *buffer, int &counter, const int &lvl)
 
 //***********************************************************************
 
-void Cell::fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, const int &lvl, const int &neighbour)
+void Cell::fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, int &numberSlopesToSendToNeighbor, const int &lvl, const int &neighbour, int numberNeighboursOfCPUneighbour)
 {
 	if (m_lvl == lvl) {
 		numberElementsToSendToNeighbor++;
+    numberSlopesToSendToNeighbor += numberNeighboursOfCPUneighbour;
 	}
 	else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
-        m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, lvl, neighbour);
+      numberNeighboursOfCPUneighbour = m_childrenCells[i]->numberOfNeighboringGhostCellsOfCPUneighbour(neighbour);
+      if (numberNeighboursOfCPUneighbour) {
+        m_childrenCells[i]->fillNumberElementsToSendToNeighbour(numberElementsToSendToNeighbor, numberSlopesToSendToNeighbor, lvl, neighbour, numberNeighboursOfCPUneighbour);
       }
     }
 	}
