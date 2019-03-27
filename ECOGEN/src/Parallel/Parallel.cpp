@@ -425,9 +425,7 @@ void Parallel::communicationsSlopes(const int &lvl)
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
         m_elementsToSend[neighbour][i]->fillBufferSlopes(m_bufferSendSlopes[lvl][neighbour], count, lvl, neighbour);
       }
-// std::cout<<"cpu "<<rankCpu<<" to neighbour "<<neighbour<<" lvl "<<lvl //KS//BD//
-// <<" count "<<count
-// <<std::endl;
+
       //Sending request
       MPI_Start(m_reqSendSlopes[lvl][neighbour]);
       //Receiving request
@@ -897,10 +895,7 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 			//-------------------
 			numberSend = m_numberPrimitiveVariables*m_bufferNumberElementsToSendToNeighbor[neighbour];
 			numberReceive = m_numberPrimitiveVariables*m_bufferNumberElementsToReceiveFromNeighbour[neighbour];
-// std::cout<<"cpu "<<rankCpu<<" to neighbour "<<neighbour //KS//BD//
-// <<" m_bufferNumberElementsToSendToNeighbor "<<m_bufferNumberElementsToSendToNeighbor[neighbour]
-// <<" m_bufferNumberElementsToReceiveFromNeighbour "<<m_bufferNumberElementsToReceiveFromNeighbour[neighbour]
-// <<std::endl;
+
 			//New sending request and its associated buffer
 			m_reqSend[lvl][neighbour] = new MPI_Request;
 			m_bufferSend[lvl][neighbour] = new double[numberSend];
@@ -915,10 +910,7 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 			//---------------
 			numberSend = m_numberSlopeVariables*m_bufferNumberSlopesToSendToNeighbor[neighbour];
 			numberReceive = m_numberSlopeVariables*m_bufferNumberSlopesToReceiveFromNeighbour[neighbour];
-// std::cout<<"cpu "<<rankCpu<<" to neighbour "<<neighbour //KS//BD//
-// <<" m_bufferNumberSlopesToSendToNeighbor "<<m_bufferNumberSlopesToSendToNeighbor[neighbour]
-// <<" m_bufferNumberSlopesToReceiveFromNeighbour "<<m_bufferNumberSlopesToReceiveFromNeighbour[neighbour]
-// <<std::endl;
+      
 			//New sending request and its associated buffer
 			m_reqSendSlopes[lvl][neighbour] = new MPI_Request;
 			m_bufferSendSlopes[lvl][neighbour] = new double[numberSend];

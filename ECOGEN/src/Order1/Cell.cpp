@@ -1830,13 +1830,6 @@ void Cell::fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl,
     for (int k = 0; k < m_numberTransports; k++) {
       buffer[++counter] = this->getTransport(k, type).getValue();
     }
-    // std::cout<<"send cpu "<<rankCpu //KS//BD//
-    // <<" lvl "<<m_lvl
-    // <<" coord "<<this->getElement()->getPosition().getX()<<" "<<this->getElement()->getPosition().getY()
-    // <<" phase 0 "<<this->getPhase(0,type)->getDensity()
-    // <<" phase 1 "<<this->getPhase(1,type)->getDensity()
-    // <<" mixture "<<this->getMixture(type)->getDensity()
-    // <<std::endl;
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
@@ -1860,13 +1853,6 @@ void Cell::getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, 
 			this->setTransport(buffer[++counter], k, type);
 		}
     this->fulfillState(type);
-// std::cout<<"recv cpu "<<rankCpu //KS//BD//
-// <<" lvl "<<m_lvl
-// <<" coord "<<this->getElement()->getPosition().getX()<<" "<<this->getElement()->getPosition().getY()
-// <<" phase 0 "<<this->getPhase(0,type)->getDensity()
-// <<" phase 1 "<<this->getPhase(1,type)->getDensity()
-// <<" mixture "<<this->getMixture(type)->getDensity()
-// <<std::endl;
 	}
 	else {
 		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
@@ -2030,7 +2016,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
           idx = 1;
       if (std::fabs(m_cellInterfaces[b]->getFace()->getNormal().getZ()-1.0) < 1e-10 )
           idx = 2;
-      int direction_j = dim==3 ? 2:1; //KS//BD// To put above inside if with dimensions (simpler)
+      int direction_j = dim==3 ? 2:1;
       int direction_i = (dim==2 || dim==3) ? 2:1; 
       for (int i =0; i<direction_i; ++i) //KS//BD// Not sure about 1D test case... To look at this loop (careful on creating cells and also cell interfaces)
       {

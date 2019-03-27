@@ -598,7 +598,6 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
 
     //4) Deraffinement des cells et cell interfaces
     //---------------------------------------------
-    bool deraffine = false;
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->chooseUnrefine(m_xiJoin, nbCellsTotalAMR); }
 
     if (Ncpu > 1) {

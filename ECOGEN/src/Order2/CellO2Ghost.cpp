@@ -218,13 +218,7 @@ void CellO2Ghost::createChildCell(const int &lvl)
 void CellO2Ghost::getBufferSlopes(double *buffer, int &counter, const int &lvl)
 {
 	if (m_lvl == lvl) {
-// std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl //KS//BD//
-// <<" m_vecPhasesSlopesGhost.size() "<<m_vecPhasesSlopesGhost.size()
-// <<std::endl;
 		for (unsigned int s = 0; s < m_vecPhasesSlopesGhost.size(); s++) {
-// std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl //KS//BD//
-// <<" counter "<<counter
-// <<std::endl;
 			for (int k = 0; k < m_numberPhases; k++) {
 				m_vecPhasesSlopesGhost[s][k]->getBufferSlopes(buffer, counter);
 			}

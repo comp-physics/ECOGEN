@@ -626,17 +626,19 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, cons
     std::vector<CellInterface*> cellInterfacesWithNeighboringGhostCell;
     for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
       if (m_cellInterfaces[b]->whoAmI() == 0) { //Inner face
-        if (this == m_cellInterfaces[b]->getCellGauche()) {
-          if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
-            if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
-              cellInterfacesWithNeighboringGhostCell.push_back(m_cellInterfaces[b]);
+          if (m_cellInterfaces[b]->getLvl() == m_lvl) {
+          if (this == m_cellInterfaces[b]->getCellGauche()) {
+            if (m_cellInterfaces[b]->getCellDroite()->isCellGhost()) {
+              if (m_cellInterfaces[b]->getCellDroite()->getRankOfNeighborCPU() == neighbour) {
+                cellInterfacesWithNeighboringGhostCell.push_back(m_cellInterfaces[b]);
+              }
             }
           }
-        }
-        else {
-          if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
-            if (m_cellInterfaces[b]->getCellGauche()->getRankOfNeighborCPU() == neighbour) {
-              cellInterfacesWithNeighboringGhostCell.push_back(m_cellInterfaces[b]);
+          else {
+            if (m_cellInterfaces[b]->getCellGauche()->isCellGhost()) {
+              if (m_cellInterfaces[b]->getCellGauche()->getRankOfNeighborCPU() == neighbour) {
+                cellInterfacesWithNeighboringGhostCell.push_back(m_cellInterfaces[b]);
+              }
             }
           }
         }
