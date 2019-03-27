@@ -86,8 +86,7 @@ class APKConductivity : public APKapila
     void solveFluxConductivityOther(Coord &gradTkLeft, double &alphakL, int &numPhase) const;
     virtual void addNonCons(Cell *cell, const int &numberPhases) {}; //The conductivity does not involve non-conservative terms.
 
-    virtual void communicationsAddPhys(int numberPhases, const int &dim);
-    virtual void communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl);
+    virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
 
   protected:
 

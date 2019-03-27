@@ -93,8 +93,7 @@ class APKViscosity : public APKapila
     void solveFluxViscosityOther(Coord &velocityLeft, Coord &gradULeft, Coord &gradVLeft, Coord &gradWLeft, double &muMixLeft, double &distLeft, int numberPhases) const;
     virtual void addNonCons(Cell *cell, const int &numberPhases);
 
-    virtual void communicationsAddPhys(int numberPhases, const int &dim);
-    virtual void communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl);
+    virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
 
   protected:
   

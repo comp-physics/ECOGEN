@@ -527,7 +527,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(std::vector<Cell *> *c
   if (resumeSimulation == 0) { //Only for simulation from input files
     for (int iterInit = 0; iterInit < 2; iterInit++) {
       for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-        if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(eos, lvl); }
+        if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
         this->procedureRaffinement(cellsLvl, cellInterfacesLvl, lvl, addPhys, model, nbCellsTotalAMR, cells, eos);
         for (unsigned int i = 0; i < cellsLvl[lvl + 1].size(); i++) {
           cellsLvl[lvl + 1][i]->fill(domains, m_lvlMax);
@@ -541,7 +541,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(std::vector<Cell *> *c
       }
     }
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(eos, lvl); }
+      if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
       for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
         if (!cellsLvl[lvl][i]->getSplit()) { cellsLvl[lvl][i]->completeFulfillState(); }
       }
@@ -608,7 +608,7 @@ void MeshCartesianAMR::procedureRaffinement(std::vector<Cell *> *cellsLvl, std::
       m_cellsLvlGhost[lvlPlus1].clear();
       for (unsigned int i = 0; i < m_cellsLvlGhost[lvl].size(); i++) { m_cellsLvlGhost[lvl][i]->chooseRefineDeraffineGhost(m_numberCellsY, m_numberCellsZ, addPhys, model, m_cellsLvlGhost); }
       //Communications primitives pour mettre a jour les cells deraffinees
-      parallel.communicationsPrimitivesAMR(eos, lvl);
+      parallel.communicationsPrimitives(eos, lvl);
 
       //6) Mise a jour des communications persistantes au niveau lvl + 1
       //----------------------------------------------------------------
@@ -877,34 +877,6 @@ void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel.initializePersistentCommunicationsAMR(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie, m_lvlMax);
-}
-
-//***********************************************************************
-
-void MeshCartesianAMR::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
-{
-	parallel.communicationsPrimitivesAMR(eos, lvl, type);
-}
-
-//***********************************************************************
-
-void MeshCartesianAMR::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
-{
-	parallel.communicationsVectorAMR(nameVector, m_geometrie, lvl, num, index);
-}
-
-//***********************************************************************
-
-void MeshCartesianAMR::communicationsAddPhys(const std::vector<AddPhys*> &addPhys,  const int &lvl)
-{
-	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhysAMR(m_numberPhases, m_geometrie, lvl); }
-}
-
-//***********************************************************************
-
-void MeshCartesianAMR::communicationsTransports(const int &lvl)
-{
-  parallel.communicationsTransportsAMR( lvl);
 }
 
 //***********************************************************************

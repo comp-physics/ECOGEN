@@ -65,7 +65,7 @@ public:
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsPrimitives();
   void finalizePersistentCommunicationsPrimitives(const int &lvlMax);
-  void communicationsPrimitives(Eos **eos, Prim type = vecPhases);
+  void communicationsPrimitives(Eos **eos, const int &lvl, Prim type = vecPhases);
 
   //Methodes pour toutes les slopes
   void initializePersistentCommunicationsSlopes();
@@ -79,12 +79,12 @@ public:
   //Methodes pour une variable vectorielle
   void initializePersistentCommunicationsVector(const int &dim);
   void finalizePersistentCommunicationsVector(const int &lvlMax);
-  void communicationsVector(std::string nameVector, const int &dim, int num=0, int index=-1);
+  void communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num=0, int index=-1);
 
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsTransports();
   void finalizePersistentCommunicationsTransports(const int &lvlMax);
-  void communicationsTransports();
+  void communicationsTransports(const int &lvl);
 
   //Methodes pour les variables AMR
   void initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax);
@@ -103,10 +103,6 @@ public:
   void initializePersistentCommunicationsNumberGhostCells();
   void finalizePersistentCommunicationsNumberGhostCells();
   void communicationsNumberGhostCells( const int &lvl);
-
-  void communicationsPrimitivesAMR(Eos **eos, const int &lvl, Prim type = vecPhases);
-  void communicationsVectorAMR(std::string nameVector, const int &dim, const int &lvl, int num = 0, int index = -1);
-  void communicationsTransportsAMR( const int &lvl);
 
 private:
     

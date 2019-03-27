@@ -330,7 +330,7 @@ void Parallel::finalizePersistentCommunicationsPrimitives(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsPrimitives(Eos **eos, Prim type)
+void Parallel::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
 {
   int count(0);
   MPI_Status status;
@@ -340,21 +340,21 @@ void Parallel::communicationsPrimitives(Eos **eos, Prim type)
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				m_elementsToSend[neighbour][i]->fillBufferPrimitives(m_bufferSend[0][neighbour], count, type);
+        m_elementsToSend[neighbour][i]->fillBufferPrimitives(m_bufferSend[lvl][neighbour], count, lvl, neighbour, type);
       }
 
       //Sending request
-      MPI_Start(m_reqSend[0][neighbour]);
+      MPI_Start(m_reqSend[lvl][neighbour]);
       //Receiving request
-      MPI_Start(m_reqReceive[0][neighbour]);
+      MPI_Start(m_reqReceive[lvl][neighbour]);
       //Waiting
-      MPI_Wait(m_reqSend[0][neighbour], &status);
-      MPI_Wait(m_reqReceive[0][neighbour], &status);
+      MPI_Wait(m_reqSend[lvl][neighbour], &status);
+      MPI_Wait(m_reqReceive[lvl][neighbour], &status);
 
       //Receivings
       count = -1;
       for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				m_elementsToReceive[neighbour][i]->getBufferPrimitives(m_bufferReceive[0][neighbour], count, eos, type);
+        m_elementsToReceive[neighbour][i]->getBufferPrimitives(m_bufferReceive[lvl][neighbour], count, lvl, eos, type);
       }
     }
   }
@@ -550,36 +550,35 @@ void Parallel::finalizePersistentCommunicationsVector(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsVector( std::string nameVector, const int &dim, int num, int index)
+void Parallel::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
 {
-	int count(0);
-	MPI_Status status;
+  int count(0);
+  MPI_Status status;
 
-	for (int neighbour = 0; neighbour < Ncpu; neighbour++)	{
-		if (m_isNeighbour[neighbour]) {
-			//Prepation of sendings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++)	{
-			  //Automatic filing of m_bufferSendVector in function of the gradient coordinates
-				m_elementsToSend[neighbour][i]->fillBufferVector(m_bufferSendVector[0][neighbour], count, dim, nameVector, num, index);
-			}
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
+      //Prepation of sendings
+      count = -1;
+      for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
+        //Automatic filing of m_bufferSendVector function of gradient coordinates
+        m_elementsToSend[neighbour][i]->fillBufferVector(m_bufferSendVector[lvl][neighbour], count, lvl, neighbour, dim, nameVector, num, index);
+      }
 
-			//Sending request
-			MPI_Start(m_reqSendVector[0][neighbour]);
-			//Receiving request
-			MPI_Start(m_reqReceiveVector[0][neighbour]);
-			//Waiting
-			MPI_Wait(m_reqSendVector[0][neighbour], &status);
-			MPI_Wait(m_reqReceiveVector[0][neighbour], &status);
-
-			//Receivings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++)	{
-			  //Automatic filing of m_bufferReceiveVector in function of the gradient coordinates
-				m_elementsToReceive[neighbour][i]->getBufferVector(m_bufferReceiveVector[0][neighbour], count, dim, nameVector, num, index);
-			}
-		} //End neighbour
-	}
+      //Sending request
+      MPI_Start(m_reqSendVector[lvl][neighbour]);
+      //Receiving request
+      MPI_Start(m_reqReceiveVector[lvl][neighbour]);
+      //Waiting
+      MPI_Wait(m_reqSendVector[lvl][neighbour], &status);
+      MPI_Wait(m_reqReceiveVector[lvl][neighbour], &status);
+      //Receivings
+      count = -1;
+      for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
+        //Automatic filing of m_bufferReceiveVector function of gradient coordinates
+        m_elementsToReceive[neighbour][i]->getBufferVector(m_bufferReceiveVector[lvl][neighbour], count, lvl, dim, nameVector, num, index);
+      }
+    }
+  }
 }
 
 //****************************************************************************
@@ -636,7 +635,7 @@ void Parallel::finalizePersistentCommunicationsTransports(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsTransports()
+void Parallel::communicationsTransports(const int &lvl)
 {
   int count(0);
   MPI_Status status;
@@ -646,21 +645,21 @@ void Parallel::communicationsTransports()
       //Prepation of sendings
       count = -1;
       for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        m_elementsToSend[neighbour][i]->fillBufferTransports(m_bufferSendTransports[0][neighbour], count);
+        m_elementsToSend[neighbour][i]->fillBufferTransports(m_bufferSendTransports[lvl][neighbour], count, lvl, neighbour);
       }
 
       //Sending request
-      MPI_Start(m_reqSendTransports[0][neighbour]);
+      MPI_Start(m_reqSendTransports[lvl][neighbour]);
       //Receiving request
-      MPI_Start(m_reqReceiveTransports[0][neighbour]);
+      MPI_Start(m_reqReceiveTransports[lvl][neighbour]);
       //Waiting
-      MPI_Wait(m_reqSendTransports[0][neighbour], &status);
-      MPI_Wait(m_reqReceiveTransports[0][neighbour], &status);
+      MPI_Wait(m_reqSendTransports[lvl][neighbour], &status);
+      MPI_Wait(m_reqReceiveTransports[lvl][neighbour], &status);
 
       //Receivings
       count = -1;
       for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-        m_elementsToReceive[neighbour][i]->getBufferTransports(m_bufferReceiveTransports[0][neighbour], count);
+        m_elementsToReceive[neighbour][i]->getBufferTransports(m_bufferReceiveTransports[lvl][neighbour], count, lvl);
       }
     }
   }
@@ -910,7 +909,7 @@ void Parallel::updatePersistentCommunicationsLvl(int lvl, const int &dim)
 			//---------------
 			numberSend = m_numberSlopeVariables*m_bufferNumberSlopesToSendToNeighbor[neighbour];
 			numberReceive = m_numberSlopeVariables*m_bufferNumberSlopesToReceiveFromNeighbour[neighbour];
-      
+
 			//New sending request and its associated buffer
 			m_reqSendSlopes[lvl][neighbour] = new MPI_Request;
 			m_bufferSendSlopes[lvl][neighbour] = new double[numberSend];
@@ -1262,103 +1261,6 @@ void Parallel::communicationsNumberGhostCells(const int &lvl)
 
 		}
 	}
-}
-
-//***********************************************************************
-
-void Parallel::communicationsPrimitivesAMR(Eos **eos, const int &lvl, Prim type)
-{
-	int count(0);
-	MPI_Status status;
-
-	for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
-		if (m_isNeighbour[neighbour]) {
-			//Prepation of sendings
-			count = -1;
-      for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        m_elementsToSend[neighbour][i]->fillBufferPrimitivesAMR(m_bufferSend[lvl][neighbour], count, lvl, neighbour, type);
-      }
-
-			//Sending request
-			MPI_Start(m_reqSend[lvl][neighbour]);
-			//Receiving request
-			MPI_Start(m_reqReceive[lvl][neighbour]);
-			//Waiting
-			MPI_Wait(m_reqSend[lvl][neighbour], &status);
-			MPI_Wait(m_reqReceive[lvl][neighbour], &status);
-
-			//Receivings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				m_elementsToReceive[neighbour][i]->getBufferPrimitivesAMR(m_bufferReceive[lvl][neighbour], count, lvl, eos, type);
-			}
-		}
-	}
-}
-
-//***********************************************************************
-
-void Parallel::communicationsVectorAMR(std::string nameVector, const int &dim, const int &lvl, int num, int index)
-{
-	int count(0);
-	MPI_Status status;
-
-	for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
-		if (m_isNeighbour[neighbour]) {
-			//Prepation of sendings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				//Automatic filing of m_bufferSendVector function of gradient coordinates
-				m_elementsToSend[neighbour][i]->fillBufferVectorAMR(m_bufferSendVector[lvl][neighbour], count, lvl, neighbour, dim, nameVector, num, index);
-			}
-
-			//Sending request
-			MPI_Start(m_reqSendVector[lvl][neighbour]);
-			//Receiving request
-			MPI_Start(m_reqReceiveVector[lvl][neighbour]);
-			//Waiting
-			MPI_Wait(m_reqSendVector[lvl][neighbour], &status);
-			MPI_Wait(m_reqReceiveVector[lvl][neighbour], &status);
-			//Receivings
-			count = -1;
-			for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-				//Automatic filing of m_bufferReceiveVector function of gradient coordinates
-				m_elementsToReceive[neighbour][i]->getBufferVectorAMR(m_bufferReceiveVector[lvl][neighbour], count, lvl, dim, nameVector, num, index);
-			}
-		}
-	}
-}
-
-//***********************************************************************
-
-void Parallel::communicationsTransportsAMR(const int &lvl)
-{
-  int count(0);
-  MPI_Status status;
-
-  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
-    if (m_isNeighbour[neighbour]) {
-      //Prepation of sendings
-      count = -1;
-      for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-        m_elementsToSend[neighbour][i]->fillBufferTransportsAMR(m_bufferSendTransports[lvl][neighbour], count, lvl, neighbour);
-      }
-
-      //Sending request
-      MPI_Start(m_reqSendTransports[lvl][neighbour]);
-      //Receiving request
-      MPI_Start(m_reqReceiveTransports[lvl][neighbour]);
-      //Waiting
-      MPI_Wait(m_reqSendTransports[lvl][neighbour], &status);
-      MPI_Wait(m_reqReceiveTransports[lvl][neighbour], &status);
-
-      //Receivings
-      count = -1;
-      for (int i = 0; i < m_numberElementsToReceiveFromNeighbour[neighbour]; i++) {
-        m_elementsToReceive[neighbour][i]->getBufferTransportsAMR(m_bufferReceiveTransports[lvl][neighbour], count, lvl);
-      }
-    }
-  }
 }
 
 //***********************************************************************

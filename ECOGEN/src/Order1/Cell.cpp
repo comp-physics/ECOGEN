@@ -1697,66 +1697,114 @@ std::vector<Cell *>* Cell::getChildVector()
 //************************** Parallel non-AMR *******************************
 //****************************************************************************
 
-void Cell::fillBufferPrimitives(double *buffer, int &counter, Prim type) const
+void Cell::fillBufferPrimitives(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type) const
 {
-	for (int k = 0; k < m_numberPhases; k++) {
-		this->getPhase(k, type)->fillBuffer(buffer, counter);
-	}
-	this->getMixture(type)->fillBuffer(buffer, counter);
-	for (int k = 0; k < m_numberTransports; k++) {
-		buffer[++counter] = this->getTransport(k, type).getValue();
-	}
-}
-
-//***********************************************************************
-
-void Cell::getBufferPrimitives(double *buffer, int &counter, Eos **eos, Prim type)
-{
-	for (int k = 0; k < m_numberPhases; k++) {
-		this->getPhase(k, type)->getBuffer(buffer, counter, eos);
-	}
-	this->getMixture(type)->getBuffer(buffer, counter);
-	for (int k = 0; k < m_numberTransports; k++) {
-		this->setTransport(buffer[++counter], k, type);
-	}
-  this->fulfillState(type);
-}
-
-//***********************************************************************
-
-void Cell::fillBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num, int index) const
-{
-	buffer[++counter] = this->selectVector(nameVector, num, index).getX();
-	if (dim > 1) buffer[++counter] = this->selectVector(nameVector, num, index).getY();
-	if (dim > 2) buffer[++counter] = this->selectVector(nameVector, num, index).getZ();
-}
-
-//***********************************************************************
-
-void Cell::getBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num, int index)
-{
-	Coord temp;
-	temp.setX(buffer[++counter]);
-	if (dim > 1) temp.setY(buffer[++counter]);
-	if (dim > 2) temp.setZ(buffer[++counter]);
-	this->setVector(nameVector, temp, num, index);
-}
-
-//***********************************************************************
-
-void Cell::fillBufferTransports(double *buffer, int &counter) const
-{
-  for (int k = 0; k < m_numberTransports; k++) {
-    buffer[++counter] = this->getTransport(k).getValue();
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberPhases; k++) {
+      this->getPhase(k, type)->fillBuffer(buffer, counter);
+    }
+    this->getMixture(type)->fillBuffer(buffer, counter);
+    for (int k = 0; k < m_numberTransports; k++) {
+      buffer[++counter] = this->getTransport(k, type).getValue();
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferPrimitives(buffer, counter, lvl, neighbour, type);
+      }
+    }
   }
 }
 
 //***********************************************************************
 
-void Cell::getBufferTransports(double *buffer, int &counter)
+void Cell::getBufferPrimitives(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type)
 {
-  for (int k = 0; k < m_numberTransports; k++) {
-    this->setTransport(buffer[++counter], k);
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberPhases; k++) {
+      this->getPhase(k, type)->getBuffer(buffer, counter, eos);
+    }
+    this->getMixture(type)->getBuffer(buffer, counter);
+    for (int k = 0; k < m_numberTransports; k++) {
+      this->setTransport(buffer[++counter], k, type);
+    }
+    this->fulfillState(type);
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->getBufferPrimitives(buffer, counter, lvl, eos, type);
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num, int index) const
+{
+  if (m_lvl == lvl) {
+    buffer[++counter] = this->selectVector(nameVector, num, index).getX();
+    if (dim > 1) buffer[++counter] = this->selectVector(nameVector, num, index).getY();
+    if (dim > 2) buffer[++counter] = this->selectVector(nameVector, num, index).getZ();
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferVector(buffer, counter, lvl, neighbour, dim, nameVector, num, index);
+      }
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num, int index)
+{
+  if (m_lvl == lvl) {
+    Coord temp;
+    temp.setX(buffer[++counter]);
+    if (dim > 1) temp.setY(buffer[++counter]);
+    if (dim > 2) temp.setZ(buffer[++counter]);
+    this->setVector(nameVector, temp, num, index);
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->getBufferVector(buffer, counter, lvl, dim, nameVector, num, index);
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::fillBufferTransports(double *buffer, int &counter, const int &lvl, const int &neighbour) const
+{
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberTransports; k++) {
+      buffer[++counter] = this->getTransport(k).getValue();
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
+        m_childrenCells[i]->fillBufferTransports(buffer, counter, lvl, neighbour);
+      }
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::getBufferTransports(double *buffer, int &counter, const int &lvl)
+{
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberTransports; k++) {
+      this->setTransport(buffer[++counter], k);
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->getBufferTransports(buffer, counter, lvl);
+    }
   }
 }
 
@@ -1819,119 +1867,6 @@ int Cell::numberOfNeighboringGhostCellsOfCPUneighbour(const int &neighbour) cons
 //****************************************************************************
 //**************************** AMR Parallel **********************************
 //****************************************************************************
-//KS//BD// See at some point if we can get rid of all the fillBuffer specific to AMR (generalize for AMR and non-AMR)
-void Cell::fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type) const
-{
-  if (m_lvl == lvl) {
-    for (int k = 0; k < m_numberPhases; k++) {
-      this->getPhase(k, type)->fillBuffer(buffer, counter);
-    }
-    this->getMixture(type)->fillBuffer(buffer, counter);
-    for (int k = 0; k < m_numberTransports; k++) {
-      buffer[++counter] = this->getTransport(k, type).getValue();
-    }
-  }
-  else {
-    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
-        m_childrenCells[i]->fillBufferPrimitivesAMR(buffer, counter, lvl, neighbour, type);
-      }
-    }
-  }
-}
-
-//***********************************************************************
-
-void Cell::getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type)
-{
-	if (m_lvl == lvl) {
-		for (int k = 0; k < m_numberPhases; k++) {
-			this->getPhase(k, type)->getBuffer(buffer, counter, eos);
-		}
-		this->getMixture(type)->getBuffer(buffer, counter);
-		for (int k = 0; k < m_numberTransports; k++) {
-			this->setTransport(buffer[++counter], k, type);
-		}
-    this->fulfillState(type);
-	}
-	else {
-		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-			m_childrenCells[i]->getBufferPrimitivesAMR(buffer, counter, lvl, eos, type);
-		}
-	}
-}
-
-//***********************************************************************
-
-void Cell::fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num, int index) const
-{
-	if (m_lvl == lvl) {
-		buffer[++counter] = this->selectVector(nameVector, num, index).getX();
-		if (dim > 1) buffer[++counter] = this->selectVector(nameVector, num, index).getY();
-		if (dim > 2) buffer[++counter] = this->selectVector(nameVector, num, index).getZ();
-	}
-	else {
-    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
-        m_childrenCells[i]->fillBufferVectorAMR(buffer, counter, lvl, neighbour, dim, nameVector, num, index);
-      }
-    }
-	}
-}
-
-//***********************************************************************
-
-void Cell::getBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num, int index)
-{
-	if (m_lvl == lvl) {
-		Coord temp;
-		temp.setX(buffer[++counter]);
-		if (dim > 1) temp.setY(buffer[++counter]);
-		if (dim > 2) temp.setZ(buffer[++counter]);
-		this->setVector(nameVector, temp, num, index);
-	}
-	else {
-		for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-			m_childrenCells[i]->getBufferVectorAMR(buffer, counter, lvl, dim, nameVector, num, index);
-		}
-	}
-}
-
-//***********************************************************************
-
-void Cell::fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const
-{
-  if (m_lvl == lvl) {
-    for (int k = 0; k < m_numberTransports; k++) {
-      buffer[++counter] = this->getTransport(k).getValue();
-    }
-  }
-  else {
-    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      if (m_childrenCells[i]->hasNeighboringGhostCellOfCPUneighbour(neighbour)) {
-        m_childrenCells[i]->fillBufferTransportsAMR(buffer, counter, lvl, neighbour);
-      }
-    }
-  }
-}
-
-//***********************************************************************
-
-void Cell::getBufferTransportsAMR(double *buffer, int &counter, const int &lvl)
-{
-  if (m_lvl == lvl) {
-    for (int k = 0; k < m_numberTransports; k++) {
-      this->setTransport(buffer[++counter], k);
-    }
-  }
-  else {
-    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      m_childrenCells[i]->getBufferTransportsAMR(buffer, counter, lvl);
-    }
-  }
-}
-
-//***********************************************************************
 
 void Cell::chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ,	const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost)
 {

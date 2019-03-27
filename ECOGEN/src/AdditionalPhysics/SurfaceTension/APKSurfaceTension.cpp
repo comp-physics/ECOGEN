@@ -365,16 +365,9 @@ void APKSurfaceTension::reinitializeColorFunction(std::vector<Cell *> *cellsLvl,
 
 //***********************************************************************
 
-void APKSurfaceTension::communicationsAddPhys(int numberPhases, const int &dim)
+void APKSurfaceTension::communicationsAddPhys(int numberPhases, const int &dim, const int &lvl)
 {
-  parallel.communicationsVector( "QPA", dim, m_numQPAGradC);
-}
-
-//***********************************************************************
-
-void APKSurfaceTension::communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl)
-{
-	parallel.communicationsVectorAMR( "QPA", dim, lvl, m_numQPAGradC);
+	parallel.communicationsVector("QPA", dim, lvl, m_numQPAGradC);
 }
 
 //***********************************************************************

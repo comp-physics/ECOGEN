@@ -83,8 +83,7 @@ class APKSurfaceTension : public APKapila
 
     virtual void reinitializeColorFunction(std::vector<Cell *> *cellsLvl, int &lvl);
 
-    virtual void communicationsAddPhys(int numberPhases, const int &dim);
-    virtual void communicationsAddPhysAMR(int numberPhases, const int &dim, const int &lvl);
+    virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
     virtual int getNumTransportAssociated() const;
 
   protected:

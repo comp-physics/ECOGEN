@@ -214,26 +214,20 @@ class Cell
         virtual void pushBackSlope() {};                                 /*!< Does nothing for non-ghost O2 cells */
         virtual int getRankOfNeighborCPU() const { return -1; };
         virtual void setRankOfNeighborCPU(int rank) {};                  /*!< Does nothing for non-ghost cells */
-        void fillBufferPrimitives(double *buffer, int &counter, Prim type = vecPhases) const;
-        void getBufferPrimitives(double *buffer, int &counter, Eos **eos, Prim type = vecPhases);
+        void fillBufferPrimitives(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type = vecPhases) const;
+        void getBufferPrimitives(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type = vecPhases);
+        void fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
+        void getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
+        void fillBufferTransports(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
+        void getBufferTransports(double *buffer, int &counter, const int &lvl);
         virtual void fillBufferSlopes(double *buffer, int &counter, const int &lvl, const int &neighbour) const {}; /*!< Does nothing for first order cells */
         virtual void getBufferSlopes(double *buffer, int &counter, const int &lvl) {};                              /*!< Does nothing for first order cells */
-        void fillBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
-        void getBufferVector(double *buffer, int &counter, const int &dim, std::string nameVector, int num = 0, int index = -1);
-        void fillBufferTransports(double *buffer, int &counter) const;
-        void getBufferTransports(double *buffer, int &counter);
         virtual bool isCellGhost() const { return false; };
         bool hasNeighboringGhostCellOfCPUneighbour(const int &neighbour) const;                      /*!< Return a bool that is true if the cell has a neighboring ghost cell corresponding to CPU "neighbour" */
         int numberOfNeighboringGhostCellsOfCPUneighbour(const int &neighbour) const;                 /*!< Return the number of neighboring ghost cells corresponding to CPU "neighbour" this cell has */
 
         //For parallel AMR computing
         //--------------------------
-        void fillBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type = vecPhases) const;
-        void getBufferPrimitivesAMR(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type = vecPhases);
-        void fillBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
-        void getBufferVectorAMR(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
-        void fillBufferTransportsAMR(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
-        void getBufferTransportsAMR(double *buffer, int &counter, const int &lvl);
         void chooseRefineDeraffineGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, std::vector<Cell *> *cellsLvlGhost); /*!< Choice for refinement, unrefinement of the ghost parent cell + Update of ghost cell vector for lvl+1 */
         void refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);                               /*!< Refinement of parent ghost cell by creation of children ghost cells */
         void unrefineCellAndCellInterfacesGhost();                                                                                      /*!< Unrefinement of parent ghost cell by destruction of children ghost cells */
