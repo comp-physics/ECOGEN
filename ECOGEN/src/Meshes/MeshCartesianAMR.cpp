@@ -897,6 +897,8 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl)
   double *loadPerCPU = new double[Ncpu];
   MPI_Request req_sendNeighborP1;
   MPI_Request req_recvNeighborM1;
+  MPI_Request req_sendNeighborP1_2;
+  MPI_Request req_recvNeighborM1_2;
   MPI_Status status;
   //while (CONDITION)
 
@@ -918,50 +920,127 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl)
   }
 
   //Compute local load position
-  double localLoadPosition(0.);
-  for (int i = 0; i <= rankCpu; ++i) { localLoadPosition += loadPerCPU[i]; }
-  std::cout<<"cpu "<<rankCpu<<" localLoadPosition "<<localLoadPosition<<std::endl; //KS//BD//
+  double localLoadEndPosition(0.);
+  for (int i = 0; i <= rankCpu; ++i) { localLoadEndPosition += loadPerCPU[i]; }
+  std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std::endl; //KS//BD//
 
   //Determine load I should send/receive to/from/ CPU P1, using positions of local load and ideal load
   //if (diff > 0), I wish to receive loads from CPU P1
   //else,          I wish to send loads to CPU P1
-  double loadDiff(0.);
-  loadDiff = idealLoadPosition - localLoadPosition;
+  double loadShiftEnd(0.);
+  loadShiftEnd = idealLoadPosition - localLoadEndPosition;
 
   //Communicate what I wish to send/receive to/from neighbours
-  double loadDiffM1(0.);
-  if (rankCpu != Ncpu - 1) MPI_Isend(&loadDiff, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-  if (rankCpu != 0)        MPI_Irecv(&loadDiffM1, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+  double loadShiftStart(0.);
+  if (rankCpu != Ncpu - 1) MPI_Isend(&loadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+  if (rankCpu != 0)        MPI_Irecv(&loadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
 
   if (rankCpu != Ncpu - 1) MPI_Wait(&req_sendNeighborP1, &status);
   if (rankCpu != 0)        MPI_Wait(&req_recvNeighborM1, &status);
 
-  //Determine what I can send/receive to/from neighbours (limited by current local cells/load)
-  double possibleLoadDiffM1(0.), possibleLoadDiffP1(0.);
-  int newStart(0), newEnd(0);
-  if (loadDiffM1 > 0) {
+  //Determine and communicate what I can send/receive to/from neighbours (limited by current local cells/load)
+  double possibleLoadShiftStart(0.), possibleLoadShiftEnd(0.);
+  int newStart(0);
+  int numberOfCellsToSendStart(0), numberOfCellsToSendEnd(0);
+  int numberOfCellsToReceiveStart(0), numberOfCellsToReceiveEnd(0);
+
+  if (loadShiftStart > 0.) {
     for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
-      if (possibleLoadDiffM1 >= loadDiffM1) {
+      if (possibleLoadShiftStart >= loadShiftStart) {
         newStart = i;
+        numberOfCellsToSendStart = i + 1;
         break;
       }
-      cellsLvl[0][i]->computeLoad(possibleLoadDiffM1);
+      cellsLvl[0][i]->computeLoad(possibleLoadShiftStart);
     }
+    //send possibleLoadShiftStart
+    if (rankCpu != 0)        MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+    if (rankCpu != 0)        MPI_Isend(&numberOfCellsToSendStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
   }
-  if (loadDiff > 0) {
+  else {
+    //recv possibleLoadShiftStart
+    if (rankCpu != 0)        MPI_Irecv(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+    if (rankCpu != 0)        MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+  }
+
+  if (loadShiftEnd < 0.) {
     for (int i = cellsLvl[0].size()-1; i >= newStart; i--) {
-      if (possibleLoadDiffP1 >= (loadDiff)) {
-        newEnd = i;
+      if (possibleLoadShiftEnd >= (loadShiftEnd)) {
+        numberOfCellsToSendEnd = cellsLvl[0].size() - i;
         break;
       }
-      cellsLvl[0][i]->computeLoad(possibleLoadDiffP1);
+      cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd);
     }
+    //send possibleLoadShiftEnd
+    if (rankCpu != Ncpu - 1) MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+    if (rankCpu != Ncpu - 1) MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+  }
+  else {
+    //recv possibleLoadShiftEnd
+    if (rankCpu != Ncpu - 1) MPI_Irecv(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+    if (rankCpu != Ncpu - 1) MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
   }
 
-  //Communicate what I can send/receive to/from neighbours
-
+  if (rankCpu != Ncpu - 1) MPI_Wait(&req_sendNeighborP1, &status);
+  if (rankCpu != 0)        MPI_Wait(&req_recvNeighborM1, &status);
+  if (rankCpu != Ncpu - 1) MPI_Wait(&req_sendNeighborP1_2, &status);
+  if (rankCpu != 0)        MPI_Wait(&req_recvNeighborM1_2, &status);
+  std::cout<<"cpu "<<rankCpu<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd<<" possibleLoadShiftStart "<<possibleLoadShiftStart<<std::endl; //KS//BD//
+  double localLoadStartPosition = localLoadEndPosition - loadPerCPU[rankCpu];
+  localLoadStartPosition += possibleLoadShiftStart;
+  localLoadEndPosition += possibleLoadShiftEnd;
+  double finalLocalLoad =localLoadEndPosition-localLoadStartPosition;
+  std::cout<<"cpu "<<rankCpu<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
+  <<" initialLocalLoad "<<loadPerCPU[rankCpu]
+  <<" finalLocalLoad "<<finalLocalLoad<<std::endl; //KS//BD//
 
   //Send/Receive cells
+
+  //RECEIVING PART
+  // for(unsigned int i = 0; i < keys.size(); ++i)
+  // {    
+  //   if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+  //   else { cells.push_back(new CellO2); }
+  //   m_elements.push_back(new ElementCartesian());
+  //   m_elements[i]->setKey(keys[i]);
+  //   cells[i]->setElement(m_elements[i], i);
+  // }
+
+  // //Create cells and elements
+  // //-------------------------
+  // double volume(0.);
+  // for(unsigned int i = 0; i < keys.size(); ++i)
+  // {
+  //   auto coord = keys[i].coordinate();
+  //   ix = coord.x(); iy = coord.y(); iz = coord.z();
+  //   volume = m_dXi[ix] * m_dYj[iy] * m_dZk[iz];
+  //   cells[i]->getElement()->setVolume(volume);
+
+  //   //CFL lenght
+  //   double lCFL(1.e10);
+  //   if (m_numberCellsX != 1) { lCFL = std::min(lCFL, m_dXi[ix]); }
+  //   if (m_numberCellsY != 1) { lCFL = std::min(lCFL, m_dYj[iy]); }
+  //   if (m_numberCellsZ != 1) { lCFL = std::min(lCFL, m_dZk[iz]); }
+  //   if (m_geometrie > 1) lCFL *= 0.6;
+
+  //   cells[i]->getElement()->setLCFL(lCFL);
+  //   cells[i]->getElement()->setPos(m_posXi[ix], m_posYj[iy], m_posZk[iz]);
+  //   cells[i]->getElement()->setSize(m_dXi[ix], m_dYj[iy], m_dZk[iz]);
+  // }
+
+  // //Create cell interfaces, faces and ghost cells
+  // //---------------------------------------------
+  // m_numberCellsCalcul = cells.size(); //KS//BD// Update this after balancing
+  // createCellInterfacesFacesAndGhostCells(cells, cellInterfaces, ordreCalcul, &decomp);
+  // m_numberCellsTotal = cells.size(); //KS//BD// Update this after balancing
+  // m_numberFacesTotal = cellInterfaces.size(); //KS//BD// Update this after balancing
+
+  // std::cout
+  //   << "numberCellsCalcul "<<m_numberCellsCalcul<<" "
+  //   << "m_numberCellsTotal "<<m_numberCellsTotal<<" "
+  //   << "m_numberFacesTotal "<<m_numberFacesTotal<<" "
+  //   <<std::endl; //KS//BD// Erase 3D faces for 1D and 2D simulations
+
 
 
 
