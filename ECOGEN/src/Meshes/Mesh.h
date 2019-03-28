@@ -131,6 +131,8 @@ public:
 	void communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const int &lvl);
   void communicationsTransports(const int &lvl);
 	virtual void finalizeParallele(const int &lvlMax);
+  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl) {};
+
   
 protected:
   mutable int m_numFichier;

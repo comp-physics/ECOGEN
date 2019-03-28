@@ -236,6 +236,7 @@ class Cell
         void fillBufferSplit(bool *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferSplit(bool *buffer, int &counter, const int &lvl);
         void fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, int &numberSlopesToSendToNeighbor, const int &lvl, const int &neighbour, int numberNeighboursOfCPUneighbour);
+        void computeLoad(double &load) const;
 
     protected:
       int m_numberPhases;

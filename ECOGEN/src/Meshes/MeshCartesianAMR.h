@@ -74,6 +74,7 @@ public:
 	//Pour parallele
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
+  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl);
 
 private:
   int m_lvlMax;                              //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

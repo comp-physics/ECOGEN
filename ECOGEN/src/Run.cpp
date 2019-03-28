@@ -295,7 +295,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   //2) (Un)Reffinement procedure
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
-    m_mesh->procedureRaffinement(m_cellsLvl, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_cells, m_eos); 
+    m_mesh->procedureRaffinement(m_cellsLvl, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_cells, m_eos);
+    m_mesh->parallelLoadBalancingAMR(m_cellsLvl);
     m_stat.endAMRTime();
   }
 

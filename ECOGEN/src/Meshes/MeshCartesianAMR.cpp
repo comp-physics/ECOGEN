@@ -529,6 +529,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(std::vector<Cell *> *c
       for (int lvl = 0; lvl < m_lvlMax; lvl++) {
         if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
         this->procedureRaffinement(cellsLvl, cellInterfacesLvl, lvl, addPhys, model, nbCellsTotalAMR, cells, eos);
+        this->parallelLoadBalancingAMR(cellsLvl);
         for (unsigned int i = 0; i < cellsLvl[lvl + 1].size(); i++) {
           cellsLvl[lvl + 1][i]->fill(domains, m_lvlMax);
         }
@@ -884,6 +885,89 @@ void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases
 void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 {
 	parallel.finalizeAMR(lvlMax);
+}
+
+//***********************************************************************
+
+void MeshCartesianAMR::parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl)
+{
+  //LOOP over the following until global balance
+  int iter(0);
+  double idealLoadPosition(0.);
+  double *loadPerCPU = new double[Ncpu];
+  MPI_Request req_sendNeighborP1;
+  MPI_Request req_recvNeighborM1;
+  MPI_Status status;
+  //while (CONDITION)
+
+  //Compute local load
+  double localLoad(0.);
+  for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
+    cellsLvl[0][i]->computeLoad(localLoad);
+  }
+
+  //Communicate overall loads
+  MPI_Allgather(&localLoad, 1, MPI_DOUBLE, loadPerCPU, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+
+  //Compute ideal load position (only for the first iteration)
+  if (iter == 0) {
+    for (int i = 0; i < Ncpu; ++i) { idealLoadPosition += loadPerCPU[i]; }
+    std::cout<<"cpu "<<rankCpu<<" totalLoad "<<idealLoadPosition<<std::endl; //KS//BD//
+    idealLoadPosition *= static_cast<double>(rankCpu + 1) / Ncpu;
+    std::cout<<"cpu "<<rankCpu<<" idealLoadPosition "<<idealLoadPosition<<std::endl; //KS//BD//
+  }
+
+  //Compute local load position
+  double localLoadPosition(0.);
+  for (int i = 0; i <= rankCpu; ++i) { localLoadPosition += loadPerCPU[i]; }
+  std::cout<<"cpu "<<rankCpu<<" localLoadPosition "<<localLoadPosition<<std::endl; //KS//BD//
+
+  //Determine load I should send/receive to/from/ CPU P1, using positions of local load and ideal load
+  //if (diff > 0), I wish to receive loads from CPU P1
+  //else,          I wish to send loads to CPU P1
+  double loadDiff(0.);
+  loadDiff = idealLoadPosition - localLoadPosition;
+
+  //Communicate what I wish to send/receive to/from neighbours
+  double loadDiffM1(0.);
+  if (rankCpu != Ncpu - 1) MPI_Isend(&loadDiff, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+  if (rankCpu != 0)        MPI_Irecv(&loadDiffM1, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+
+  if (rankCpu != Ncpu - 1) MPI_Wait(&req_sendNeighborP1, &status);
+  if (rankCpu != 0)        MPI_Wait(&req_recvNeighborM1, &status);
+
+  //Determine what I can send/receive to/from neighbours (limited by current local cells/load)
+  double possibleLoadDiffM1(0.), possibleLoadDiffP1(0.);
+  int newStart(0), newEnd(0);
+  if (loadDiffM1 > 0) {
+    for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
+      if (possibleLoadDiffM1 >= loadDiffM1) {
+        newStart = i;
+        break;
+      }
+      cellsLvl[0][i]->computeLoad(possibleLoadDiffM1);
+    }
+  }
+  if (loadDiff > 0) {
+    for (int i = cellsLvl[0].size()-1; i >= newStart; i--) {
+      if (possibleLoadDiffP1 >= (loadDiff)) {
+        newEnd = i;
+        break;
+      }
+      cellsLvl[0][i]->computeLoad(possibleLoadDiffP1);
+    }
+  }
+
+  //Communicate what I can send/receive to/from neighbours
+
+
+  //Send/Receive cells
+
+
+
+  //END OF LOOP
+
+  delete[] loadPerCPU;
 }
 
 //***********************************************************************
