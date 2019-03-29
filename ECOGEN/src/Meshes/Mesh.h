@@ -118,9 +118,9 @@ public:
   virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
     std::vector<CellInterface *> **cellInterfacesLvl);
   virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl,
-    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains, TypeMeshContainer<Cell *> &cells, Eos **eos, const int &resumeSimulation) { nbCellsTotalAMR = m_numberCellsCalcul; };
+    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains, Eos **eos, const int &resumeSimulation, std::string ordreCalcul) { nbCellsTotalAMR = m_numberCellsCalcul; };
   virtual void procedureRaffinement(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const int &lvl,
-    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, TypeMeshContainer<Cell *> &cells, Eos **eos) {};
+    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, Eos **eos) {};
 
 	//Specific for parallel
   //---------------------
@@ -131,7 +131,7 @@ public:
 	void communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const int &lvl);
   void communicationsTransports(const int &lvl);
 	virtual void finalizeParallele(const int &lvlMax);
-  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl) {};
+  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul) {};
 
   
 protected:

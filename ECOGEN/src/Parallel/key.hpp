@@ -503,6 +503,10 @@ public: // print
         std::cout<<std::endl;
     }
 
+    value_type getIndex() const noexcept
+    {
+        return _index;
+    }
 
 
 public: // members

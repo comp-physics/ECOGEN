@@ -48,14 +48,15 @@ public:
 
   virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
   void initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
-  void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul, decomposition::Decomposition* _decomp);
+  void assignElementProperties(TypeMeshContainer<Cell *> &cells, std::vector<decomposition::Key<3>> &keys);
+  void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul);
 	virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
 		std::vector<CellInterface *> **cellInterfacesLvl);
   virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl,
 		const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains,
-		TypeMeshContainer<Cell *> &cells, Eos **eos, const int &resumeSimulation);
+		Eos **eos, const int &resumeSimulation, std::string ordreCalcul);
   virtual void procedureRaffinement(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const int &lvl,
-    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, TypeMeshContainer<Cell *> &cells, Eos **eos);
+    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, Eos **eos);
   virtual std::string whoAmI() const;
 
   //Printing / Reading
@@ -74,7 +75,7 @@ public:
 	//Pour parallele
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
-  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl);
+  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
 
 private:
   int m_lvlMax;                              //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)
@@ -83,6 +84,7 @@ private:
 	double m_xiSplit, m_xiJoin;                //!<Valeur de xi pour split ou join les mailles
   std::vector<Cell *> **m_cellsLvl;          //!<Pointer vers le tableau de vecteurs contenant les cells de compute, un vecteur par niveau.
 	std::vector<Cell *> *m_cellsLvlGhost;      //!<Tableau de vecteurs contenant les cells fantomes, un vecteur par niveau.
+  decomposition::Decomposition m_decomp;     //!<Parallel domain decomposition based on keys
 
 };
 
