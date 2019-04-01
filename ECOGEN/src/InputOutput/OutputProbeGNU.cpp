@@ -147,7 +147,7 @@ void OutputProbeGNU::prepareSortieSpecifique()
   m_nextAcq = 0.;
 
   //Locate probe in mesh
-  locateProbeInMesh(m_run->m_cells, m_run->m_mesh->getNumberCells());
+  locateProbeInMesh(m_run->m_cellsLvl[0], m_run->m_mesh->getNumberCells()); //KS//FP// If probe doesn't work, look argument m_run->m_cellsLvl[0] here
 
   //Preparing output files
   try {

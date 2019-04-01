@@ -62,7 +62,7 @@ public:
   virtual ~Mesh();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond) = 0;
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
   virtual void effetsMesh(CellInterface **face, const int &numberPhases) const = 0;
   //virtual void ecritSolution(Cell **cells, std::vector<Cell *> *cellsLvl, const int &numberPhases, const int &numberTransports, const int &lvlMax, std::string const &file,
   //  bool ecritVTK, std::string variableConstanteCut1, std::string variableConstanteCut2, const double &valueCut1, const double &valueCut2,
@@ -115,8 +115,6 @@ public:
   
   //Specific to AMR method
   //----------------------
-  virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
-    std::vector<CellInterface *> **cellInterfacesLvl);
   virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl,
     const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains, Eos **eos, const int &resumeSimulation, std::string ordreCalcul) { nbCellsTotalAMR = m_numberCellsCalcul; };
   virtual void procedureRaffinement(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const int &lvl,
@@ -124,7 +122,7 @@ public:
 
 	//Specific for parallel
   //---------------------
-	virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
+	virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul);
 	void communicationsPrimitives(Eos **eos, const int &lvl, Prim type = vecPhases);
 	void communicationsSlopes(const int &lvl);
 	void communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index);

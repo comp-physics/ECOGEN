@@ -108,17 +108,19 @@ void MeshUnStruct::attributLimites(std::vector<BoundCond*> &boundCond)
 
 //***********************************************************************
 
-int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele, std::string ordreCalcul)
 {
   try {
-    if (Ncpu == 1) { this->initializeGeometrieMonoCPU(cells, cellInterfaces, ordreCalcul); }
+    (*cellsLvl) = new TypeMeshContainer<Cell *>[1];
+    (*cellInterfacesLvl) = new TypeMeshContainer<CellInterface *>[1];
+    if (Ncpu == 1) { this->initializeGeometrieMonoCPU((*cellsLvl), (*cellInterfacesLvl), ordreCalcul); }
     else {
       //Pretraitement du file de mesh par le CPU 0
       if (pretraitementParallele) {
         if (rankCpu == 0) { this->pretraitementFichierMeshGmsh(); }
         MPI_Barrier(MPI_COMM_WORLD);
       }
-      this->initializeGeometrieParallele(cells, cellInterfaces, ordreCalcul);
+      this->initializeGeometrieParallele((*cellsLvl), (*cellInterfacesLvl), ordreCalcul);
     }
     return m_geometrie;
   }
@@ -127,7 +129,7 @@ int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMesh
 
 //***********************************************************************
 
-void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
+void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul)
 {
   try {
     //1) Lecture noeuds et elements
@@ -177,9 +179,9 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
     m_numberFacesInternes = 0;
     for (int i = 0; i < m_numberCellsCalcul; i++)
     {
-      if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
-      else { cells.push_back(new CellO2); }
-      cells[i]->setElement(m_elements[i + m_numberFacesLimites], i);
+      if (ordreCalcul == "FIRSTORDER") { cellsLvl[0].push_back(new Cell); }
+      else { cellsLvl[0].push_back(new CellO2); }
+      cellsLvl[0][i]->setElement(m_elements[i + m_numberFacesLimites], i);
       m_numberFacesInternes += m_elements[i + m_numberFacesLimites]->getNumberFaces();
     }
 
@@ -222,7 +224,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
     double volTot(0.);
     for (int i = 0; i < m_numberCellsCalcul; i++)
     {
-      volTot += cells[i]->getElement()->getVolume();
+      volTot += cellsLvl[0][i]->getElement()->getVolume();
     }
     std::cout << "Total volume : " << volTot << std::endl;
 
@@ -290,22 +292,22 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
       {
         int appPhys(m_faces[i]->getElementDroite()->getAppartenancePhysique() - 1); //appartenance - 1 pour tableau commencant a zero
         if (appPhys >= static_cast<int>(m_lim.size()) || appPhys < 0) { Errors::errorMessage("Number de conditions aux limites non adapte"); }
-        m_lim[appPhys]->creeLimite(cellInterfaces);
-        cellInterfaces[i]->setFace(m_faces[i]);
+        m_lim[appPhys]->creeLimite(cellInterfacesLvl[0]);
+        cellInterfacesLvl[0][i]->setFace(m_faces[i]);
         iMailleG = m_faces[i]->getElementGauche()->getIndex() - m_numberFacesLimites;
         iMailleD = iMailleG;
       }
       else
       {
-        if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        cellInterfaces[i]->setFace(m_faces[i]);
+        if (ordreCalcul == "FIRSTORDER") { cellInterfacesLvl[0].push_back(new CellInterface); }
+        else { cellInterfacesLvl[0].push_back(new CellInterfaceO2); }
+        cellInterfacesLvl[0][i]->setFace(m_faces[i]);
         iMailleG = m_faces[i]->getElementGauche()->getIndex() - m_numberFacesLimites;
         iMailleD = m_faces[i]->getElementDroite()->getIndex() - m_numberFacesLimites;
       }
-      cellInterfaces[i]->initialize(cells[iMailleG], cells[iMailleD]);
-      cells[iMailleG]->addCellInterface(cellInterfaces[i]);
-      cells[iMailleD]->addCellInterface(cellInterfaces[i]);
+      cellInterfacesLvl[0][i]->initialize(cellsLvl[0][iMailleG], cellsLvl[0][iMailleD]);
+      cellsLvl[0][iMailleG]->addCellInterface(cellInterfacesLvl[0][i]);
+      cellsLvl[0][iMailleD]->addCellInterface(cellInterfacesLvl[0][i]);
 
       //-------------Ici il faut trouver les mailles voisines pour le compute ordre 2 multislopes ------------
       if (ordreCalcul != "FIRSTORDER") {
@@ -316,8 +318,8 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //int index(eG->getIndex() - m_numberFacesLimites);
 
 
-        //MeshUnStruct::rechercheElementsArrieres(eG,m_faces[i], cellInterfaces[i], voisins[index], *cells);
-        //MeshUnStruct::rechercheElementsAvants(eG, m_faces[i], cellInterfaces[i], voisins[index], *cells);
+        //MeshUnStruct::rechercheElementsArrieres(eG,m_faces[i], cellInterfacesLvl[0][i], voisins[index], *cellsLvl[0]);
+        //MeshUnStruct::rechercheElementsAvants(eG, m_faces[i], cellInterfacesLvl[0][i], voisins[index], *cellsLvl[0]);
         //
         //
         ////A enlever a terme...
@@ -340,23 +342,23 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  if (cosTemp >= cos) {
         //    cos = cosTemp;
         //    if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //      cellInterfaces[i]->setB(BG1M, 0);
+        //      cellInterfacesLvl[0][i]->setB(BG1M, 0);
         //    }
         //    else { //Sinon on met a jour avec la maille la plus loin
-        //      Cell *c(cells[eT->getNumCellAssociee()]);
-        //      cellInterfaces[i]->setB(BG1M, c);
+        //      Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //      cellInterfacesLvl[0][i]->setB(BG1M, c);
         //    }
         //  }
         //}
         ////2) Recherche du second element arriere gauche BG2M
         ////---------------------------------------------------
         //cos = 0.;
-        //if (cellInterfaces[i]->getB(BG1M) != 0) {  //Cas non cellInterface
-        //  Element *e1(cellInterfaces[i]->getB(BG1M)->getElement());
+        //if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) {  //Cas non cellInterface
+        //  Element *e1(cellInterfacesLvl[0][i]->getB(BG1M)->getElement());
         //  Coord v1 = e1->vecteur(eG);
         //  Coord sin1(Coord::sin(v1, vG));
         //  if (std::fabs(sin1.norm()) <= 1e-8) {
-        //    cellInterfaces[i]->setB(BG2M, cellInterfaces[i]->getB(BG1M)); // Si le cos est nul, meme cell pour B1 et B2
+        //    cellInterfacesLvl[0][i]->setB(BG2M, cellInterfacesLvl[0][i]->getB(BG1M)); // Si le cos est nul, meme cell pour B1 et B2
         //  }
         //  else {
         //    for (unsigned int v = 0; v < voisins[index].size(); v++) {
@@ -370,11 +372,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //        if (cosTemp >= cos) {
         //          cos = cosTemp;
         //          if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //            cellInterfaces[i]->setB(BG2M, 0);
+        //            cellInterfacesLvl[0][i]->setB(BG2M, 0);
         //          }
         //          else {  //Sinon on met a jour avec la 2 eme maille la plus loin
-        //            Cell *c(cells[eT->getNumCellAssociee()]);
-        //            cellInterfaces[i]->setB(BG2M, c);
+        //            Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //            cellInterfacesLvl[0][i]->setB(BG2M, c);
         //          }
         //        }
         //      } //fin sin*sin <0
@@ -383,17 +385,17 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //} //Fin if cellInterface
 
         ////Determination des ponderations arrieres
-        //Coord MB1; if (cellInterfaces[i]->getB(BG1M) != 0) { MB1.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfaces[i]->getB(BG1M)->getPosition()); }
-        //Coord MB2; if (cellInterfaces[i]->getB(BG2M) != 0) { MB2.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfaces[i]->getB(BG2M)->getPosition()); }
+        //Coord MB1; if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) { MB1.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfacesLvl[0][i]->getB(BG1M)->getPosition()); }
+        //Coord MB2; if (cellInterfacesLvl[0][i]->getB(BG2M) != 0) { MB2.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfacesLvl[0][i]->getB(BG2M)->getPosition()); }
         //Coord MB; MB.setFromSubtractedVectors(m_faces[i]->getPos(), eG->getPosition());
         //double a, b, beta1(1.), beta2(0.);
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
         //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
-        //cellInterfaces[i]->setBeta(betaG1M, beta1);
-        //cellInterfaces[i]->setBeta(betaG2M, beta2);
+        //cellInterfacesLvl[0][i]->setBeta(betaG1M, beta1);
+        //cellInterfacesLvl[0][i]->setBeta(betaG2M, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
-        //if (cellInterfaces[i]->getB(BG1M) != 0) {
+        //if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) {
         //  cos = Coord::cos(MB, MB1);
         //  double d, e, c;
         //  d = cos*MB1.norm();
@@ -401,11 +403,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  e = B1B2.norm()*beta1;
         //  c = sqrt(e*e - a*a);
         //  d += c;
-        //  cellInterfaces[i]->setDistanceH(distanceHGM, d);
+        //  cellInterfacesLvl[0][i]->setDistanceH(distanceHGM, d);
         //}
         ////cout << eG->getIndex() << " : " << endl;
-        ////if (cellInterfaces[i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfaces[i]->getB(BG1M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGM) << endl;
-        ////if (cellInterfaces[i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfaces[i]->getB(BG2M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGM) << endl;
+        ////if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfacesLvl[0][i]->getB(BG1M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGM) << endl;
+        ////if (cellInterfacesLvl[0][i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfacesLvl[0][i]->getB(BG2M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGM) << endl;
 
         ////3) Recherche du premier element avant gauche BG1P
         ////-------------------------------------------------
@@ -417,23 +419,23 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  if (cosTemp <= cos) {
         //    cos = cosTemp;
         //    if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1P a NULL
-        //      cellInterfaces[i]->setB(BG1P, 0);
+        //      cellInterfacesLvl[0][i]->setB(BG1P, 0);
         //    }
         //    else { //Sinon on met a jour avec la maille la plus loin
-        //      Cell *c(cells[eT->getNumCellAssociee()]);
-        //      cellInterfaces[i]->setB(BG1P, c);
+        //      Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //      cellInterfacesLvl[0][i]->setB(BG1P, c);
         //    }
         //  }
         //}
         ////4) Recherche du second element avant gauche BG2P
         ////------------------------------------------------
         //cos = 0.;
-        //if (cellInterfaces[i]->getB(BG1P) != 0) {  //Cas non cellInterface
-        //  Element *e1(cellInterfaces[i]->getB(BG1P)->getElement());
+        //if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) {  //Cas non cellInterface
+        //  Element *e1(cellInterfacesLvl[0][i]->getB(BG1P)->getElement());
         //  Coord v1 = e1->vecteur(eG);
         //  Coord sin1(Coord::sin(v1, vG));
         //  if (std::fabs(sin1.norm()) <= 1e-8) {
-        //    cellInterfaces[i]->setB(BG2P, cellInterfaces[i]->getB(BG1P)); // Si le cos est nul, meme cell pour B1 et B2
+        //    cellInterfacesLvl[0][i]->setB(BG2P, cellInterfacesLvl[0][i]->getB(BG1P)); // Si le cos est nul, meme cell pour B1 et B2
         //  }
         //  else {
         //    for (unsigned int v = 0; v < voisins[index].size(); v++) {
@@ -447,11 +449,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //        if (cosTemp <= cos) {
         //          cos = cosTemp;
         //          if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG2P a NULL
-        //            cellInterfaces[i]->setB(BG2P, 0);
+        //            cellInterfacesLvl[0][i]->setB(BG2P, 0);
         //          }
         //          else {  //Sinon on met a jour avec la 2 eme maille la plus loin
-        //            Cell *c(cells[eT->getNumCellAssociee()]);
-        //            cellInterfaces[i]->setB(BG2P, c);
+        //            Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //            cellInterfacesLvl[0][i]->setB(BG2P, c);
         //          }
         //        }
         //      } //fin sin*sin <0
@@ -460,17 +462,17 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //} //Fin if cellInterface
 
         ////Determination des ponderations avant
-        //MB1 = 0.; if (cellInterfaces[i]->getB(BG1P) != 0) { MB1.setFromSubtractedVectors(cellInterfaces[i]->getB(BG1P)->getPosition(), m_faces[i]->getPos()); }
-        //MB2 = 0.; if (cellInterfaces[i]->getB(BG2P) != 0) { MB2.setFromSubtractedVectors(cellInterfaces[i]->getB(BG2P)->getPosition(), m_faces[i]->getPos()); }
+        //MB1 = 0.; if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) { MB1.setFromSubtractedVectors(cellInterfacesLvl[0][i]->getB(BG1P)->getPosition(), m_faces[i]->getPos()); }
+        //MB2 = 0.; if (cellInterfacesLvl[0][i]->getB(BG2P) != 0) { MB2.setFromSubtractedVectors(cellInterfacesLvl[0][i]->getB(BG2P)->getPosition(), m_faces[i]->getPos()); }
         //MB.setFromSubtractedVectors(eG->getPosition(), m_faces[i]->getPos());
         //beta1 = 1., beta2 = 0.;
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
         //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
-        //cellInterfaces[i]->setBeta(betaG1P, beta1);
-        //cellInterfaces[i]->setBeta(betaG2P, beta2);
+        //cellInterfacesLvl[0][i]->setBeta(betaG1P, beta1);
+        //cellInterfacesLvl[0][i]->setBeta(betaG2P, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
-        //if (cellInterfaces[i]->getB(BG1P) != 0) {
+        //if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) {
         //  cos = Coord::cos(MB, -1.*MB1);
         //  double d, e, c;
         //  d = cos*MB1.norm();
@@ -478,11 +480,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  e = B1B2.norm()*beta1;
         //  c = sqrt(e*e - a*a);
         //  d += c;
-        //  cellInterfaces[i]->setDistanceH(distanceHGP, d);
+        //  cellInterfacesLvl[0][i]->setDistanceH(distanceHGP, d);
         //}
         ////cout << eG->getIndex() << " : " << endl;
-        ////if (cellInterfaces[i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfaces[i]->getB(BG1P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGP) << endl;
-        ////if (cellInterfaces[i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfaces[i]->getB(BG2P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGP) << endl;
+        ////if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfacesLvl[0][i]->getB(BG1P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGP) << endl;
+        ////if (cellInterfacesLvl[0][i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfacesLvl[0][i]->getB(BG2P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGP) << endl;
 
 
         ////DROITE) Recherche des mailles a droite
@@ -501,23 +503,23 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //    if (cosTemp >= cos) {
         //      cos = cosTemp;
         //      if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //        cellInterfaces[i]->setB(BD1M, 0);
+        //        cellInterfacesLvl[0][i]->setB(BD1M, 0);
         //      }
         //      else { //Sinon on met a jour avec la maille la plus loin
-        //        Cell *c(cells[eT->getNumCellAssociee()]);
-        //        cellInterfaces[i]->setB(BD1M, c);
+        //        Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //        cellInterfacesLvl[0][i]->setB(BD1M, c);
         //      }
         //    }
         //  }
         //  //2) Recherche du second element arriere droite BD2M
         //  //---------------------------------------------------
         //  cos = 0.;
-        //  if (cellInterfaces[i]->getB(BD1M) != 0) {  //Cas non cellInterface
-        //    Element *e1(cellInterfaces[i]->getB(BD1M)->getElement());
+        //  if (cellInterfacesLvl[0][i]->getB(BD1M) != 0) {  //Cas non cellInterface
+        //    Element *e1(cellInterfacesLvl[0][i]->getB(BD1M)->getElement());
         //    Coord v1 = e1->vecteur(eD);
         //    Coord sin1(Coord::sin(v1, vD));
         //    if (std::fabs(sin1.norm()) <= 1e-8) {
-        //      cellInterfaces[i]->setB(BD2M, cellInterfaces[i]->getB(BD1M)); // Si le cos est nul, meme cell pour B1 et B2
+        //      cellInterfacesLvl[0][i]->setB(BD2M, cellInterfacesLvl[0][i]->getB(BD1M)); // Si le cos est nul, meme cell pour B1 et B2
         //    }
         //    else {
         //      for (unsigned int v = 0; v < voisins[index].size(); v++) {
@@ -531,11 +533,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //          if (cosTemp >= cos) {
         //            cos = cosTemp;
         //            if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //              cellInterfaces[i]->setB(BD2M, 0);
+        //              cellInterfacesLvl[0][i]->setB(BD2M, 0);
         //            }
         //            else {  //Sinon on met a jour avec la 2 eme maille la plus loin
-        //              Cell *c(cells[eT->getNumCellAssociee()]);
-        //              cellInterfaces[i]->setB(BD2M, c);
+        //              Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //              cellInterfacesLvl[0][i]->setB(BD2M, c);
         //            }
         //          }
         //        } //fin sin*sin <0
@@ -544,17 +546,17 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  } //Fin if cellInterface
 
         //  //Determination des ponderations arrieres
-        //  MB1 = 0.; if (cellInterfaces[i]->getB(BD1M) != 0) { MB1.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfaces[i]->getB(BD1M)->getPosition()); }
-        //  MB2 = 0.; if (cellInterfaces[i]->getB(BD2M) != 0) { MB2.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfaces[i]->getB(BD2M)->getPosition()); }
+        //  MB1 = 0.; if (cellInterfacesLvl[0][i]->getB(BD1M) != 0) { MB1.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfacesLvl[0][i]->getB(BD1M)->getPosition()); }
+        //  MB2 = 0.; if (cellInterfacesLvl[0][i]->getB(BD2M) != 0) { MB2.setFromSubtractedVectors(m_faces[i]->getPos(), cellInterfacesLvl[0][i]->getB(BD2M)->getPosition()); }
         //  MB.setFromSubtractedVectors(m_faces[i]->getPos(), eD->getPosition());
         //  beta1 = 1.; beta2 = 0.;
         //  a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //  b = (MB2.vectoriel(MB)).norm() / MB.norm();
         //  if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
-        //  cellInterfaces[i]->setBeta(betaD1M, beta1);
-        //  cellInterfaces[i]->setBeta(betaD2M, beta2);
+        //  cellInterfacesLvl[0][i]->setBeta(betaD1M, beta1);
+        //  cellInterfacesLvl[0][i]->setBeta(betaD2M, beta2);
         //  //Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
-        //  if (cellInterfaces[i]->getB(BD1M) != 0) {
+        //  if (cellInterfacesLvl[0][i]->getB(BD1M) != 0) {
         //    cos = Coord::cos(MB, MB1);
         //    double d, e, c;
         //    d = cos*MB1.norm();
@@ -562,11 +564,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //    e = B1B2.norm()*beta1;
         //    c = sqrt(e*e - a*a);
         //    d += c;
-        //    cellInterfaces[i]->setDistanceH(distanceHDM, d);
+        //    cellInterfacesLvl[0][i]->setDistanceH(distanceHDM, d);
         //  }
         //  //cout << eD->getIndex() << " : " << endl;
-        //  //if (cellInterfaces[i]->getB(BD1M) != 0) cout << "BD1M = " << cellInterfaces[i]->getB(BD1M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHDM) << endl;
-        //  //if (cellInterfaces[i]->getB(BD2M) != 0) cout << "BD2M = " << cellInterfaces[i]->getB(BD2M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHDM) << endl;
+        //  //if (cellInterfacesLvl[0][i]->getB(BD1M) != 0) cout << "BD1M = " << cellInterfacesLvl[0][i]->getB(BD1M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHDM) << endl;
+        //  //if (cellInterfacesLvl[0][i]->getB(BD2M) != 0) cout << "BD2M = " << cellInterfacesLvl[0][i]->getB(BD2M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHDM) << endl;
 
         //  //3) Recherche du premier element avant droite BD1P
         //  //-------------------------------------------------
@@ -578,23 +580,23 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //    if (cosTemp <= cos) {
         //      cos = cosTemp;
         //      if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //        cellInterfaces[i]->setB(BD1P, 0);
+        //        cellInterfacesLvl[0][i]->setB(BD1P, 0);
         //      }
         //      else { //Sinon on met a jour avec la maille la plus loin
-        //        Cell *c(cells[eT->getNumCellAssociee()]);
-        //        cellInterfaces[i]->setB(BD1P, c);
+        //        Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //        cellInterfacesLvl[0][i]->setB(BD1P, c);
         //      }
         //    }
         //  }
         //  //4) Recherche du second element avant droite BD2P
         //  //------------------------------------------------
         //  cos = 0.;
-        //  if (cellInterfaces[i]->getB(BD1P) != 0) {  //Cas non cellInterface
-        //    Element *e1(cellInterfaces[i]->getB(BD1P)->getElement());
+        //  if (cellInterfacesLvl[0][i]->getB(BD1P) != 0) {  //Cas non cellInterface
+        //    Element *e1(cellInterfacesLvl[0][i]->getB(BD1P)->getElement());
         //    Coord v1 = e1->vecteur(eD);
         //    Coord sin1(Coord::sin(v1, vD));
         //    if (std::fabs(sin1.norm()) <= 1e-8) {
-        //      cellInterfaces[i]->setB(BD2P, cellInterfaces[i]->getB(BD1P)); // Si le cos est nul, meme cell pour B1 et B2
+        //      cellInterfacesLvl[0][i]->setB(BD2P, cellInterfacesLvl[0][i]->getB(BD1P)); // Si le cos est nul, meme cell pour B1 et B2
         //    }
         //    else {
         //      for (unsigned int v = 0; v < voisins[index].size(); v++) {
@@ -608,11 +610,11 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //          if (cosTemp <= cos) {
         //            cos = cosTemp;
         //            if (eT->getIndex() < m_numberFacesLimites) { //Si c est une limite on remet BG1M a NULL
-        //              cellInterfaces[i]->setB(BD2P, 0);
+        //              cellInterfacesLvl[0][i]->setB(BD2P, 0);
         //            }
         //            else {  //Sinon on met a jour avec la 2 eme maille la plus loin
-        //              Cell *c(cells[eT->getNumCellAssociee()]);
-        //              cellInterfaces[i]->setB(BD2P, c);
+        //              Cell *c(cellsLvl[0][eT->getNumCellAssociee()]);
+        //              cellInterfacesLvl[0][i]->setB(BD2P, c);
         //            }
         //          }
         //        } //fin sin*sin <0
@@ -622,17 +624,17 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //} //Fin si limite
 
         ////Determination des ponderations avant
-        //MB1 = 0.; if (cellInterfaces[i]->getB(BD1P) != 0) { MB1.setFromSubtractedVectors(cellInterfaces[i]->getB(BD1P)->getPosition(), m_faces[i]->getPos()); }
-        //MB2 = 0.; if (cellInterfaces[i]->getB(BD2P) != 0) { MB2.setFromSubtractedVectors(cellInterfaces[i]->getB(BD2P)->getPosition(), m_faces[i]->getPos()); }
+        //MB1 = 0.; if (cellInterfacesLvl[0][i]->getB(BD1P) != 0) { MB1.setFromSubtractedVectors(cellInterfacesLvl[0][i]->getB(BD1P)->getPosition(), m_faces[i]->getPos()); }
+        //MB2 = 0.; if (cellInterfacesLvl[0][i]->getB(BD2P) != 0) { MB2.setFromSubtractedVectors(cellInterfacesLvl[0][i]->getB(BD2P)->getPosition(), m_faces[i]->getPos()); }
         //MB.setFromSubtractedVectors(eD->getPosition(), m_faces[i]->getPos());
         //beta1 = 1., beta2 = 0.;
         //a = (MB1.vectoriel(MB)).norm() / MB.norm();
         //b = (MB2.vectoriel(MB)).norm() / MB.norm();
         //if (std::fabs(a + b) > 1e-8) { beta1 = b / (a + b); beta2 = 1. - beta1; }
-        //cellInterfaces[i]->setBeta(betaD1P, beta1);
-        //cellInterfaces[i]->setBeta(betaD2P, beta2);
+        //cellInterfacesLvl[0][i]->setBeta(betaD1P, beta1);
+        //cellInterfacesLvl[0][i]->setBeta(betaD2P, beta2);
         ////Calcul de la distance du vertex M (cellInterface de maille) au vertex H (barycenter)
-        //if (cellInterfaces[i]->getB(BD1P) != 0) {
+        //if (cellInterfacesLvl[0][i]->getB(BD1P) != 0) {
         //  cos = Coord::cos(MB, -1.*MB1);
         //  double d, e, c;
         //  d = cos*MB1.norm();
@@ -640,24 +642,24 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
         //  e = B1B2.norm()*beta1;
         //  c = sqrt(e*e - a*a);
         //  d += c;
-        //  cellInterfaces[i]->setDistanceH(distanceHDP, d);
+        //  cellInterfacesLvl[0][i]->setDistanceH(distanceHDP, d);
         //}
         //cout << eD->getIndex() << " : " << endl;
-        //if (cellInterfaces[i]->getB(BD1P) != 0) cout << "BD1P = " << cellInterfaces[i]->getB(BD1P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHDP) << endl;
-        //if (cellInterfaces[i]->getB(BD2P) != 0) cout << "BD2P = " << cellInterfaces[i]->getB(BD2P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHDP) << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD1P) != 0) cout << "BD1P = " << cellInterfacesLvl[0][i]->getB(BD1P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHDP) << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD2P) != 0) cout << "BD2P = " << cellInterfacesLvl[0][i]->getB(BD2P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHDP) << endl;
 
 
 
         //cout << "******" << endl;
         //cout << eG->getIndex() << " " << eD->getIndex() << " : " << endl;
-        //if (cellInterfaces[i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfaces[i]->getB(BG1M)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfaces[i]->getB(BG2M)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfaces[i]->getB(BG1P)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfaces[i]->getB(BG2P)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BD1M) != 0) cout << "BD1M = " << cellInterfaces[i]->getB(BD1M)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BD2M) != 0) cout << "BD2M = " << cellInterfaces[i]->getB(BD2M)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BD1P) != 0) cout << "BD1P = " << cellInterfaces[i]->getB(BD1P)->getElement()->getIndex() << endl;
-        //if (cellInterfaces[i]->getB(BD2P) != 0) cout << "BD2P = " << cellInterfaces[i]->getB(BD2P)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfacesLvl[0][i]->getB(BG1M)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfacesLvl[0][i]->getB(BG2M)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfacesLvl[0][i]->getB(BG1P)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfacesLvl[0][i]->getB(BG2P)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD1M) != 0) cout << "BD1M = " << cellInterfacesLvl[0][i]->getB(BD1M)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD2M) != 0) cout << "BD2M = " << cellInterfacesLvl[0][i]->getB(BD2M)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD1P) != 0) cout << "BD1P = " << cellInterfacesLvl[0][i]->getB(BD1P)->getElement()->getIndex() << endl;
+        //if (cellInterfacesLvl[0][i]->getB(BD2P) != 0) cout << "BD2P = " << cellInterfacesLvl[0][i]->getB(BD2P)->getElement()->getIndex() << endl;
 
       } //Fin preparation voisins ordre 2
       //---------------------------------------------------------------------------------------
@@ -676,7 +678,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
 
 //***********************************************************************
 
-void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
+void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul)
 {
 
   clock_t totalTime(clock());
@@ -730,9 +732,9 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
     m_numberFacesInternes = 0;
     for (int i = 0; i < m_numberCellsTotal; i++)
     {
-      if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
-      else { cells.push_back(new CellO2); }
-      cells[i]->setElement(m_elements[i + m_numberFacesLimites], i);
+      if (ordreCalcul == "FIRSTORDER") { cellsLvl[0].push_back(new Cell); }
+      else { cellsLvl[0].push_back(new CellO2); }
+      cellsLvl[0][i]->setElement(m_elements[i + m_numberFacesLimites], i);
       if (i < m_numberCellsCalcul) { m_numberFacesInternes += m_elements[i + m_numberFacesLimites]->getNumberFaces(); }
     }
     m_numberFacesInternes -= m_numberFacesLimites + m_numberFacesParallele; //On enleve les limites et les faces communicantes
@@ -852,9 +854,9 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
         //Communication
         if (m_faces[i]->getEstComm())
         {
-          if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-          else { cellInterfaces.push_back(new CellInterfaceO2); }
-          cellInterfaces[i]->setFace(m_faces[i]);
+          if (ordreCalcul == "FIRSTORDER") { cellInterfacesLvl[0].push_back(new CellInterface); }
+          else { cellInterfacesLvl[0].push_back(new CellInterfaceO2); }
+          cellInterfacesLvl[0][i]->setFace(m_faces[i]);
           iMailleG = m_faces[i]->getElementGauche()->getNumCellAssociee();
           iMailleD = m_faces[i]->getElementDroite()->getNumCellAssociee();
         }
@@ -863,8 +865,8 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
         {
           int appPhys(m_faces[i]->getElementDroite()->getAppartenancePhysique() - 1); //appartenance - 1 pour tableau commencant a zero
           if (appPhys >= static_cast<int>(m_lim.size()) || appPhys < 0) { throw ErrorECOGEN("Number de conditions aux limites non adapte", __FILE__, __LINE__); }
-          m_lim[appPhys]->creeLimite(cellInterfaces);
-          cellInterfaces[i]->setFace(m_faces[i]);
+          m_lim[appPhys]->creeLimite(cellInterfacesLvl[0]);
+          cellInterfacesLvl[0][i]->setFace(m_faces[i]);
           iMailleG = m_faces[i]->getElementGauche()->getNumCellAssociee();
           iMailleD = iMailleG;
         }
@@ -872,15 +874,15 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
       //face interne au domain
       else
       {
-        if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
-        else { cellInterfaces.push_back(new CellInterfaceO2); }
-        cellInterfaces[i]->setFace(m_faces[i]);
+        if (ordreCalcul == "FIRSTORDER") { cellInterfacesLvl[0].push_back(new CellInterface); }
+        else { cellInterfacesLvl[0].push_back(new CellInterfaceO2); }
+        cellInterfacesLvl[0][i]->setFace(m_faces[i]);
         iMailleG = m_faces[i]->getElementGauche()->getNumCellAssociee();
         iMailleD = m_faces[i]->getElementDroite()->getNumCellAssociee();
       }
-      cellInterfaces[i]->initialize(cells[iMailleG], cells[iMailleD]);
-      cells[iMailleG]->addCellInterface(cellInterfaces[i]);
-      cells[iMailleD]->addCellInterface(cellInterfaces[i]);
+      cellInterfacesLvl[0][i]->initialize(cellsLvl[0][iMailleG], cellsLvl[0][iMailleD]);
+      cellsLvl[0][iMailleG]->addCellInterface(cellInterfacesLvl[0][i]);
+      cellsLvl[0][iMailleD]->addCellInterface(cellInterfacesLvl[0][i]);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if (rankCpu == 0)
@@ -935,11 +937,11 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
       for(int i=0;i<numberElementsAEnvoyer[v];++i)
       {
           const auto buffer = elementsAEnvoyer[v][i] - m_numberFacesLimites;
-          parallel.addElementToSend(v,cells[buffer]);
+          parallel.addElementToSend(v,cellsLvl[0][buffer]);
       }
       for (int i = 0; i < numberElementsARecevoir[v]; i++) { 
           const auto buffer= elementsARecevoir[v][i] - m_numberFacesLimites;
-          parallel.addElementToReceive(v, cells[buffer]);
+          parallel.addElementToReceive(v, cellsLvl[0][buffer]);
        }
     }
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1741,7 +1743,7 @@ void MeshUnStruct::lectureElementGmshV4(const Coord *TableauNoeuds, std::ifstrea
 //******************************** ECRITURE ********************************
 //**************************************************************************
 
-void MeshUnStruct::ecritHeaderPiece(std::ofstream &fileStream, std::vector<Cell *> *cellsLvl) const
+void MeshUnStruct::ecritHeaderPiece(std::ofstream &fileStream, TypeMeshContainer<Cell *> *cellsLvl) const
 {
   fileStream << "    <Piece NumberOfPoints=\"" << m_numberNoeuds << "\" NumberOfCells=\"" << m_numberCellsCalcul - m_numberCellsFantomes << "\">" << std::endl;
 }
@@ -1804,7 +1806,7 @@ void MeshUnStruct::recupereTypeCell(std::vector<double> &jeuDonnees) const
 
 //****************************************************************************
 
-void MeshUnStruct::recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const
+void MeshUnStruct::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const
 {
   jeuDonnees.clear();
   int numCell;
@@ -1840,7 +1842,7 @@ void MeshUnStruct::recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<do
 
 //****************************************************************************
 
-void MeshUnStruct::setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const
+void MeshUnStruct::setDataSet(std::vector<double> &jeuDonnees, TypeMeshContainer<Cell *> *cellsLvl, const int var, int phase) const
 {
   int iterDataSet(0);
   int numCell;
@@ -1874,7 +1876,7 @@ void MeshUnStruct::setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell 
 }
 
 //****************************************************************************
-void MeshUnStruct::extractAbsVeloxityMRF(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Source *sourceMRF) const
+void MeshUnStruct::extractAbsVeloxityMRF(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Source *sourceMRF) const
 {
   jeuDonnees.clear();
   int numCell;
@@ -1972,8 +1974,8 @@ void MeshUnStruct::rechercheElementsArrieres(ElementNS *element, FaceNS *face, C
   //  cellInterface->setDistanceH(distanceHGM, d);
   //}
   //cout << eG->getIndex() << " : " << endl;
-  //if (cellInterfaces[i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfaces[i]->getB(BG1M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGM) << endl;
-  //if (cellInterfaces[i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfaces[i]->getB(BG2M)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGM) << endl;
+  //if (cellInterfacesLvl[0][i]->getB(BG1M) != 0) cout << "BG1M = " << cellInterfacesLvl[0][i]->getB(BG1M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGM) << endl;
+  //if (cellInterfacesLvl[0][i]->getB(BG2M) != 0) cout << "BG2M = " << cellInterfacesLvl[0][i]->getB(BG2M)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGM) << endl;
 }
 
 //***********************************************************************
@@ -2057,8 +2059,8 @@ void MeshUnStruct::rechercheElementsAvants(ElementNS *element, FaceNS *face, Cel
   //  cellInterface->setDistanceH(distanceHGP, d);
   //}
   //cout << eG->getIndex() << " : " << endl;
-  //if (cellInterfaces[i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfaces[i]->getB(BG1P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGP) << endl;
-  //if (cellInterfaces[i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfaces[i]->getB(BG2P)->getElement()->getIndex() << " " << cellInterfaces[i]->getDistanceH(distanceHGP) << endl;
+  //if (cellInterfacesLvl[0][i]->getB(BG1P) != 0) cout << "BG1P = " << cellInterfacesLvl[0][i]->getB(BG1P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGP) << endl;
+  //if (cellInterfacesLvl[0][i]->getB(BG2P) != 0) cout << "BG2P = " << cellInterfacesLvl[0][i]->getB(BG2P)->getElement()->getIndex() << " " << cellInterfacesLvl[0][i]->getDistanceH(distanceHGP) << endl;
 }
 
 //***********************************************************************

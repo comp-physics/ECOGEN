@@ -119,8 +119,6 @@ class Run
     //Specific to AMR method
     int m_lvlMax;                              //!<Maximum AMR level (if 0, then no AMR)
     int m_nbCellsTotalAMR;                     //!<Number de mailles total maximum durant la simulation
-    std::vector<Cell *> *m_cellsLvl;           //!<Tableau de vecteurs contenant les cells de compute, un vecteur par niveau.
-    std::vector<CellInterface *> *m_cellInterfacesLvl; //!<Tableau de vecteurs contenant les cell interfaces de compute, un vecteur par niveau.
 
     //Geometrical attributes
     bool m_parallelPreTreatment;               //!<Choice for mesh parallel pre-treatment  (needed for first simulation on a new parallel unstructured geometry)
@@ -128,8 +126,8 @@ class Run
     //Calcul attributes
     Mesh *m_mesh;                              //!<Mesh type object: contains all geometrical properties of the simulation
     Model *m_model;                            //!<Model type object: contains the flow model methods
-    TypeMeshContainer<Cell *> m_cells;         //!<Vector of computational cell objects: Contains physical fluid states
-    TypeMeshContainer<CellInterface *> m_cellInterfaces; //!<Vector of interface objects between cells (or between a cell and a physical domain boundary)
+    TypeMeshContainer<Cell *> *m_cellsLvl;           //!<Array of vectors (one per level) of computational cell objects: Contains physical fluid states.
+    TypeMeshContainer<CellInterface *> *m_cellInterfacesLvl; //!<Array of vectors (one per level) of interface objects between cells (or between a cell and a physical domain boundary)
     Eos **m_eos;                               //!<Array of Equations of states: Contains fluid EOS parameters
     std::vector<AddPhys*> m_addPhys;           //!<Vector of Additional physics
     Symmetry *m_symmetry;                      //!<Specific object for symmetry (cylindrical or spherical) if active

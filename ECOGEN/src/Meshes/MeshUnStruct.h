@@ -48,23 +48,23 @@ public:
   ~MeshUnStruct();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond);
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
   virtual void effetsMesh(CellInterface **face, const int &numberPhases) const{};
   virtual std::string whoAmI() const { return 0; };
 
   //Printing / Reading
-  virtual void ecritHeaderPiece(std::ofstream &fileStream, std::vector<Cell *> *cellsLvl) const;
+  virtual void ecritHeaderPiece(std::ofstream &fileStream, TypeMeshContainer<Cell *> *cellsLvl) const;
   virtual void recupereNoeuds(std::vector<double> &jeuDonnees) const;
   virtual void recupereConnectivite(std::vector<double> &jeuDonnees) const;
   virtual void recupereOffsets(std::vector<double> &jeuDonnees) const;
   virtual void recupereTypeCell(std::vector<double> &jeuDonnees) const;
-  virtual void recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
-  virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const;
-  virtual void extractAbsVeloxityMRF(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Source *sourceMRF) const;
+  virtual void recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
+  virtual void setDataSet(std::vector<double> &jeuDonnees, TypeMeshContainer<Cell *> *cellsLvl, const int var, int phase) const;
+  virtual void extractAbsVeloxityMRF(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Source *sourceMRF) const;
 
 private:
-  void initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
-  void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
+  void initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
+  void initializeGeometrieParallele(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
   void pretraitementFichierMeshGmsh();
   void lectureGeometrieGmsh(std::vector<ElementNS*>** voisinsNoeuds);
   void readGmshV2(std::vector<ElementNS*>** voisinsNoeuds, std::ifstream &meshFile);

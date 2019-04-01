@@ -51,19 +51,19 @@ public:
   virtual void attributLimites(std::vector<BoundCond*> &boundCond);
   void recupereIJK(const int &index, int &i, int &j, int &k) const;
   void construitIGlobal(const int &i, const int &j, const int &k, int &index) const;
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele, std::string ordreCalcul);
   void meshStretching();
-  void initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
-  void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
+  void initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
+  void initializeGeometrieParallele(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
   virtual void effetsMesh(CellInterface **face, const int &numberPhases) const {};
-  void decoupageParallele(std::string ordreCalcul,TypeMeshContainer<Cell*>& cells);
+  void decoupageParallele(std::string ordreCalcul, TypeMeshContainer<Cell *> *cellsLvl);
   virtual std::string whoAmI() const;
 
   //Printing / Reading
   virtual std::string recupereChaineExtent(int localRank, bool global = false) const;
-  virtual void recupereCoord(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Axe axe) const;
-  virtual void recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
-  virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const;
+  virtual void recupereCoord(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Axe axe) const;
+  virtual void recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
+  virtual void setDataSet(std::vector<double> &jeuDonnees, TypeMeshContainer<Cell *> *cellsLvl, const int var, int phase) const;
 
 protected:
   TypeMeshContainer<Element *> m_elements; //!<Vector of element objects: Contains geometrical attributes

@@ -46,45 +46,43 @@ public:
     bool varAlpha = false, double xiSplit = 1., double xiJoin = 1.);
   virtual ~MeshCartesianAMR();
 
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
-  void initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele, std::string ordreCalcul);
+  void initializeGeometrieAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
   void assignElementProperties(TypeMeshContainer<Cell *> &cells, std::vector<decomposition::Key<3>> &keys);
   void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul);
-	virtual void genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
-		std::vector<CellInterface *> **cellInterfacesLvl);
-  virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl,
+  virtual void procedureRaffinementInitialization(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
 		const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains,
 		Eos **eos, const int &resumeSimulation, std::string ordreCalcul);
-  virtual void procedureRaffinement(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const int &lvl,
+  virtual void procedureRaffinement(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, const int &lvl,
     const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, Eos **eos);
   virtual std::string whoAmI() const;
 
   //Printing / Reading
-  virtual void ecritHeaderPiece(std::ofstream &fileStream, std::vector<Cell *> *cellsLvl) const;
+  virtual void ecritHeaderPiece(std::ofstream &fileStream, TypeMeshContainer<Cell *> *cellsLvl) const;
   virtual void recupereNoeuds(std::vector<double> &jeuDonnees) const;
   virtual void recupereConnectivite(std::vector<double> &jeuDonnees) const;
   virtual void recupereOffsets(std::vector<double> &jeuDonnees) const;
   virtual void recupereTypeCell(std::vector<double> &jeuDonnees) const;
-  virtual void recupereDonnees(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
-  virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const;
+  virtual void recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
+  virtual void setDataSet(std::vector<double> &jeuDonnees, TypeMeshContainer<Cell *> *cellsLvl, const int var, int phase) const;
   virtual void refineCell(Cell *cell, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR);
 
   //Accesseurs
   virtual int getLvlMax() const { return m_lvlMax; };
 
 	//Pour parallele
-  virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
+  virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
-  virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
+  virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
 
 private:
-  int m_lvlMax;                              //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)
-	double m_criteriaVar;                      //!<Valeur du criteria a depasser sur la variation d'une variable pour le (de)raffinement (met xi=1.)
-	bool m_varRho, m_varP, m_varU, m_varAlpha; //!<Choix sur quelle variation on (de)raffine
-	double m_xiSplit, m_xiJoin;                //!<Valeur de xi pour split ou join les mailles
-  std::vector<Cell *> **m_cellsLvl;          //!<Pointer vers le tableau de vecteurs contenant les cells de compute, un vecteur par niveau.
-	std::vector<Cell *> *m_cellsLvlGhost;      //!<Tableau de vecteurs contenant les cells fantomes, un vecteur par niveau.
-  decomposition::Decomposition m_decomp;     //!<Parallel domain decomposition based on keys
+  int m_lvlMax;                               //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)
+	double m_criteriaVar;                       //!<Valeur du criteria a depasser sur la variation d'une variable pour le (de)raffinement (met xi=1.)
+	bool m_varRho, m_varP, m_varU, m_varAlpha;  //!<Choix sur quelle variation on (de)raffine
+	double m_xiSplit, m_xiJoin;                 //!<Valeur de xi pour split ou join les mailles
+  TypeMeshContainer<Cell *> **m_cellsLvl;     //!<Pointer vers le tableau de vecteurs contenant les cells de compute, un vecteur par niveau.
+	TypeMeshContainer<Cell *> *m_cellsLvlGhost; //!<Tableau de vecteurs contenant les cells fantomes, un vecteur par niveau.
+  decomposition::Decomposition m_decomp;      //!<Parallel domain decomposition based on keys
 
 };
 

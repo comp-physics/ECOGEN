@@ -1733,6 +1733,7 @@ void Cell::getBufferPrimitives(double *buffer, int &counter, const int &lvl, Eos
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      //std::cout<<m_childrenCells[i]->getElement()->getPosition().getX()<<std::endl;
       m_childrenCells[i]->getBufferPrimitives(buffer, counter, lvl, eos, type);
     }
   }

@@ -83,37 +83,22 @@ void Mesh::ecritSolutionGnuplot(std::vector<Cell *> *cellsLvl, std::ofstream &fi
 }
 
 //****************************************************************************
-//***************************** Methode AMR **********************************
-//****************************************************************************
-
-void Mesh::genereTableauxCellsCellInterfacesLvl(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::vector<Cell *> **cellsLvl,
-  std::vector<CellInterface *> **cellInterfacesLvl)
-{
-  (*cellsLvl) = new std::vector<Cell *>[1];
-  for (int i = 0; i < m_numberCellsCalcul; i++) { (*cellsLvl)[0].push_back(cells[i]); }
-
-  (*cellInterfacesLvl) = new std::vector<CellInterface *>[1];
-  for (int i = 0; i < m_numberFacesTotal; i++) { (*cellInterfacesLvl)[0].push_back(cellInterfaces[i]); }
-}
-
-
-//****************************************************************************
 //****************************** Parallele ***********************************
 //****************************************************************************
 
-void Mesh::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul)
+void Mesh::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul)
 {
 	m_numberPhases = numberPhases;
 	m_numberTransports = numberTransports;
-	int numberVariablesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedVariables();
+	int numberVariablesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedVariables();
 	numberVariablesPhaseATransmettre *= m_numberPhases;
-	int numberVariablesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedVariables();
+	int numberVariablesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedVariables();
 	int m_numberPrimitiveVariables = numberVariablesPhaseATransmettre + numberVariablesMixtureATransmettre + m_numberTransports;
   int m_numberSlopeVariables(0);
   if (ordreCalcul == "SECONDORDER") {
-    int numberSlopesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedSlopes();
+    int numberSlopesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedSlopes();
     numberSlopesPhaseATransmettre *= m_numberPhases;
-    int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
+    int numberSlopesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel.initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);

@@ -76,7 +76,7 @@ void Run::initialize(int argc, char* argv[])
   //---------------------------
   m_mesh->attributLimites(boundCond);
   try {
-    m_dimension = m_mesh->initializeGeometrie(m_cells, m_cellInterfaces, m_parallelPreTreatment, m_order);
+    m_dimension = m_mesh->initializeGeometrie(&m_cellsLvl, &m_cellInterfacesLvl, m_parallelPreTreatment, m_order);
   }
   catch (ErrorECOGEN &) { throw; }
   int numberCells = m_mesh->getNumberCells();
@@ -85,61 +85,57 @@ void Run::initialize(int argc, char* argv[])
 
   //4) Main array initialization using model and phase number
   //---------------------------------------------------------
-  for (int i = 0; i < numberCellsTotales; i++) { m_cells[i]->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model); }
+  for (int i = 0; i < numberCellsTotales; i++) { m_cellsLvl[0][i]->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model); }
   //Attribution model and slopes to faces
-  for (int i = 0; i < m_mesh->getNumberFaces(); i++) { m_cellInterfaces[i]->associeModel(m_model); }
+  for (int i = 0; i < m_mesh->getNumberFaces(); i++) { m_cellInterfacesLvl[0][i]->associeModel(m_model); }
 
   //5) Physical data initialization: filling fluid states
   //-----------------------------------------------------
   for (int i = 0; i < numberCellsTotales; i++) {
-    m_cells[i]->fill(domains, m_lvlMax);
+    m_cellsLvl[0][i]->fill(domains, m_lvlMax);
   }
   //EOS filling
-  m_cells[0]->allocateEos(m_numberPhases, m_model);
+  m_cellsLvl[0][0]->allocateEos(m_numberPhases, m_model);
   //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
   for (int i = 0; i < numberCells; i++) {
-    m_cells[i]->completeFulfillState();
+    m_cellsLvl[0][i]->completeFulfillState();
   }
 
   //6) Allocate Sloped and buffer Cells for Riemann problems
   //--------------------------------------------------------
   int allocateSlopeLocal = 0;
-  for (int i = 0; i < m_mesh->getNumberFaces(); i++) { m_cellInterfaces[i]->allocateSlopes(m_numberPhases, m_numberTransports, allocateSlopeLocal); }
+  for (int i = 0; i < m_mesh->getNumberFaces(); i++) { m_cellInterfacesLvl[0][i]->allocateSlopes(m_numberPhases, m_numberTransports, allocateSlopeLocal); }
   cellLeft = new Cell; cellRight = new Cell;
   cellLeft->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model);
   cellRight->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model);
   domains[0]->fillIn(cellLeft, m_numberPhases, m_numberTransports);
   domains[0]->fillIn(cellRight, m_numberPhases, m_numberTransports);
 
-  //7) Creation of cells and cell-interfaces level arrays (one per AMR level, also requested for non-AMR)
-  //-----------------------------------------------------------------------------------------------------
-  m_mesh->genereTableauxCellsCellInterfacesLvl(m_cells, m_cellInterfaces, &m_cellsLvl, &m_cellInterfacesLvl);
-
-  //8) Intialization of persistant communications for parallel computing
+  //7) Intialization of persistant communications for parallel computing
   //--------------------------------------------------------------------
-	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cells, m_order);
+	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cellsLvl, m_order);
   if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
   
-	//9) AMR initialization
+	//8) AMR initialization
 	//---------------------
   m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
 
   for (unsigned int d = 0; d < domains.size(); d++) { delete domains[d]; }
 
-  //10) Output file preparation
+  //9) Output file preparation
   //---------------------------
   m_outPut->prepareOutput(*cellLeft);
   for (unsigned int c = 0; c < m_cuts.size(); c++) m_cuts[c]->prepareOutput(*cellLeft);
   for (unsigned int p = 0; p < m_probes.size(); p++) m_probes[p]->prepareOutput(*cellLeft);
 
-  //11) Resume simulation
+  //10) Resume simulation
   //---------------------
   if (m_resumeSimulation > 0) {
     try { this->resumeSimulation(); }
     catch (ErrorECOGEN &) { throw; }
   }
   
-  //12) Printing t0 solution
+  //11) Printing t0 solution
   //------------------------
   if (m_resumeSimulation == 0) {
     try {
@@ -181,7 +177,7 @@ void Run::resumeSimulation()
 
   //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
   for (int i = 0; i < m_mesh->getNumberCells(); i++) {
-    m_cells[i]->completeFulfillState(resume); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
+    m_cellsLvl[0][i]->completeFulfillState(resume); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
     //KS//FP// apparemment fulfillState avec Prim::resume n'est pas a jour dans tous les modeles (seulement pour Kapila)
   }
 
@@ -296,7 +292,7 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
     m_mesh->procedureRaffinement(m_cellsLvl, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
-    m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellInterfacesLvl, m_order);
+    //m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellInterfacesLvl, m_order);
     m_stat.endAMRTime();
   }
 
@@ -516,8 +512,8 @@ void Run::verifyErrors() const
 void Run::finalize()
 {
   //Global desallocations
-  for (int i = 0; i < m_cellInterfaces.size(); i++) { delete m_cellInterfaces[i]; }
-  for (int i = 0; i < m_cells.size(); i++) { delete m_cells[i]; }
+  for (int i = 0; i < m_cellInterfacesLvl[0].size(); i++) { delete m_cellInterfacesLvl[0][i]; }
+  for (int i = 0; i < m_cellsLvl[0].size(); i++) { delete m_cellsLvl[0][i]; }
   for (int i = 0; i < m_numberEos; i++) { delete m_eos[i]; } delete[] m_eos;
   //Additional physics desallocations
   for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { delete m_addPhys[pa]; }
