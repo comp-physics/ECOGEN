@@ -62,11 +62,7 @@ public:
   virtual ~Mesh();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond) = 0;
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
-  virtual void effetsMesh(CellInterface **face, const int &numberPhases) const = 0;
-  //virtual void ecritSolution(Cell **cells, std::vector<Cell *> *cellsLvl, const int &numberPhases, const int &numberTransports, const int &lvlMax, std::string const &file,
-  //  bool ecritVTK, std::string variableConstanteCut1, std::string variableConstanteCut2, const double &valueCut1, const double &valueCut2,
-  //  bool cut1Dde2D = false, bool cut1Dde3D = false, bool cut2Dde3D = false, bool ecritXML = false, bool ecritBinaire = false, bool cree = false) const = 0;
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
   virtual std::string whoAmI() const { Errors::errorMessage("whoAmI pas prevu pour le mesh demande"); return 0; };
 
   //Accessors
@@ -88,10 +84,10 @@ public:
   virtual void ecritHeaderPiece(std::ofstream &fileStream, std::vector<Cell *> *cellsLvl) const { Errors::errorMessage("ecritHeaderPiece non prevu pour mesh considere"); };
   virtual std::string recupereChaineExtent(int localRank, bool global = false) const { Errors::errorMessage("recupereChaineExtent non prevu pour mesh considere"); return 0; };
   virtual void recupereCoord(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Axe axe) const { Errors::errorMessage("recupereCoord non prevu pour mesh considere"); };
-  virtual void recupereNoeuds(std::vector<double> &jeuDonnees) const { Errors::errorMessage("recupereNoeuds non prevu pour mesh considere"); };
-  virtual void recupereConnectivite(std::vector<double> &jeuDonnees) const { Errors::errorMessage("recupereConnectivite non prevu pour mesh considere"); };
-  virtual void recupereOffsets(std::vector<double> &jeuDonnees) const { Errors::errorMessage("recupereOffsets non prevu pour mesh considere"); };
-  virtual void recupereTypeCell(std::vector<double> &jeuDonnees) const { Errors::errorMessage("recupereTypeCell non prevu pour mesh considere"); };
+  virtual void recupereNoeuds(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const { Errors::errorMessage("recupereNoeuds non prevu pour mesh considere"); };
+  virtual void recupereConnectivite(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const { Errors::errorMessage("recupereConnectivite non prevu pour mesh considere"); };
+  virtual void recupereOffsets(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const { Errors::errorMessage("recupereOffsets non prevu pour mesh considere"); };
+  virtual void recupereTypeCell(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const { Errors::errorMessage("recupereTypeCell non prevu pour mesh considere"); };
   //! \brief     Extracting data for printing results
   //! \details   This method enable to extract a set of data for mixture or phase, scalar or vetor
   //! \param     cellsLvl         data structure containing pointer to cells
@@ -122,7 +118,7 @@ public:
 
 	//Specific for parallel
   //---------------------
-	virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul);
+	virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
 	void communicationsPrimitives(Eos **eos, const int &lvl, Prim type = vecPhases);
 	void communicationsSlopes(const int &lvl);
 	void communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index);

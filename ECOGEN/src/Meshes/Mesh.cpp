@@ -86,19 +86,19 @@ void Mesh::ecritSolutionGnuplot(std::vector<Cell *> *cellsLvl, std::ofstream &fi
 //****************************** Parallele ***********************************
 //****************************************************************************
 
-void Mesh::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul)
+void Mesh::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul)
 {
 	m_numberPhases = numberPhases;
 	m_numberTransports = numberTransports;
-	int numberVariablesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedVariables();
+	int numberVariablesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedVariables();
 	numberVariablesPhaseATransmettre *= m_numberPhases;
-	int numberVariablesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedVariables();
+	int numberVariablesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedVariables();
 	int m_numberPrimitiveVariables = numberVariablesPhaseATransmettre + numberVariablesMixtureATransmettre + m_numberTransports;
   int m_numberSlopeVariables(0);
   if (ordreCalcul == "SECONDORDER") {
-    int numberSlopesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedSlopes();
+    int numberSlopesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedSlopes();
     numberSlopesPhaseATransmettre *= m_numberPhases;
-    int numberSlopesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedSlopes();
+    int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel.initializePersistentCommunications(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie);

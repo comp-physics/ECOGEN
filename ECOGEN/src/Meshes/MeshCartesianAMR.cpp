@@ -55,20 +55,17 @@ MeshCartesianAMR::~MeshCartesianAMR(){
 
 //***********************************************************************
 
-int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> **cellsLvl, TypeMeshContainer<CellInterface *> **cellInterfacesLvl, bool pretraitementParallele, std::string ordreCalcul)
+int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
 {
   this->meshStretching();
-  (*cellsLvl) = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
-  (*cellInterfacesLvl) = new TypeMeshContainer<CellInterface *>[m_lvlMax + 1];
-  m_cellsLvl = cellsLvl;
-  this->initializeGeometrieAMR((*cellsLvl), (*cellInterfacesLvl), ordreCalcul);
+  this->initializeGeometrieAMR(cells, cellInterfaces, ordreCalcul);
   return m_geometrie;
 }
 
 
 //***********************************************************************
 
-void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul)
+void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
 {
   int ix, iy, iz;
 
@@ -83,30 +80,30 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> *cellsLv
 
   for(unsigned int i = 0; i < keys.size(); ++i)
   {    
-    if (ordreCalcul == "FIRSTORDER") { cellsLvl[0].push_back(new Cell); }
-    else { cellsLvl[0].push_back(new CellO2); }
+    if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
+    else { cells.push_back(new CellO2); }
     m_elements.push_back(new ElementCartesian());
     m_elements[i]->setKey(keys[i]);
-    cellsLvl[0][i]->setElement(m_elements[i], i);
+    cells[i]->setElement(m_elements[i], i);
   }
 
   //Create cells and elements
   //-------------------------
-  this->assignElementProperties(cellsLvl[0], keys);
+  this->assignElementProperties(cells, keys);
 
   //Create cell interfaces, faces and ghost cells
   //---------------------------------------------
-  m_numberCellsCalcul = cellsLvl[0].size(); //KS//BD// Update this after balancing
-  createCellInterfacesFacesAndGhostCells(cellsLvl[0], cellInterfacesLvl[0], ordreCalcul);
-  m_numberCellsTotal = cellsLvl[0].size(); //KS//BD// Update this after balancing
-  m_numberFacesTotal = cellInterfacesLvl[0].size(); //KS//BD// Update this after balancing
+  m_numberCellsCalcul = cells.size(); //KS//BD// Update this after balancing
+  createCellInterfacesFacesAndGhostCells(cells, cellInterfaces, ordreCalcul);
+  m_numberCellsTotal = cells.size(); //KS//BD// Update this after balancing
+  m_numberFacesTotal = cellInterfaces.size(); //KS//BD// Update this after balancing
 
   //Generate the vectors of ghost cells per level
   //---------------------------------------------
   if (Ncpu > 1) {
     m_cellsLvlGhost = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
     for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
-      m_cellsLvlGhost[0].push_back(cellsLvl[0][i]);
+      m_cellsLvlGhost[0].push_back(cells[i]);
     }
   }
 
@@ -146,7 +143,7 @@ void MeshCartesianAMR::assignElementProperties(TypeMeshContainer<Cell *> &cells,
 //***********************************************************************
 
 void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells,     
-TypeMeshContainer<CellInterface*>& cellInterfaces, 
+TypeMeshContainer<CellInterface*> &cellInterfaces, 
 std::string ordreCalcul)
 {
    using coordinate_type = decomposition::Key<3>::coordinate_type;
@@ -641,7 +638,11 @@ void MeshCartesianAMR::ecritHeaderPiece(std::ofstream &fileStream, TypeMeshConta
   int numberCells = 0, numberPointsParMaille = 4;
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
-      if (!cellsLvl[lvl][i]->getSplit()) { numberCells += 1; }
+      if (!cellsLvl[lvl][i]->getSplit()) {
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          numberCells += 1;
+        }
+      }
     }
   }
   if (m_numberCellsZ > 1) { numberPointsParMaille = 8; }
@@ -651,7 +652,7 @@ void MeshCartesianAMR::ecritHeaderPiece(std::ofstream &fileStream, TypeMeshConta
 
 //***********************************************************************
 
-void MeshCartesianAMR::recupereNoeuds(std::vector<double> &jeuDonnees) const
+void MeshCartesianAMR::recupereNoeuds(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const
 {
   int dimZ = 0;
   if (m_numberCellsZ > 1) dimZ = 1;
@@ -659,47 +660,48 @@ void MeshCartesianAMR::recupereNoeuds(std::vector<double> &jeuDonnees) const
   double dXsur2(0.), dYsur2(0.), dZsur2(0.);
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
     dXsur2 = 0.; dYsur2 = 0.; dZsur2 = 0.;
-    for (unsigned int i = 0; i < (*m_cellsLvl)[lvl].size(); i++) {
-      if (!(*m_cellsLvl)[lvl][i]->getSplit()) {
+    for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+      if (!cellsLvl[lvl][i]->getSplit()) {
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          dXsur2 = 0.5*cellsLvl[lvl][i]->getSizeX();
+          dYsur2 = 0.5*cellsLvl[lvl][i]->getSizeY();
+          dZsur2 = 0.5*cellsLvl[lvl][i]->getSizeZ();
+          //Point 0
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() - dXsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() - dYsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
+          //Point 1
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() + dXsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() - dYsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
+          //Point 2
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() + dXsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() + dYsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
+          //Point 3
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() - dXsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() + dYsur2);
+          jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
 
-        dXsur2 = 0.5*(*m_cellsLvl)[lvl][i]->getSizeX();
-        dYsur2 = 0.5*(*m_cellsLvl)[lvl][i]->getSizeY();
-        dZsur2 = 0.5*(*m_cellsLvl)[lvl][i]->getSizeZ();
-        //Point 0
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() - dXsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() - dYsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
-        //Point 1
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() + dXsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() - dYsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
-        //Point 2
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() + dXsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() + dYsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
-        //Point 3
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() - dXsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() + dYsur2);
-        jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() - dZsur2*dimZ);
-
-        if (dimZ > 0.99) {
-          //Point 4
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() - dXsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() - dYsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() + dZsur2);
-          //Point 5
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() + dXsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() - dYsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() + dZsur2);
-          //Point 6
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() + dXsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() + dYsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() + dZsur2);
-          //Point 7
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getX() - dXsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getY() + dYsur2);
-          jeuDonnees.push_back((*m_cellsLvl)[lvl][i]->getPosition().getZ() + dZsur2);
-        }
+          if (dimZ > 0.99) {
+            //Point 4
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() - dXsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() - dYsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() + dZsur2);
+            //Point 5
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() + dXsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() - dYsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() + dZsur2);
+            //Point 6
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() + dXsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() + dYsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() + dZsur2);
+            //Point 7
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getX() - dXsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getY() + dYsur2);
+            jeuDonnees.push_back(cellsLvl[lvl][i]->getPosition().getZ() + dZsur2);
+          }
+        } //Fin cell non ghost
       } //Fin cell non split
     } //Fin Cells
   } //Fin Levels
@@ -707,7 +709,7 @@ void MeshCartesianAMR::recupereNoeuds(std::vector<double> &jeuDonnees) const
 
 //***********************************************************************
 
-void MeshCartesianAMR::recupereConnectivite(std::vector<double> &jeuDonnees) const
+void MeshCartesianAMR::recupereConnectivite(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const
 {
   int dimZ(0);
   int numberPointsParMaille(4);
@@ -716,13 +718,15 @@ void MeshCartesianAMR::recupereConnectivite(std::vector<double> &jeuDonnees) con
   if (dimZ < 0.99) {
     int numCell(0);
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (unsigned int i = 0; i < (*m_cellsLvl)[lvl].size(); i++) {
-        if (!(*m_cellsLvl)[lvl][i]->getSplit()) {
-          jeuDonnees.push_back(numCell*numberPointsParMaille);
-          jeuDonnees.push_back(numCell*numberPointsParMaille+1);
-          jeuDonnees.push_back(numCell*numberPointsParMaille+2);
-          jeuDonnees.push_back(numCell*numberPointsParMaille+3);
-          numCell++;
+      for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+        if (!cellsLvl[lvl][i]->getSplit()) {
+          if (!cellsLvl[lvl][i]->isCellGhost()) {
+            jeuDonnees.push_back(numCell*numberPointsParMaille);
+            jeuDonnees.push_back(numCell*numberPointsParMaille+1);
+            jeuDonnees.push_back(numCell*numberPointsParMaille+2);
+            jeuDonnees.push_back(numCell*numberPointsParMaille+3);
+            numCell++;
+          }
         }
       }
     }
@@ -730,17 +734,19 @@ void MeshCartesianAMR::recupereConnectivite(std::vector<double> &jeuDonnees) con
   else {
     int numCell(0);
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (unsigned int i = 0; i < (*m_cellsLvl)[lvl].size(); i++) {
-        if (!(*m_cellsLvl)[lvl][i]->getSplit()) {
-          jeuDonnees.push_back(numCell*numberPointsParMaille);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 1);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 2);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 3);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 4);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 5);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 6);
-          jeuDonnees.push_back(numCell*numberPointsParMaille + 7);
-          numCell++;
+      for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+        if (!cellsLvl[lvl][i]->getSplit()) {
+          if (!cellsLvl[lvl][i]->isCellGhost()) {
+            jeuDonnees.push_back(numCell*numberPointsParMaille);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 1);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 2);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 3);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 4);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 5);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 6);
+            jeuDonnees.push_back(numCell*numberPointsParMaille + 7);
+            numCell++;
+          }
         }
       }
     }
@@ -749,16 +755,18 @@ void MeshCartesianAMR::recupereConnectivite(std::vector<double> &jeuDonnees) con
 
 //***********************************************************************
 
-void MeshCartesianAMR::recupereOffsets(std::vector<double> &jeuDonnees) const
+void MeshCartesianAMR::recupereOffsets(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const
 {
   int numberPointsParMaille(4);
   if (m_numberCellsZ > 1) { numberPointsParMaille = 8; }
   int numCell(0);
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-    for (unsigned int i = 0; i < (*m_cellsLvl)[lvl].size(); i++) {
-      if (!(*m_cellsLvl)[lvl][i]->getSplit()) {
-        jeuDonnees.push_back((numCell + 1)*numberPointsParMaille);
-        numCell++;
+    for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+      if (!cellsLvl[lvl][i]->getSplit()) {
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          jeuDonnees.push_back((numCell + 1)*numberPointsParMaille);
+          numCell++;
+        }
       }
     }
   }
@@ -766,16 +774,18 @@ void MeshCartesianAMR::recupereOffsets(std::vector<double> &jeuDonnees) const
 
 //****************************************************************************
 
-void MeshCartesianAMR::recupereTypeCell(std::vector<double> &jeuDonnees) const
+void MeshCartesianAMR::recupereTypeCell(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const
 {
   int type(9);
   if (m_numberCellsZ > 1) { type = 12; }
   int numCell(0);
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-    for (unsigned int i = 0; i < (*m_cellsLvl)[lvl].size(); i++) {
-      if (!(*m_cellsLvl)[lvl][i]->getSplit()) {
-        jeuDonnees.push_back(type);
-        numCell++;
+    for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+      if (!cellsLvl[lvl][i]->getSplit()) {
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          jeuDonnees.push_back(type);
+          numCell++;
+        }
       }
     }
   }
@@ -789,27 +799,29 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
       if (!cellsLvl[lvl][i]->getSplit()) {
-        if (var > 0) { //On veut recuperer les donnees scalars
-          if (phase >= 0) { jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnScalar(var)); }      //Donnees de phases
-          else if (phase == -1) { jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnScalar(var)); }   //Donnees de mixture
-          else if (phase == -2) { jeuDonnees.push_back(cellsLvl[lvl][i]->getTransport(var - 1).getValue()); }
-          else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
-          else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
-          else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
-        }
-        else { //On veut recuperer les donnees vectorielles
-          if (phase >= 0) { //Donnees de phases
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getX());
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getY());
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getZ());
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          if (var > 0) { //On veut recuperer les donnees scalars
+            if (phase >= 0) { jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnScalar(var)); }      //Donnees de phases
+            else if (phase == -1) { jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnScalar(var)); }   //Donnees de mixture
+            else if (phase == -2) { jeuDonnees.push_back(cellsLvl[lvl][i]->getTransport(var - 1).getValue()); }
+            else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
+            else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
+            else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
           }
-          else if(phase == -1){  //Donnees de mixture
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getX());
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getY());
-            jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getZ());
-          }
-          else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
-        } //Fin vecteur
+          else { //On veut recuperer les donnees vectorielles
+            if (phase >= 0) { //Donnees de phases
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getX());
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getY());
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getZ());
+            }
+            else if(phase == -1){  //Donnees de mixture
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getX());
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getY());
+              jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getZ());
+            }
+            else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
+          } //Fin vecteur
+        } //Fin cell non ghost
       } //Fin split
     } //fin lvl
   } //fin levels
@@ -824,26 +836,28 @@ void MeshCartesianAMR::setDataSet(std::vector<double> &jeuDonnees, TypeMeshConta
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
       if (!cellsLvl[lvl][i]->getSplit()) {
-        if (var > 0) { //Scalars data are first set
-          if (phase >= 0) { cellsLvl[lvl][i]->getPhase(phase)->setScalar(var, jeuDonnees[iterDataSet++]); } //phases data
-          else if (phase == -1) { cellsLvl[lvl][i]->getMixture()->setScalar(var, jeuDonnees[iterDataSet++]); }  //mixture data
-          else if (phase == -2) { cellsLvl[lvl][i]->getTransport(var - 1).setValue(jeuDonnees[iterDataSet++]); } //transport data
-          else if (phase == -3) { cellsLvl[lvl][i]->setXi(jeuDonnees[iterDataSet++]); } //xi indicator
-          else { Errors::errorMessage("MeshCartesianAMR::setDataSet: unknown phase number: ", phase); }
-        }
-        else { //On veut recuperer les donnees vectorielles
-          if (phase >= 0) { //Phases data
-            vec.setXYZ(jeuDonnees[iterDataSet], jeuDonnees[iterDataSet + 1], jeuDonnees[iterDataSet + 2]);
-            cellsLvl[lvl][i]->getPhase(phase)->setVector(-var, vec);
-            iterDataSet += 3;
+        if (!cellsLvl[lvl][i]->isCellGhost()) {
+          if (var > 0) { //Scalars data are first set
+            if (phase >= 0) { cellsLvl[lvl][i]->getPhase(phase)->setScalar(var, jeuDonnees[iterDataSet++]); } //phases data
+            else if (phase == -1) { cellsLvl[lvl][i]->getMixture()->setScalar(var, jeuDonnees[iterDataSet++]); }  //mixture data
+            else if (phase == -2) { cellsLvl[lvl][i]->getTransport(var - 1).setValue(jeuDonnees[iterDataSet++]); } //transport data
+            else if (phase == -3) { cellsLvl[lvl][i]->setXi(jeuDonnees[iterDataSet++]); } //xi indicator
+            else { Errors::errorMessage("MeshCartesianAMR::setDataSet: unknown phase number: ", phase); }
           }
-          else if (phase == -1) {  //Mixture data
-            vec.setXYZ(jeuDonnees[iterDataSet], jeuDonnees[iterDataSet + 1], jeuDonnees[iterDataSet + 2]);
-            cellsLvl[lvl][i]->getMixture()->setVector(-var, vec);
-            iterDataSet += 3;
-          }
-          else { Errors::errorMessage("MeshCartesianAMR::setDataSet: unknown phase number: ", phase); }
-        } //Fin vecteur
+          else { //On veut recuperer les donnees vectorielles
+            if (phase >= 0) { //Phases data
+              vec.setXYZ(jeuDonnees[iterDataSet], jeuDonnees[iterDataSet + 1], jeuDonnees[iterDataSet + 2]);
+              cellsLvl[lvl][i]->getPhase(phase)->setVector(-var, vec);
+              iterDataSet += 3;
+            }
+            else if (phase == -1) {  //Mixture data
+              vec.setXYZ(jeuDonnees[iterDataSet], jeuDonnees[iterDataSet + 1], jeuDonnees[iterDataSet + 2]);
+              cellsLvl[lvl][i]->getMixture()->setVector(-var, vec);
+              iterDataSet += 3;
+            }
+            else { Errors::errorMessage("MeshCartesianAMR::setDataSet: unknown phase number: ", phase); }
+          } //Fin vecteur
+        } //Fin cell non ghost
       } // Fin split
     } // Fin lvl
   } // Fin levels
@@ -861,26 +875,19 @@ void MeshCartesianAMR::refineCell(Cell *cell, const std::vector<AddPhys*> &addPh
 //****************************** Parallele ***********************************
 //****************************************************************************
 
-void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> *cellsLvl, std::string ordreCalcul)
+void MeshCartesianAMR::initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul)
 {
-  // if (Ncpu > 1) { //KS//BD//
-  //   m_cellsLvlGhost = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
-  //   for (int i = m_numberCellsCalcul; i < m_numberCellsTotal; i++) {
-  //     m_cellsLvlGhost[0].push_back(cellsLvl[0][i]);
-  //   }
-  // }
-
 	m_numberPhases = numberPhases;
 	m_numberTransports = numberTransports;
-	int numberVariablesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedVariables();
+	int numberVariablesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedVariables();
 	numberVariablesPhaseATransmettre *= m_numberPhases;
-	int numberVariablesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedVariables();
+	int numberVariablesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedVariables();
 	int m_numberPrimitiveVariables = numberVariablesPhaseATransmettre + numberVariablesMixtureATransmettre + m_numberTransports;
   int m_numberSlopeVariables(0);
   if (ordreCalcul == "SECONDORDER") {
-    int numberSlopesPhaseATransmettre = cellsLvl[0][0]->getPhase(0)->numberOfTransmittedSlopes();
+    int numberSlopesPhaseATransmettre = cells[0]->getPhase(0)->numberOfTransmittedSlopes();
     numberSlopesPhaseATransmettre *= m_numberPhases;
-    int numberSlopesMixtureATransmettre = cellsLvl[0][0]->getMixture()->numberOfTransmittedSlopes();
+    int numberSlopesMixtureATransmettre = cells[0]->getMixture()->numberOfTransmittedSlopes();
     m_numberSlopeVariables = numberSlopesPhaseATransmettre + numberSlopesMixtureATransmettre + m_numberTransports + 1 + 1; //+1 for the interface detection + 1 for slope index
   }
 	parallel.initializePersistentCommunicationsAMR(m_numberPrimitiveVariables, m_numberSlopeVariables, m_numberTransports, m_geometrie, m_lvlMax);

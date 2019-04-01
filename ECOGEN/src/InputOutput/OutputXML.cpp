@@ -583,7 +583,7 @@ void OutputXML::ecritMeshUnstructuredXML(Mesh *mesh, std::vector<Cell *> *cellsL
     if (!m_ecritBinaire) { fileStream << "format=\"ascii\">" << std::endl << "          "; }
     else { fileStream << "format=\"binary\">" << std::endl; }
     jeuDonnees.clear();
-    mesh->recupereNoeuds(jeuDonnees);
+    mesh->recupereNoeuds(jeuDonnees, cellsLvl);
     ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
     fileStream << std::endl;
     fileStream << "        </" << prefix << "DataArray>" << std::endl;
@@ -600,7 +600,7 @@ void OutputXML::ecritMeshUnstructuredXML(Mesh *mesh, std::vector<Cell *> *cellsL
     if (!m_ecritBinaire) { fileStream << "format=\"ascii\">" << std::endl << "          "; }
     else { fileStream << "format=\"binary\">" << std::endl; }
     jeuDonnees.clear();
-    mesh->recupereConnectivite(jeuDonnees);
+    mesh->recupereConnectivite(jeuDonnees, cellsLvl);
     ecritJeuDonnees(jeuDonnees, fileStream, INT);
     fileStream << std::endl;
     fileStream << "        </" << prefix << "DataArray>" << std::endl;
@@ -612,7 +612,7 @@ void OutputXML::ecritMeshUnstructuredXML(Mesh *mesh, std::vector<Cell *> *cellsL
     if (!m_ecritBinaire) { fileStream << "format=\"ascii\">" << std::endl << "          "; }
     else { fileStream << "format=\"binary\">" << std::endl; }
     jeuDonnees.clear();
-    mesh->recupereOffsets(jeuDonnees);
+    mesh->recupereOffsets(jeuDonnees, cellsLvl);
     ecritJeuDonnees(jeuDonnees, fileStream, INT);
     fileStream << std::endl;
     fileStream << "        </" << prefix << "DataArray>" << std::endl;
@@ -624,7 +624,7 @@ void OutputXML::ecritMeshUnstructuredXML(Mesh *mesh, std::vector<Cell *> *cellsL
     if (!m_ecritBinaire) { fileStream << "format=\"ascii\">" << std::endl << "          "; }
     else { fileStream << "format=\"binary\">" << std::endl; }
     jeuDonnees.clear();
-    mesh->recupereTypeCell(jeuDonnees);
+    mesh->recupereTypeCell(jeuDonnees, cellsLvl);
     ecritJeuDonnees(jeuDonnees, fileStream, CHAR);
     fileStream << std::endl;
     fileStream << "        </" << prefix << "DataArray>" << std::endl;
@@ -695,7 +695,7 @@ void OutputXML::ecritFinFichierUnstructuredXML(std::ofstream &fileStream, bool p
 //     if (!m_ecritBinaire) { fileStream << "format=\"ascii\">" << endl << "          "; }
 //     else { fileStream << "format=\"binary\">" << endl; }
 //     jeuDonnees.clear();
-//     mesh->recupereNoeuds(jeuDonnees, lvl);
+//     mesh->recupereNoeuds(jeuDonnees, cellsLvl);
 //     ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
 //     fileStream << endl;
 //     fileStream << "        </" << prefix << "DataArray>" << endl;

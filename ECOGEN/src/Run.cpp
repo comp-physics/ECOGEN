@@ -75,8 +75,10 @@ void Run::initialize(int argc, char* argv[])
   //3) Mesh data initialization
   //---------------------------
   m_mesh->attributLimites(boundCond);
+  m_cellsLvl = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
+  m_cellInterfacesLvl = new TypeMeshContainer<CellInterface *>[m_lvlMax + 1];
   try {
-    m_dimension = m_mesh->initializeGeometrie(&m_cellsLvl, &m_cellInterfacesLvl, m_parallelPreTreatment, m_order);
+    m_dimension = m_mesh->initializeGeometrie(m_cellsLvl[0], m_cellInterfacesLvl[0], m_parallelPreTreatment, m_order);
   }
   catch (ErrorECOGEN &) { throw; }
   int numberCells = m_mesh->getNumberCells();
@@ -113,7 +115,7 @@ void Run::initialize(int argc, char* argv[])
 
   //7) Intialization of persistant communications for parallel computing
   //--------------------------------------------------------------------
-	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cellsLvl, m_order);
+	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cellsLvl[0], m_order);
   if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
   
 	//8) AMR initialization
