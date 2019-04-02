@@ -48,7 +48,7 @@ public:
   ~MeshUnStruct();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond);
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
   virtual std::string whoAmI() const { return 0; };
 
   //Printing / Reading
@@ -63,7 +63,7 @@ public:
 
 private:
   void initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
-  void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
+  void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   void pretraitementFichierMeshGmsh();
   void lectureGeometrieGmsh(std::vector<ElementNS*>** voisinsNoeuds);
   void readGmshV2(std::vector<ElementNS*>** voisinsNoeuds, std::ifstream &meshFile);

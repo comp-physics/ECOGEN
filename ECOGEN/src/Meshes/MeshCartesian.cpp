@@ -157,7 +157,7 @@ void MeshCartesian::construitIGlobal(const int &i, const int &j, const int &k, i
 
 //***********************************************************************
 
-int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
 {
   this->meshStretching();
   if (Ncpu == 1)
@@ -166,7 +166,7 @@ int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMes
   }
   else
   {
-    this->initializeGeometrieParallele(cells, cellInterfaces, ordreCalcul);
+    this->initializeGeometrieParallele(cells, cellsGhost, cellInterfaces, ordreCalcul);
   }
   return m_geometrie;
 }
@@ -570,7 +570,7 @@ void MeshCartesian::initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells,
 
 //***********************************************************************
 
-void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
+void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
 {
   int ix, iy, iz;
   int compteMaillesParallele(0);
@@ -1045,6 +1045,10 @@ void MeshCartesian::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cell
       }
     }
   }
+
+  //Update of cellsGhost
+  cellsGhost.insert(cellsGhost.begin(), cells.begin()+m_numberCellsCalcul, cells.end());
+  cells.erase(cells.begin()+m_numberCellsCalcul, cells.end());
 }
 
 //***********************************************************************

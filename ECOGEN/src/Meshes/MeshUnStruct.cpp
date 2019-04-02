@@ -108,7 +108,7 @@ void MeshUnStruct::attributLimites(std::vector<BoundCond*> &boundCond)
 
 //***********************************************************************
 
-int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
 {
   try {
     if (Ncpu == 1) { this->initializeGeometrieMonoCPU(cells, cellInterfaces, ordreCalcul); }
@@ -118,7 +118,7 @@ int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMesh
         if (rankCpu == 0) { this->pretraitementFichierMeshGmsh(); }
         MPI_Barrier(MPI_COMM_WORLD);
       }
-      this->initializeGeometrieParallele(cells, cellInterfaces, ordreCalcul);
+      this->initializeGeometrieParallele(cells, cellsGhost, cellInterfaces, ordreCalcul);
     }
     return m_geometrie;
   }
@@ -676,9 +676,9 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
 
 //***********************************************************************
 
-void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
+void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
 {
-
+//KS//FP// Distinction between cells and cellsGhost not done here. To do in the future.
   clock_t totalTime(clock());
 
   //1) Lecture noeuds et elements
@@ -956,6 +956,10 @@ void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells
       std::cout << " Total time of geometrical building : " << t1 << " seconds" << std::endl;
       std::cout << "------------------------------------------------------" << std::endl;
     }
+
+    //Update of cellsGhost
+    cellsGhost.insert(cellsGhost.begin(), cells.begin()+m_numberCellsCalcul, cells.end());
+    cells.erase(cells.begin()+m_numberCellsCalcul, cells.end());
   }
   catch (ErrorECOGEN &) { throw; }
 }

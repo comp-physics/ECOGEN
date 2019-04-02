@@ -76,32 +76,28 @@ void Run::initialize(int argc, char* argv[])
   //---------------------------
   m_mesh->attributLimites(boundCond);
   m_cellsLvl = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
+  m_cellsLvlGhost = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
   m_cellInterfacesLvl = new TypeMeshContainer<CellInterface *>[m_lvlMax + 1];
   try {
-    m_dimension = m_mesh->initializeGeometrie(m_cellsLvl[0], m_cellInterfacesLvl[0], m_parallelPreTreatment, m_order);
+    m_dimension = m_mesh->initializeGeometrie(m_cellsLvl[0], m_cellsLvlGhost[0], m_cellInterfacesLvl[0], m_parallelPreTreatment, m_order);
   }
   catch (ErrorECOGEN &) { throw; }
-  int numberCells = m_mesh->getNumberCells();
-  int numberCellsTotales(numberCells);
-  if (Ncpu>1) numberCellsTotales = m_mesh->getNumberCellsTotal();
 
   //4) Main array initialization using model and phase number
   //---------------------------------------------------------
-  for (int i = 0; i < numberCellsTotales; i++) { m_cellsLvl[0][i]->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model); }
+  for (int i = 0; i < m_cellsLvl[0].size(); i++) { m_cellsLvl[0][i]->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model); }
+  for (int i = 0; i < m_cellsLvlGhost[0].size(); i++) { m_cellsLvlGhost[0][i]->allocate(m_numberPhases, m_numberTransports, m_addPhys, m_model); }
   //Attribution model and slopes to faces
   for (int i = 0; i < m_mesh->getNumberFaces(); i++) { m_cellInterfacesLvl[0][i]->associeModel(m_model); }
 
   //5) Physical data initialization: filling fluid states
   //-----------------------------------------------------
-  for (int i = 0; i < numberCellsTotales; i++) {
-    m_cellsLvl[0][i]->fill(domains, m_lvlMax);
-  }
+  for (int i = 0; i < m_cellsLvl[0].size(); i++) { m_cellsLvl[0][i]->fill(domains, m_lvlMax); }
+  for (int i = 0; i < m_cellsLvlGhost[0].size(); i++) { m_cellsLvlGhost[0][i]->fill(domains, m_lvlMax); }
   //EOS filling
   m_cellsLvl[0][0]->allocateEos(m_numberPhases, m_model);
   //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
-  for (int i = 0; i < numberCells; i++) {
-    m_cellsLvl[0][i]->completeFulfillState();
-  }
+  for (int i = 0; i < m_cellsLvl[0].size(); i++) { m_cellsLvl[0][i]->completeFulfillState(); }
 
   //6) Allocate Sloped and buffer Cells for Riemann problems
   //--------------------------------------------------------
@@ -120,7 +116,7 @@ void Run::initialize(int argc, char* argv[])
   
 	//8) AMR initialization
 	//---------------------
-  m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
+  m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
 
   for (unsigned int d = 0; d < domains.size(); d++) { delete domains[d]; }
 
@@ -178,7 +174,7 @@ void Run::resumeSimulation()
   fileStream.close();
 
   //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
-  for (int i = 0; i < m_mesh->getNumberCells(); i++) {
+  for (int i = 0; i < m_cellsLvl[0].size(); i++) {
     m_cellsLvl[0][i]->completeFulfillState(resume); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
     //KS//FP// apparemment fulfillState avec Prim::resume n'est pas a jour dans tous les modeles (seulement pour Kapila)
   }
@@ -209,7 +205,7 @@ void Run::solver()
 {
   int nbCellsTotalAMRMax = m_nbCellsTotalAMR;
   double dtMax;
-
+  
   //-------------------
   //Time iterative loop
   //-------------------
@@ -293,8 +289,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   //2) (Un)Reffinement procedure
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
-    m_mesh->procedureRaffinement(m_cellsLvl, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
-    //m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellInterfacesLvl, m_order);
+    m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
+    //m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order);
     m_stat.endAMRTime();
   }
 
@@ -516,6 +512,7 @@ void Run::finalize()
   //Global desallocations
   for (int i = 0; i < m_cellInterfacesLvl[0].size(); i++) { delete m_cellInterfacesLvl[0][i]; }
   for (int i = 0; i < m_cellsLvl[0].size(); i++) { delete m_cellsLvl[0][i]; }
+  for (int i = 0; i < m_cellsLvlGhost[0].size(); i++) { delete m_cellsLvlGhost[0][i]; }
   for (int i = 0; i < m_numberEos; i++) { delete m_eos[i]; } delete[] m_eos;
   //Additional physics desallocations
   for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { delete m_addPhys[pa]; }

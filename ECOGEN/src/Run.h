@@ -126,7 +126,8 @@ class Run
     //Calcul attributes
     Mesh *m_mesh;                              //!<Mesh type object: contains all geometrical properties of the simulation
     Model *m_model;                            //!<Model type object: contains the flow model methods
-    TypeMeshContainer<Cell *> *m_cellsLvl;           //!<Array of vectors (one per level) of computational cell objects: Contains physical fluid states.
+    TypeMeshContainer<Cell *> *m_cellsLvl;                   //!<Array of vectors (one per level) of computational cell objects: Contains physical fluid states.
+    TypeMeshContainer<Cell *> *m_cellsLvlGhost;              //!<Array of vectors (one per level) of ghost cell objects.
     TypeMeshContainer<CellInterface *> *m_cellInterfacesLvl; //!<Array of vectors (one per level) of interface objects between cells (or between a cell and a physical domain boundary)
     Eos **m_eos;                               //!<Array of Equations of states: Contains fluid EOS parameters
     std::vector<AddPhys*> m_addPhys;           //!<Vector of Additional physics
