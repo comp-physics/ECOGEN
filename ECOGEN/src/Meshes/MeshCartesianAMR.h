@@ -52,7 +52,7 @@ public:
   void createCellInterfacesFacesAndGhostCells(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface*>& cellInterfaces, std::string ordreCalcul);
   virtual void procedureRaffinementInitialization(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
 		const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains,
-		Eos **eos, const int &resumeSimulation, std::string ordreCalcul);
+		Eos **eos, const int &resumeSimulation, std::string ordreCalcul, const int &numberPhases, const int &numberTransports);
   virtual void procedureRaffinement(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, const int &lvl,
     const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, Eos **eos);
   virtual std::string whoAmI() const;
@@ -73,7 +73,8 @@ public:
 	//Pour parallele
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
-  virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul);
+  virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model);
 
 private:
   int m_lvlMax;                               //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

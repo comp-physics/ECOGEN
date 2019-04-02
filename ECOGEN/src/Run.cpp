@@ -116,7 +116,8 @@ void Run::initialize(int argc, char* argv[])
   
 	//8) AMR initialization
 	//---------------------
-  m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
+  m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model,
+    m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order, m_numberPhases, m_numberTransports);
 
   for (unsigned int d = 0; d < domains.size(); d++) { delete domains[d]; }
 
@@ -205,7 +206,7 @@ void Run::solver()
 {
   int nbCellsTotalAMRMax = m_nbCellsTotalAMR;
   double dtMax;
-  
+
   //-------------------
   //Time iterative loop
   //-------------------
@@ -290,7 +291,7 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
     m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
-    //m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order);
+    m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model);
     m_stat.endAMRTime();
   }
 

@@ -52,6 +52,7 @@ public:
   void addElementToReceive(int neighbour, Cell* cell);
   void addSlopesToSend(int neighbour);
   void addSlopesToReceive(int neighbour);
+  void purgeElementsAndSlopesToSendAndReceive();
   const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
   TypeMeshContainer<Cell*> &getElementsToSend(int neighbour);
   TypeMeshContainer<Cell*> &getElementsToReceive(int neighbour);

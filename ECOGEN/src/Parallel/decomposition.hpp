@@ -167,12 +167,15 @@ public: //Ctors
     }
 
 
+    const key_type& start_key(int i) const noexcept{return key_rank_map_[i];}
+    key_type& start_key(int i) noexcept{return key_rank_map_[i];}
+
 
 private:
     int base_level_=-1;
     std::array<int,Dim> nCells_global_;
     std::vector<key_type> key_rank_map_;
-    std::vector<int> nCells_per_rank_;
+    std::vector<int> nCells_per_rank_; //Not updated once the starts are changed
 
 };
 }

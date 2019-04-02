@@ -185,6 +185,18 @@ void Parallel::addSlopesToReceive(int neighbour)
 
 //***********************************************************************
 
+void Parallel::purgeElementsAndSlopesToSendAndReceive()
+{
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    m_elementsToSend[neighbour].clear();
+    m_elementsToReceive[neighbour].clear();
+    m_numberSlopesToSendToNeighbour[neighbour] = 0;
+    m_numberSlopesToReceiveFromNeighbour[neighbour] = 0;
+  }
+}
+
+//***********************************************************************
+
 const TypeMeshContainer<Cell*> &Parallel::getElementsToSend(int neighbour) const
 {
     return m_elementsToSend[neighbour];
@@ -672,23 +684,23 @@ void Parallel::communicationsTransports(const int &lvl)
 void Parallel::initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax)
 {
 	if (Ncpu > 1) {
-		m_numberPrimitiveVariables = numberPrimitiveVariables;
-		m_numberSlopeVariables = numberSlopeVariables;
+    m_numberPrimitiveVariables = numberPrimitiveVariables;
+    m_numberSlopeVariables = numberSlopeVariables;
     m_numberTransportVariables = numberTransportVariables;
-		//Initialization of communications of primitive variables from resolved model
-		parallel.initializePersistentCommunicationsPrimitives();
-		//Initialization of communications of slopes for second order
-		parallel.initializePersistentCommunicationsSlopes();
-		//Initialization of communications necessary for additional physics (vectors of dim=3)
-		parallel.initializePersistentCommunicationsVector(dim);
-        //Initialization of communications of transported variables
-        parallel.initializePersistentCommunicationsTransports();
-        //Initialization of communications for AMR variables
-        parallel.initializePersistentCommunicationsXi();
-        parallel.initializePersistentCommunicationsSplit();
-        parallel.initializePersistentCommunicationsNumberGhostCells();
-        //Initialization of communications for the levels superior to 0
-        parallel.initializePersistentCommunicationsLvlAMR(lvlMax);
+    //Initialization of communications of primitive variables from resolved model
+    parallel.initializePersistentCommunicationsPrimitives();
+    //Initialization of communications of slopes for second order
+    parallel.initializePersistentCommunicationsSlopes();
+    //Initialization of communications necessary for additional physics (vectors of dim=3)
+    parallel.initializePersistentCommunicationsVector(dim);
+    //Initialization of communications of transported variables
+    parallel.initializePersistentCommunicationsTransports();
+    //Initialization of communications for AMR variables
+    parallel.initializePersistentCommunicationsXi();
+    parallel.initializePersistentCommunicationsSplit();
+    parallel.initializePersistentCommunicationsNumberGhostCells();
+    //Initialization of communications for the levels superior to 0
+    parallel.initializePersistentCommunicationsLvlAMR(lvlMax);
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
