@@ -42,9 +42,6 @@ ElementCartesian::ElementCartesian() : m_elementsChildren(0) {}
 
 ElementCartesian::~ElementCartesian()
 {
-  for (unsigned int i = 0; i < m_elementsChildren.size(); i++) {
-    delete m_elementsChildren[i];
-  }
   m_elementsChildren.clear();
 }
 
@@ -166,8 +163,5 @@ Element* ElementCartesian::getElementChildBack()
 
 void ElementCartesian::finalizeElementsChildren()
 {
-  for (unsigned int i = 0; i < m_elementsChildren.size(); i++) {
-    delete m_elementsChildren[i];
-  }
   m_elementsChildren.clear();
 }

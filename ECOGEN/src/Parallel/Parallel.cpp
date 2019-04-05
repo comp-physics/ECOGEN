@@ -185,7 +185,7 @@ void Parallel::addSlopesToReceive(int neighbour)
 
 //***********************************************************************
 
-void Parallel::purgeElementsAndSlopesToSendAndReceive()
+void Parallel::clearElementsAndSlopesToSendAndReceive()
 {
   for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
     m_elementsToSend[neighbour].clear();

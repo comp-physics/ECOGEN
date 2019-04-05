@@ -68,8 +68,6 @@ MeshCartesian::MeshCartesian(double lX, int numberCellsX, double lY, int numberC
 //***********************************************************************
 
 MeshCartesian::~MeshCartesian(){
-  for (int i = 0; i < m_faces.size(); i++) { delete m_faces[i]; }
-  for (int i = 0; i < m_elements.size(); i++) { delete m_elements[i]; }
   for (int j = m_numberBoundCondInit; j < 6; j++) {
     switch (j) {
     case 0:

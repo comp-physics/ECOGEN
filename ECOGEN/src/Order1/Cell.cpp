@@ -68,7 +68,6 @@ Cell::~Cell()
     delete m_vecQuantitiesAddPhys[qpa];
   }
   for (unsigned int i = 0; i < m_childrenInternalCellInterfaces.size(); i++) {
-    m_childrenInternalCellInterfaces[i]->finalizeFace();
     delete m_childrenInternalCellInterfaces[i];
   }
   m_childrenInternalCellInterfaces.clear();
@@ -76,6 +75,7 @@ Cell::~Cell()
     delete m_childrenCells[i];
   }
   m_childrenCells.clear();
+  delete m_element;
 }
 
 //***********************************************************************
@@ -232,6 +232,26 @@ void Cell::setToZeroBufferFlux(const int &numberPhases)
 
 void Cell::timeEvolution(const double &dt, const int &numberPhases, const int &numberTransports, Symmetry *symmetry, Prim type)
 {
+if (std::fabs(m_element->getPosition().getX() - 0.1725) < 1.e-6 && //KS//BD//
+    std::fabs(m_element->getPosition().getY() - 0.0075) < 1.e-6) {
+// std::cout<<"cell"
+// <<" lvl "<<m_lvl
+// <<" cellInterfacesSize "<<m_cellInterfaces.size()
+// <<std::endl;
+// for (int b = 0; b < m_cellInterfaces.size(); b++) {
+// std::cout<<"interface "<<b
+// <<" lvl "<<m_cellInterfaces[b]->getLvl()
+// <<std::endl;
+// }
+std::cout<<"cell cons"
+<<" getAlpha "<<m_cons->getAlpha(0)<<" "<<m_cons->getAlpha(1)
+<<" getMasse "<<m_cons->getMasse(0)<<" "<<m_cons->getMasse(1)
+<<" getEnergy "<<m_cons->getEnergy(0)<<" "<<m_cons->getEnergy(1)
+<<" getQdm "<<m_cons->getQdm().getX()<<" "<<m_cons->getQdm().getY()
+<<" getMasseMix "<<m_cons->getMasseMix()
+<<" getEnergyMix "<<m_cons->getEnergyMix()
+<<std::endl;
+}
   m_cons->setBufferFlux(*this, numberPhases);                //fluxTempXXX receive conservative variables at time n : Un
   symmetry->addSymmetricTerms(this, numberPhases, type);     //m_cons is incremented by the symmetric terms from primitive variables at time n
   m_cons->multiply(dt, numberPhases);                        //m_cons is multiplied by dt
@@ -243,6 +263,26 @@ void Cell::timeEvolution(const double &dt, const int &numberPhases, const int &n
     m_consTransports[k].multiply(dt);
     m_vecTransports[k].add(m_consTransports[k].getValue());
   }
+if (std::fabs(m_element->getPosition().getX() - 0.1725) < 1.e-6 && //KS//BD//
+    std::fabs(m_element->getPosition().getY() - 0.0075) < 1.e-6) {
+// std::cout<<"cell"
+// <<" lvl "<<m_lvl
+// <<" cellInterfacesSize "<<m_cellInterfaces.size()
+// <<std::endl;
+// for (int b = 0; b < m_cellInterfaces.size(); b++) {
+// std::cout<<"interface "<<b
+// <<" lvl "<<m_cellInterfaces[b]->getLvl()
+// <<std::endl;
+// }
+std::cout<<"cell cons"
+<<" getAlpha "<<m_cons->getAlpha(0)<<" "<<m_cons->getAlpha(1)
+<<" getMasse "<<m_cons->getMasse(0)<<" "<<m_cons->getMasse(1)
+<<" getEnergy "<<m_cons->getEnergy(0)<<" "<<m_cons->getEnergy(1)
+<<" getQdm "<<m_cons->getQdm().getX()<<" "<<m_cons->getQdm().getY()
+<<" getMasseMix "<<m_cons->getMasseMix()
+<<" getEnergyMix "<<m_cons->getEnergyMix()
+<<std::endl;
+}
 }
 
 //***********************************************************************
@@ -1431,7 +1471,6 @@ void Cell::unrefineCellAndCellInterfaces()
   //--------------------------------------------
 
   for (unsigned int i = 0; i < m_childrenInternalCellInterfaces.size(); i++) {
-    m_childrenInternalCellInterfaces[i]->finalizeFace();
     delete m_childrenInternalCellInterfaces[i];
   }
   m_childrenInternalCellInterfaces.clear();
@@ -2225,6 +2264,98 @@ void Cell::computeLoad(double &load) const
   load += std::pow(2., m_lvl);
   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
     m_childrenCells[i]->computeLoad(load);
+  }
+}
+
+//***************************************************************************
+
+void Cell::clearExternalCellInterfaces(const int &nbCellsY, const int &nbCellsZ)
+{
+  //Clear cell interfaces
+  for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+    m_childrenCells[i]->clearExternalCellInterfaces(nbCellsY, nbCellsZ);
+  }
+  m_cellInterfaces.clear();
+
+  //Re-assign pointers of children cells to internal cell interfaces (similar function as refineCellAndCellInterfaces)
+  if (m_split) {
+    if (nbCellsZ == 1) {
+      if (nbCellsY == 1) {
+        //1D
+        m_childrenCells[0]->addCellInterface(m_childrenInternalCellInterfaces[0]);
+        m_childrenCells[1]->addCellInterface(m_childrenInternalCellInterfaces[0]);
+      }
+      else {
+        //2D
+        for (int i = 0; i < 4; i++) {
+          if (i < 2) {
+            m_childrenCells[2 * i]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+            m_childrenCells[1 + 2 * i]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          }
+          else {
+            m_childrenCells[i % 2]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+            m_childrenCells[2 + i % 2]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          }
+        }
+      }
+    }
+    else {
+      //3D
+      for (int i = 0; i < 4; i++) {
+        if (i == 0) {
+          m_childrenCells[4]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[5]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 1) {
+          m_childrenCells[0]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[1]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 2) {
+          m_childrenCells[6]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[7]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else {
+          m_childrenCells[2]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[3]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+      }
+      for (int i = 4; i < 8; i++) {
+        if (i == 4) {
+          m_childrenCells[5]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[7]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 5) {
+          m_childrenCells[1]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[3]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 6) {
+          m_childrenCells[4]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[6]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else {
+          m_childrenCells[0]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[2]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+      }
+      for (int i = 8; i < 12; i++) {
+        if (i == 8) {
+          m_childrenCells[0]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[4]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 9) {
+          m_childrenCells[1]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[5]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else if (i == 10) {
+          m_childrenCells[2]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[6]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+        else {
+          m_childrenCells[3]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+          m_childrenCells[7]->addCellInterface(m_childrenInternalCellInterfaces[i]);
+        }
+      }
+    }
   }
 }
 

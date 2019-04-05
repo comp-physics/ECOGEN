@@ -74,9 +74,7 @@ MeshUnStruct::MeshUnStruct(const std::string &fichierMesh) :
 //***********************************************************************
 
 MeshUnStruct::~MeshUnStruct(){
-  for (int f = 0; f < m_numberFacesTotal; f++) { delete m_faces[f]; }
   delete[] m_faces;
-  for (int e = 0; e < m_numberElements; e++) { delete m_elements[e]; }
   delete[] m_elements;
   delete[] m_noeuds;
   for (unsigned int l = 0; l < m_lim.size(); l++) { delete m_lim[l]; }

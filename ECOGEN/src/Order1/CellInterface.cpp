@@ -58,10 +58,10 @@ CellInterface::CellInterface(int lvl) : m_mod(0), m_cellLeft(0), m_cellRight(0),
 CellInterface::~CellInterface()
 {
   for (unsigned int i = 0; i < m_cellInterfacesChildren.size(); i++) {
-    m_cellInterfacesChildren[i]->finalizeFace();
     delete m_cellInterfacesChildren[i];
   }
   m_cellInterfacesChildren.clear();
+  delete m_face;
 }
 
 //***********************************************************************
@@ -97,20 +97,61 @@ void CellInterface::setFace(Face *face)
 
 void CellInterface::computeFlux(const int &numberPhases, const int &numberTransports, double &dtMax, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, Prim type)
 {
+// std::cout<<"lvl "<<m_lvl //KS//BD//
+// << " posX "<<m_face->getPos().getX()
+// << " posY "<<m_face->getPos().getY()
+// << " left "<<m_cellLeft->getPosition().getX()
+// << " "     <<m_cellLeft->getPosition().getY()
+// << " right "<<m_cellRight->getPosition().getX()
+// << " "      <<m_cellRight->getPosition().getY()
+// <<std::endl;
   this->solveRiemann(numberPhases, numberTransports, dtMax, globalLimiter, interfaceLimiter, globalVolumeFractionLimiter, interfaceVolumeFractionLimiter, type);
 
-  if (m_cellLeft->getLvl() == m_cellRight->getLvl()) {     //CoefAMR = 1 pour les deux
-    this->addFlux(numberPhases, numberTransports, 1.);      //Ajout du flux sur maille droite
+  // if (m_cellLeft->getLvl() == m_cellRight->getLvl()) {     //CoefAMR = 1 pour les deux
+  //   this->addFlux(numberPhases, numberTransports, 1.);      //Ajout du flux sur maille droite
+  //   this->subtractFlux(numberPhases, numberTransports, 1.);     //Retrait du flux sur maille gauche
+  // }
+  // else if (m_cellLeft->getLvl() > m_cellRight->getLvl()) { //CoefAMR = 1 pour la gauche et 0.5 pour la droite
+  //   this->addFlux(numberPhases, numberTransports, 0.5);     //Ajout du flux sur maille droite
+  //   this->subtractFlux(numberPhases, numberTransports, 1.);     //Retrait du flux sur maille gauche
+  // }
+  // else {                                                      //CoefAMR = 0.5 pour la gauche et 1 pour la droite
+  //   this->addFlux(numberPhases, numberTransports, 1.);      //Ajout du flux sur maille droite
+  //   this->subtractFlux(numberPhases, numberTransports, 0.5);    //Retrait du flux sur maille gauche
+  // }
+      this->addFlux(numberPhases, numberTransports, 1.);      //Ajout du flux sur maille droite
     this->subtractFlux(numberPhases, numberTransports, 1.);     //Retrait du flux sur maille gauche
-  }
-  else if (m_cellLeft->getLvl() > m_cellRight->getLvl()) { //CoefAMR = 1 pour la gauche et 0.5 pour la droite
-    this->addFlux(numberPhases, numberTransports, 0.5);     //Ajout du flux sur maille droite
-    this->subtractFlux(numberPhases, numberTransports, 1.);     //Retrait du flux sur maille gauche
-  }
-  else {                                                      //CoefAMR = 0.5 pour la gauche et 1 pour la droite
-    this->addFlux(numberPhases, numberTransports, 1.);      //Ajout du flux sur maille droite
-    this->subtractFlux(numberPhases, numberTransports, 0.5);    //Retrait du flux sur maille gauche
-  }
+if ((std::fabs(m_face->getPos().getX() - 0.18) < 1.e-6 && //KS//BD//
+    std::fabs(m_face->getPos().getY() - 0.00375) < 1.e-6) ||
+    (std::fabs(m_face->getPos().getX() - 0.18) < 1.e-6 && //KS//BD//
+    std::fabs(m_face->getPos().getY() - 0.01125) < 1.e-6) ||
+    (std::fabs(m_face->getPos().getX() - 0.1725) < 1.e-6 && //KS//BD//
+    std::fabs(m_face->getPos().getY() - 0.015) < 1.e-6) ||
+    (std::fabs(m_face->getPos().getX() - 0.165) < 1.e-6 && //KS//BD//
+    std::fabs(m_face->getPos().getY() - 0.0075) < 1.e-6) ||
+    (std::fabs(m_face->getPos().getX() - 0.165) < 1.e-6 && //KS//BD//
+    std::fabs(m_face->getPos().getY() - 0.) < 1.e-6)) {
+// std::cout<<"cell"
+// <<" lvl "<<m_lvl
+// <<" cellInterfacesSize "<<m_cellInterfaces.size()
+// <<std::endl;
+// for (int b = 0; b < m_cellInterfaces.size(); b++) {
+// std::cout<<"interface "<<b
+// <<" lvl "<<m_cellInterfaces[b]->getLvl()
+// <<std::endl;
+// }
+std::cout<<"cellInterface"
+<<" normal "<<m_face->getNormal().getX()<<" "<<m_face->getNormal().getY()
+<<" tangent "<<m_face->getTangent().getX()<<" "<<m_face->getTangent().getY()
+<<" binormal "<<m_face->getBinormal().getX()<<" "<<m_face->getBinormal().getY()
+<<" pos "<<m_face->getPos().getX()<<" "<<m_face->getPos().getY()
+<<" surface "<<m_face->getSurface()
+<<" left "<<m_cellLeft->getElement()->getPosition().getX()<<" "<<m_cellLeft->getElement()->getPosition().getY()
+<<" vel "<<m_cellLeft->getVelocity().getX()<<" "<<m_cellLeft->getVelocity().getY()
+<<" right "<<m_cellRight->getElement()->getPosition().getX()<<" "<<m_cellRight->getElement()->getPosition().getY()
+<<" vel "<<m_cellRight->getVelocity().getX()<<" "<<m_cellRight->getVelocity().getY()
+<<std::endl;
+}
 }
 
 //***********************************************************************
@@ -371,7 +412,6 @@ void CellInterface::raffineCellInterfaceExterne(const int &nbCellsY, const int &
       }
     }
     else {
-
       //--------------------------------------------------
       //--------------------- Cas 2D ---------------------
       //--------------------------------------------------
@@ -1073,17 +1113,9 @@ void CellInterface::deraffineCellInterfaceExterne(Cell *cellRef)
 
 //***********************************************************************
 
-void CellInterface::finalizeFace()
-{
-  delete m_face;
-}
-
-//***********************************************************************
-
 void CellInterface::deraffineCellInterfacesChildren()
 {
   for (unsigned int i = 0; i < m_cellInterfacesChildren.size(); i++) {
-    m_cellInterfacesChildren[i]->finalizeFace();
     delete m_cellInterfacesChildren[i];
   }
   m_cellInterfacesChildren.clear();

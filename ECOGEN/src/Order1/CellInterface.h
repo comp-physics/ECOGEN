@@ -107,7 +107,6 @@ class CellInterface
     void creerFaceChild(CellInterface *cellInterfaceParent);             /*!< Creer une face enfant (non initialize) */
     virtual void raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent, const double &dZParent, Cell *cellRef, const int &dim);      /*!< Raffinement du extern cell interface en creant si besoin des children cell interfaces + liaisons cells/cell interfaces */
     virtual void deraffineCellInterfaceExterne(Cell *cellRef);        /*!< Deraffinement du extern cell interface en supprimant si besoin ses children cell interfaces + liaisons cells/cell interfaces */
-    void finalizeFace();                                        /*!< Supprime la face correspondante au cell interface */
     void deraffineCellInterfacesChildren();                               /*!< Supprime les children cell interfaces */
     void constructionTableauCellInterfacesExternesLvl(std::vector<CellInterface *> *cellInterfacesLvl); /*!< Construction du nouveau tableau de cell interfaces du niveau (lvl + 1), cell interfaces externes ajoutes ici */
     bool getSplit() const;                                      /*!< Renvoie si oui ou non le cell interface est splitte */
@@ -124,7 +123,7 @@ class CellInterface
     
     //Attributs pour methode AMR
     int m_lvl;                                             /*!< Niveau dans l arbre AMR du cell interface */
-    std::vector<CellInterface*> m_cellInterfacesChildren;             /*!< Tableau de children cell interfaces (taille : 1 en 1D, 2 en 2D et 4 en 3D) */
+    std::vector<CellInterface*> m_cellInterfacesChildren;  /*!< Tableau de children cell interfaces (taille : 1 en 1D, 2 en 2D et 4 en 3D) */
 
   private:
 };

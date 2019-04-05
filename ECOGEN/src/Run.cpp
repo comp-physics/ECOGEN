@@ -285,13 +285,15 @@ void Run::solver()
 void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsTotalAMR)
 {
   //1) AMR Level time step determination
-  double dtLvl = dt * std::pow(2., -(double)lvl);
+  // double dtLvl = dt * std::pow(2., -(double)lvl);
+  double dtLvl = dt * std::pow(2., -(double)m_lvlMax); //KS//BD//
   
   //2) (Un)Reffinement procedure
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
-    m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
-    m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model);
+    //m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos); //KS//BD//
+    if (Ncpu > 1) { m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model); } //KS//BD//
+    //m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model); //KS//BD//
     m_stat.endAMRTime();
   }
 
@@ -317,17 +319,17 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   this->advancingProcedure(dtLvl, lvl, dtMax);
 
   //6) Additional calculations for AMR levels > 0
-  if (lvl > 0) {
-    if (m_order == "SECONDORDER") {
-      for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
-      if (Ncpu > 1) {
-        m_mesh->communicationsSlopes( lvl);
-        if (lvl > 0) { m_mesh->communicationsSlopes( lvl - 1); }
-      }
-    }
-    if (lvl < m_lvlMax) { this->integrationProcedure(dt, lvl + 1, dtMax, nbCellsTotalAMR); }
-    this->advancingProcedure(dtLvl, lvl, dtMax);
-  }
+  // if (lvl > 0) { //KS//BD//
+  //   if (m_order == "SECONDORDER") {
+  //     for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
+  //     if (Ncpu > 1) {
+  //       m_mesh->communicationsSlopes( lvl);
+  //       if (lvl > 0) { m_mesh->communicationsSlopes( lvl - 1); }
+  //     }
+  //   }
+  //   if (lvl < m_lvlMax) { this->integrationProcedure(dt, lvl + 1, dtMax, nbCellsTotalAMR); }
+  //   this->advancingProcedure(dtLvl, lvl, dtMax);
+  // }
 }
 
 //***********************************************************************
