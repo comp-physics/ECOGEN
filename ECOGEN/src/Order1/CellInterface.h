@@ -114,6 +114,7 @@ class CellInterface
     int getNumberCellInterfacesChildren() const;                          /*!< Renvoie le number de children cell interfaces de ce cell interface*/
     CellInterface *getCellInterfaceChild(const int &numChild);          /*!< Renvoie le child cell interface correspondant au number */
     CellInterface *getCellInterfaceChildBack();          /*!< Renvoie le child cell interface correspondant au number */
+    void updatePointersInternalCellInterfaces();
 
    protected:
     Cell *m_cellLeft;

@@ -232,26 +232,6 @@ void Cell::setToZeroBufferFlux(const int &numberPhases)
 
 void Cell::timeEvolution(const double &dt, const int &numberPhases, const int &numberTransports, Symmetry *symmetry, Prim type)
 {
-if (std::fabs(m_element->getPosition().getX() - 0.1725) < 1.e-6 && //KS//BD//
-    std::fabs(m_element->getPosition().getY() - 0.0075) < 1.e-6) {
-// std::cout<<"cell"
-// <<" lvl "<<m_lvl
-// <<" cellInterfacesSize "<<m_cellInterfaces.size()
-// <<std::endl;
-// for (int b = 0; b < m_cellInterfaces.size(); b++) {
-// std::cout<<"interface "<<b
-// <<" lvl "<<m_cellInterfaces[b]->getLvl()
-// <<std::endl;
-// }
-std::cout<<"cell cons"
-<<" getAlpha "<<m_cons->getAlpha(0)<<" "<<m_cons->getAlpha(1)
-<<" getMasse "<<m_cons->getMasse(0)<<" "<<m_cons->getMasse(1)
-<<" getEnergy "<<m_cons->getEnergy(0)<<" "<<m_cons->getEnergy(1)
-<<" getQdm "<<m_cons->getQdm().getX()<<" "<<m_cons->getQdm().getY()
-<<" getMasseMix "<<m_cons->getMasseMix()
-<<" getEnergyMix "<<m_cons->getEnergyMix()
-<<std::endl;
-}
   m_cons->setBufferFlux(*this, numberPhases);                //fluxTempXXX receive conservative variables at time n : Un
   symmetry->addSymmetricTerms(this, numberPhases, type);     //m_cons is incremented by the symmetric terms from primitive variables at time n
   m_cons->multiply(dt, numberPhases);                        //m_cons is multiplied by dt
@@ -263,26 +243,6 @@ std::cout<<"cell cons"
     m_consTransports[k].multiply(dt);
     m_vecTransports[k].add(m_consTransports[k].getValue());
   }
-if (std::fabs(m_element->getPosition().getX() - 0.1725) < 1.e-6 && //KS//BD//
-    std::fabs(m_element->getPosition().getY() - 0.0075) < 1.e-6) {
-// std::cout<<"cell"
-// <<" lvl "<<m_lvl
-// <<" cellInterfacesSize "<<m_cellInterfaces.size()
-// <<std::endl;
-// for (int b = 0; b < m_cellInterfaces.size(); b++) {
-// std::cout<<"interface "<<b
-// <<" lvl "<<m_cellInterfaces[b]->getLvl()
-// <<std::endl;
-// }
-std::cout<<"cell cons"
-<<" getAlpha "<<m_cons->getAlpha(0)<<" "<<m_cons->getAlpha(1)
-<<" getMasse "<<m_cons->getMasse(0)<<" "<<m_cons->getMasse(1)
-<<" getEnergy "<<m_cons->getEnergy(0)<<" "<<m_cons->getEnergy(1)
-<<" getQdm "<<m_cons->getQdm().getX()<<" "<<m_cons->getQdm().getY()
-<<" getMasseMix "<<m_cons->getMasseMix()
-<<" getEnergyMix "<<m_cons->getEnergyMix()
-<<std::endl;
-}
 }
 
 //***********************************************************************
@@ -2356,6 +2316,31 @@ void Cell::clearExternalCellInterfaces(const int &nbCellsY, const int &nbCellsZ)
         }
       }
     }
+  }
+}
+
+//***************************************************************************
+
+void Cell::updatePointersInternalCellInterfaces()
+{
+  //Check if the cells pointed by my internal cell interfaces also points to my internal cell interfaces
+  bool foundCellInterface(false);
+  for (int b = 0; b < m_childrenInternalCellInterfaces.size(); b++) {
+    m_childrenInternalCellInterfaces[b]->updatePointersInternalCellInterfaces();
+
+    // //Left
+    // for (int b2 = 0; b2 < m_childrenInternalCellInterfaces[b]->getCellGauche()->getCellInterfacesSize(); b2++) {
+    //   if (m_childrenInternalCellInterfaces[b]->getCellGauche()->getCellInterface(b2) == m_childrenInternalCellInterfaces[b]) {
+    //     foundCellInterface = true; break;
+    //   }
+    // }
+    // if (!foundCellInterface) m_childrenInternalCellInterfaces[b]->getCellGauche()->addCellInterface(m_childrenInternalCellInterfaces[b]);
+
+    //Right
+
+    //Also check the children of my internal cell interfaces
+    //Do similar thing but inside CellInterface.cpp
+    //m_childrenInternalCellInterfaces[b]->updatePointersInternalCellInterfaces();
   }
 }
 

@@ -514,7 +514,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(TypeMeshContainer<Cell
         if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
         this->procedureRaffinement(cellsLvl, cellsLvlGhost, cellInterfacesLvl, lvl, addPhys, model, nbCellsTotalAMR, eos);
         //if (Ncpu > 1) { this->parallelLoadBalancingAMR(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model); } //KS//BD//
-        this->parallelLoadBalancingAMR(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model);
+        this->parallelLoadBalancingAMR(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model); //KS//BD//
         for (unsigned int i = 0; i < cellsLvl[lvl + 1].size(); i++) {
           cellsLvl[lvl + 1][i]->fill(domains, m_lvlMax);
         }
@@ -878,6 +878,7 @@ void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
   const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model)
 {
+  //return; //KS//BD//
   int iter(0);
   double idealLoadEndPosition(0.);
   double *loadPerCPU = new double[Ncpu];
@@ -1131,15 +1132,6 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
 
   //8) Create cell interfaces, faces and ghost cells level 0
   //--------------------------------------------------------
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " before balance"
-// <<std::endl;
-// for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-// std::cout<<"cpu "<<rankCpu
-// << " cellsLvl["<<lvl<<"].size() "<<cellsLvl[lvl].size()
-// << " cellInterfacesLvl["<<lvl<<"].size() "<<cellInterfacesLvl[lvl].size()
-// <<std::endl;
-// }
   for (int b = 0; b < cellInterfacesLvl[0].size(); b++) { delete cellInterfacesLvl[0][b]; }
   for (int i = 0; i < cellsLvl[0].size(); i++) { cellsLvl[0][i]->clearExternalCellInterfaces(m_numberCellsY, m_numberCellsZ); }
   for (int i = 0; i < cellsLvlGhost[0].size(); i++) { delete cellsLvlGhost[0][i]; }
@@ -1159,7 +1151,7 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
 
   //9) Allocate physical variables of cells and cell interfaces level 0
   //-------------------------------------------------------------------
-  // for (int i = 0; i < bufferCellsNew.size(); i++) { bufferCellsNew[i]->allocate(numberPhases, numberTransports, addPhys, model); }
+  //for (int i = 0; i < bufferCellsNew.size(); i++) { bufferCellsNew[i]->allocate(numberPhases, numberTransports, addPhys, model); }
   for (int i = 0; i < cellsLvlGhost[0].size(); i++) { cellsLvlGhost[0][i]->allocate(numberPhases, numberTransports, addPhys, model); }
   //Attribution model and slopes to faces
   int allocateSlopeLocal = 1;
@@ -1168,6 +1160,8 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
     cellInterfacesLvl[0][b]->allocateSlopes(numberPhases, numberTransports, allocateSlopeLocal);
   }
 
+
+
   //Refine external cell interfaces for already splitted cells (the ones not shift around)
   int dim(1);
   if (m_numberCellsZ != 1) { dim = 3; }
@@ -1175,66 +1169,13 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   for (int lvl = 0; lvl < m_lvlMax; lvl++) {
     for (int i = 0; i < cellsLvl[lvl].size(); i++) {
       if (cellsLvl[lvl][i]->getSplit()) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " posX "<<cellsLvl[lvl][i]->getPosition().getX()
-// << " posY "<<cellsLvl[lvl][i]->getPosition().getY()
-// << " getCellInterfacesSize "<<cellsLvl[lvl][i]->getCellInterfacesSize()
-// <<std::endl;
         for (int b = 0; b < cellsLvl[lvl][i]->getCellInterfacesSize(); b++) {
-// if (lvl == 1) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " posX "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getX()
-// << " posY "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getY()
-// <<" lvl "<<cellsLvl[lvl][i]->getCellInterface(b)->getLvl()
-// <<std::endl;
-// }
           if (!cellsLvl[lvl][i]->getCellInterface(b)->getSplit()) {
-// if (lvl == 1) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// <<" getCellInterface "<<b
-// <<" whoAmI "<<cellsLvl[lvl][i]->getCellInterface(b)->whoAmI()
-// <<std::endl;
-// }
-// if (lvl == 1) {
-// std::cout<<"HERE"<<std::endl;
-// }
             cellsLvl[lvl][i]->getCellInterface(b)->raffineCellInterfaceExterne(m_numberCellsY, m_numberCellsZ, 
               cellsLvl[lvl][i]->getElement()->getSizeX(), cellsLvl[lvl][i]->getElement()->getSizeY(), cellsLvl[lvl][i]->getElement()->getSizeZ(), cellsLvl[lvl][i], dim);
           }
-// if (cellsLvl[lvl][i]->getCellInterface(b)->getLvl() == 1) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// <<" getCellInterface "<<b
-// <<" whoAmI "<<cellsLvl[lvl][i]->getCellInterface(b)->whoAmI()
-// <<" parentCell "<<cellsLvl[lvl][i]->getPosition().getX()
-// <<" parentCell "<<cellsLvl[lvl][i]->getPosition().getY()
-// <<" lvl "<<cellsLvl[lvl][i]->getLvl()
-// <<std::endl;
-// if (cellsLvl[lvl][i]->getCellInterface(b)->whoAmI() == 0) {
-// for (int c = 0; c < cellsLvl[lvl][i]->getCellInterface(b)->getNumberCellInterfacesChildren(); c++) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " posX "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getFace()->getPos().getX()
-// << " posY "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getFace()->getPos().getY()
-// <<" lvl "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getLvl()
-// << " left "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getCellGauche()->getPosition().getX()
-// << " "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getCellGauche()->getPosition().getY()
-// << " right "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getCellDroite()->getPosition().getX()
-// << " "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellInterfaceChild(c)->getCellDroite()->getPosition().getY()
-// <<std::endl;
-// }
-// }
-// }
-// else if (cellsLvl[lvl][i]->getCellInterface(b)->getLvl() == 2) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " posX "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getX()
-// << " posY "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getY()
-// <<" lvl "<<cellsLvl[lvl][i]->getCellInterface(b)->getLvl()
-// << " left "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellGauche()->getPosition().getX()
-// << " "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellGauche()->getPosition().getY()
-// << " right "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellDroite()->getPosition().getX()
-// << " "<<cellsLvl[lvl][i]->getCellInterface(b)->getCellDroite()->getPosition().getY()
-// <<std::endl;
-// }
         }
+        cellsLvl[lvl][i]->updatePointersInternalCellInterfaces();
       }
     }
     //Reconstruction of the arrays of cells and cell interfaces of lvl + 1
@@ -1246,18 +1187,7 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
     }
   }
 
-// int lvl =2; //KS//BD//
-// for (int i = 0; i < cellsLvl[lvl].size(); i++) {
-// for (int b = 0; b < cellsLvl[lvl][i]->getCellInterfacesSize(); b++) {
-// if (lvl == 2) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " posX "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getX()
-// << " posY "<<cellsLvl[lvl][i]->getCellInterface(b)->getFace()->getPos().getY()
-// <<" lvl "<<cellsLvl[lvl][i]->getCellInterface(b)->getLvl()
-// <<std::endl;
-// }
-// }
-// }
+
 
   //10) Send/Receive physical values
   //--------------------------------
@@ -1282,19 +1212,19 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   // m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
 
 
-std::cout<<"cpu "<<rankCpu //KS//BD//
-<< " after balance"
-<<std::endl;
-for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-std::cout<<"cpu "<<rankCpu
-<< " cellsLvl["<<lvl<<"].size() "<<cellsLvl[lvl].size()
-<< " cellInterfacesLvl["<<lvl<<"].size() "<<cellInterfacesLvl[lvl].size()
-<<std::endl;
-}
-  std::cout<<"cpu "<<rankCpu
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// << " after balance"
+// <<std::endl;
+// for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+// std::cout<<"cpu "<<rankCpu
+// << " cellsLvl["<<lvl<<"].size() "<<cellsLvl[lvl].size()
+// << " cellInterfacesLvl["<<lvl<<"].size() "<<cellInterfacesLvl[lvl].size()
+// <<std::endl;
+// }
+  std::cout<<"cpu "<<rankCpu //KS//BD//
     << " GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD!!! "
     <<std::endl;
-  MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
+  //MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
 
 
   //Refinement and physical values to communicate

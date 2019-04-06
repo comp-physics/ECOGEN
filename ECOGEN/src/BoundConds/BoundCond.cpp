@@ -65,36 +65,8 @@ void BoundCond::initialize(Cell *cellLeft, Cell *cellRight)
 
 void BoundCond::computeFlux(const int &numberPhases, const int &numberTransports, double &dtMax, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, Prim type)
 {
-// std::cout<<"lvl "<<m_lvl //KS//BD//
-// << " posX "<<m_face->getPos().getX()
-// << " posY "<<m_face->getPos().getY()
-// << " left "<<m_cellLeft->getPosition().getX()
-// << " "     <<m_cellLeft->getPosition().getY()
-// << " whoAmI "<<this->whoAmI()
-// <<std::endl;
   this->solveRiemann(numberPhases, numberTransports, dtMax, globalLimiter, interfaceLimiter, globalVolumeFractionLimiter, interfaceVolumeFractionLimiter, type);
   this->subtractFlux(numberPhases, numberTransports, 1.); //Retrait du flux sur maille gauche
-if ((std::fabs(m_face->getPos().getX() - 0.1725) < 1.e-6 && //KS//BD//
-    std::fabs(m_face->getPos().getY() - 0.) < 1.e-6)) {
-// std::cout<<"cell"
-// <<" lvl "<<m_lvl
-// <<" cellInterfacesSize "<<m_cellInterfaces.size()
-// <<std::endl;
-// for (int b = 0; b < m_cellInterfaces.size(); b++) {
-// std::cout<<"interface "<<b
-// <<" lvl "<<m_cellInterfaces[b]->getLvl()
-// <<std::endl;
-// }
-std::cout<<"BoundCond"
-<<" normal "<<m_face->getNormal().getX()<<" "<<m_face->getNormal().getY()
-<<" tangent "<<m_face->getTangent().getX()<<" "<<m_face->getTangent().getY()
-<<" binormal "<<m_face->getBinormal().getX()<<" "<<m_face->getBinormal().getY()
-<<" pos "<<m_face->getPos().getX()<<" "<<m_face->getPos().getY()
-<<" surface "<<m_face->getSurface()
-<<" left "<<m_cellLeft->getElement()->getPosition().getX()<<" "<<m_cellLeft->getElement()->getPosition().getY()
-<<" vel "<<m_cellLeft->getVelocity().getX()<<" "<<m_cellLeft->getVelocity().getY()
-<<std::endl;
-}
 }
 
 //***********************************************************************
