@@ -177,12 +177,32 @@ void PhaseEulerHomogeneous::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void PhaseEulerHomogeneous::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_alpha);
+  dataToSend.push_back(m_density);
+  dataToSend.push_back(m_pressure);
+  dataToSend.push_back(static_cast<double>(m_eos->getNumber()));
+}
+
+//***************************************************************************
+
 void PhaseEulerHomogeneous::getBuffer(double *buffer, int &counter, Eos **eos)
 {
   m_alpha = buffer[++counter];
   m_density = buffer[++counter];
   m_pressure = buffer[++counter];
   m_eos = eos[static_cast<int>(buffer[++counter])];
+}
+
+//***************************************************************************
+
+void PhaseEulerHomogeneous::getBuffer(std::vector<double> &dataToReceive, int &counter, Eos **eos)
+{
+  m_alpha = dataToReceive[counter++];
+  m_density = dataToReceive[counter++];
+  m_pressure = dataToReceive[counter++];
+  m_eos = eos[static_cast<int>(dataToReceive[counter++])];
 }
 
 //****************************************************************************

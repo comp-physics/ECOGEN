@@ -65,7 +65,7 @@ public:
   virtual void recupereTypeCell(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl) const;
   virtual void recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;
   virtual void setDataSet(std::vector<double> &jeuDonnees, TypeMeshContainer<Cell *> *cellsLvl, const int var, int phase) const;
-  virtual void refineCell(Cell *cell, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR);
+  virtual void refineCellAndCellInterfaces(Cell *cell, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR);
 
   //Accesseurs
   virtual int getLvlMax() const { return m_lvlMax; };
@@ -74,7 +74,7 @@ public:
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
   virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model);
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos);
 
 private:
   int m_lvlMax;                               //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

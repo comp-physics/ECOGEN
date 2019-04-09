@@ -1247,7 +1247,7 @@ void Parallel::communicationsNumberGhostCells(const int &lvl)
 			m_bufferNumberElementsToSendToNeighbor[neighbour] = 0;
       m_bufferNumberSlopesToSendToNeighbor[neighbour] = 0;
 			for (int i = 0; i < m_numberElementsToSendToNeighbour[neighbour]; i++) {
-				//Automatic filing of m_bufferSendSplit
+				//Automatic filing of m_bufferNumberElementsToSendToNeighbor and m_bufferNumberSlopesToSendToNeighbor
 				m_elementsToSend[neighbour][i]->fillNumberElementsToSendToNeighbour(m_bufferNumberElementsToSendToNeighbor[neighbour], m_bufferNumberSlopesToSendToNeighbor[neighbour], lvl, neighbour, 0);
 			}
       

@@ -160,7 +160,9 @@ class Mixture
       //---------------------------------------
       virtual int numberOfTransmittedVariables() const { Errors::errorMessage("numberOfTransmittedVariables non implemente pour mixture utilise"); return 0; };
       virtual void fillBuffer(double *buffer, int &counter) const { Errors::errorMessage("fillBuffer non implemente pour mixture utilise"); };
+      virtual void fillBuffer(std::vector<double> &dataToSend) const { Errors::errorMessage("fillBuffer non implemente pour mixture utilise"); };
       virtual void getBuffer(double *buffer, int &counter) { Errors::errorMessage("getBuffer non implemente pour mixture utilise"); };
+      virtual void getBuffer(std::vector<double> &dataToReceive, int &counter) { Errors::errorMessage("getBuffer non implemente pour mixture utilise"); };
 
       //Specific methods for second order
       //---------------------------------

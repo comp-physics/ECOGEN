@@ -247,6 +247,18 @@ void PhaseEuler::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void PhaseEuler::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_density);
+  dataToSend.push_back(m_velocity.getX());
+  dataToSend.push_back(m_velocity.getY());
+  dataToSend.push_back(m_velocity.getZ());
+  dataToSend.push_back(m_pressure);
+  dataToSend.push_back(static_cast<double>(m_eos->getNumber()));
+}
+
+//***************************************************************************
+
 void PhaseEuler::getBuffer(double *buffer, int &counter, Eos **eos)
 {
   m_density = buffer[++counter];
@@ -255,6 +267,18 @@ void PhaseEuler::getBuffer(double *buffer, int &counter, Eos **eos)
   m_velocity.setZ(buffer[++counter]);
   m_pressure = buffer[++counter];
   m_eos = eos[static_cast<int>(buffer[++counter])];
+}
+
+//***************************************************************************
+
+void PhaseEuler::getBuffer(std::vector<double> &dataToReceive, int &counter, Eos **eos)
+{
+  m_density = dataToReceive[counter++];
+  m_velocity.setX(dataToReceive[counter++]);
+  m_velocity.setY(dataToReceive[counter++]);
+  m_velocity.setZ(dataToReceive[counter++]);
+  m_pressure = dataToReceive[counter++];
+  m_eos = eos[static_cast<int>(dataToReceive[counter++])];
 }
 
 //****************************************************************************

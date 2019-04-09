@@ -192,7 +192,7 @@ class Cell
         void chooseRefine(const double &xiSplit, const int &nbCellsY, const int &nbCellsZ,
           const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR); /*!< Choice for refinement of parent cell */
         void chooseUnrefine(const double &xiJoin, int &nbCellsTotalAMR); /*!< Choice for unrefinement of parent cell */
-        void refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);           /*!< Refine parent cell by creation of children cells */
+        void refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, const bool &refineExternalCellInterfaces);           /*!< Refine parent cell by creation of children cells */
         virtual void createChildCell(const int &lvl);                    /*!< Create a child cell (not initialized) */
         void unrefineCellAndCellInterfaces();                            /*!< Unrefine parent cell by destruction of children cells */
         void averageChildrenInParent();                                  /*!< Average variables of children cells in the parent cell, needed for computation of xi. */
@@ -236,6 +236,9 @@ class Cell
         void fillBufferSplit(bool *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferSplit(bool *buffer, int &counter, const int &lvl);
         void fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, int &numberSlopesToSendToNeighbor, const int &lvl, const int &neighbour, int numberNeighboursOfCPUneighbour);
+        void fillDataToSend(std::vector<double> &dataToSend, std::vector<int> &dataSplitToSend, const int &lvl) const;
+        void getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
+            const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);
         void computeLoad(double &load) const;
         void clearExternalCellInterfaces(const int &nbCellsY, const int &nbCellsZ);
         void updatePointersInternalCellInterfaces();

@@ -357,6 +357,17 @@ void MixEulerHomogeneous::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void MixEulerHomogeneous::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_velocity.getX());
+  dataToSend.push_back(m_velocity.getY());
+  dataToSend.push_back(m_velocity.getZ());
+  dataToSend.push_back(m_pressure);
+  dataToSend.push_back(m_totalEnergy);
+}
+
+//***************************************************************************
+
 void MixEulerHomogeneous::getBuffer(double *buffer, int &counter)
 {
   m_velocity.setX(buffer[++counter]);
@@ -364,6 +375,17 @@ void MixEulerHomogeneous::getBuffer(double *buffer, int &counter)
   m_velocity.setZ(buffer[++counter]);
   m_pressure = buffer[++counter];
   m_totalEnergy = buffer[++counter];
+}
+
+//***************************************************************************
+
+void MixEulerHomogeneous::getBuffer(std::vector<double> &dataToReceive, int &counter)
+{
+  m_velocity.setX(dataToReceive[counter++]);
+  m_velocity.setY(dataToReceive[counter++]);
+  m_velocity.setZ(dataToReceive[counter++]);
+  m_pressure = dataToReceive[counter++];
+  m_totalEnergy = dataToReceive[counter++];
 }
 
 //****************************************************************************

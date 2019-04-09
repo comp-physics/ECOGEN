@@ -463,6 +463,18 @@ void MixThermalEq::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void MixThermalEq::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_pressure);
+  dataToSend.push_back(m_temperature);
+  dataToSend.push_back(m_velocity.getX());
+  dataToSend.push_back(m_velocity.getY());
+  dataToSend.push_back(m_velocity.getZ());
+  dataToSend.push_back(m_totalEnergy);
+}
+
+//***************************************************************************
+
 void MixThermalEq::getBuffer(double *buffer, int &counter)
 {
   m_pressure = buffer[++counter];
@@ -471,6 +483,18 @@ void MixThermalEq::getBuffer(double *buffer, int &counter)
   m_velocity.setY(buffer[++counter]);
   m_velocity.setZ(buffer[++counter]);
   m_totalEnergy = buffer[++counter];
+}
+
+//***************************************************************************
+
+void MixThermalEq::getBuffer(std::vector<double> &dataToReceive, int &counter)
+{
+  m_pressure = dataToReceive[counter++];
+  m_temperature = dataToReceive[counter++];
+  m_velocity.setX(dataToReceive[counter++]);
+  m_velocity.setY(dataToReceive[counter++]);
+  m_velocity.setZ(dataToReceive[counter++]);
+  m_totalEnergy = dataToReceive[counter++];
 }
 
 //****************************************************************************

@@ -89,7 +89,9 @@ class Phase
     //---------------------------------------
     virtual int numberOfTransmittedVariables() const { Errors::errorMessage("numberOfTransmittedVariables not available for requested phase type"); return 0; };
     virtual void fillBuffer(double *buffer, int &counter) const { Errors::errorMessage("fillBuffer not available for requested phase type"); };
+    virtual void fillBuffer(std::vector<double> &dataToSend) const { Errors::errorMessage("fillBuffer not available for requested phase type"); };
     virtual void getBuffer(double *buffer, int &counter, Eos **eos) { Errors::errorMessage("getBuffer not available for requested phase type"); };
+    virtual void getBuffer(std::vector<double> &dataToReceive, int &counter, Eos **eos) { Errors::errorMessage("getBuffer not available for requested phase type"); };
 
     //Specific methods for second order
     //---------------------------------

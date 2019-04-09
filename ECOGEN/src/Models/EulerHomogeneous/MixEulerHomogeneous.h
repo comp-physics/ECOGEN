@@ -88,7 +88,9 @@ public:
   //---------------------------------------
   virtual int numberOfTransmittedVariables() const;
   virtual void fillBuffer(double *buffer, int &counter) const;
+  virtual void fillBuffer(std::vector<double> &dataToSend) const;
   virtual void getBuffer(double *buffer, int &counter);
+  virtual void getBuffer(std::vector<double> &dataToReceive, int &counter);
 
   //Specific methods for second order
   //---------------------------------

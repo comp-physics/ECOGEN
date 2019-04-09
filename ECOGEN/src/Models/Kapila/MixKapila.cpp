@@ -314,12 +314,32 @@ void MixKapila::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void MixKapila::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_velocity.getX());
+  dataToSend.push_back(m_velocity.getY());
+  dataToSend.push_back(m_velocity.getZ());
+  dataToSend.push_back(m_totalEnergy);
+}
+
+//***************************************************************************
+
 void MixKapila::getBuffer(double *buffer, int &counter)
 {
   m_velocity.setX(buffer[++counter]);
   m_velocity.setY(buffer[++counter]);
   m_velocity.setZ(buffer[++counter]);
   m_totalEnergy = buffer[++counter];
+}
+
+//***************************************************************************
+
+void MixKapila::getBuffer(std::vector<double> &dataToReceive, int &counter)
+{
+  m_velocity.setX(dataToReceive[counter++]);
+  m_velocity.setY(dataToReceive[counter++]);
+  m_velocity.setZ(dataToReceive[counter++]);
+  m_totalEnergy = dataToReceive[counter++];
 }
 
 //****************************************************************************

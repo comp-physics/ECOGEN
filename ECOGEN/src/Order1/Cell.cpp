@@ -1033,7 +1033,8 @@ void Cell::chooseRefine(const double &xiSplit, const int &nbCellsY, const int &n
   if (!m_split) {
     if (m_xi >= xiSplit) {
       if (!this->lvlNeighborTooLow()) {
-        this->refineCellAndCellInterfaces(nbCellsY, nbCellsZ, addPhys, model);
+        bool refineExternalCellInterfaces(true);
+        this->refineCellAndCellInterfaces(nbCellsY, nbCellsZ, addPhys, model, refineExternalCellInterfaces);
         nbCellsTotalAMR += m_childrenCells.size() - 1;
       }
     }
@@ -1065,7 +1066,7 @@ void Cell::chooseUnrefine(const double &xiJoin, int &nbCellsTotalAMR)
 
 //***********************************************************************
 
-void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
+void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model, const bool &refineExternalCellInterfaces)
 {
 	m_split = true;
 
@@ -1403,9 +1404,10 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
   //----------------------------------
   //External cell-interface refinement
   //----------------------------------
-
-  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
-    if (!m_cellInterfaces[b]->getSplit()) { m_cellInterfaces[b]->raffineCellInterfaceExterne(nbCellsY, nbCellsZ, dXParent, dYParent, dZParent, this, dim); }
+  if (refineExternalCellInterfaces) {
+    for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+      if (!m_cellInterfaces[b]->getSplit()) { m_cellInterfaces[b]->raffineCellInterfaceExterne(nbCellsY, nbCellsZ, dXParent, dYParent, dZParent, this, dim); }
+    }
   }
 }
 
@@ -2217,6 +2219,56 @@ void Cell::fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighb
 	}
 }
 
+//***********************************************************************
+
+void Cell::fillDataToSend(std::vector<double> &dataToSend, std::vector<int> &dataSplitToSend, const int &lvl) const
+{
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberPhases; k++) {
+      m_vecPhases[k]->fillBuffer(dataToSend);
+    }
+    m_mixture->fillBuffer(dataToSend);
+    for (int k = 0; k < m_numberTransports; k++) {
+      dataToSend.push_back(m_vecTransports[k].getValue());
+    }
+    dataSplitToSend.push_back(m_split);
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->fillDataToSend(dataToSend, dataSplitToSend, lvl);
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
+  const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
+{
+  if (m_lvl == lvl) {
+    for (int k = 0; k < m_numberPhases; k++) {
+      m_vecPhases[k]->getBuffer(dataToReceive, counter, eos);
+    }
+    m_mixture->getBuffer(dataToReceive, counter);
+    for (int k = 0; k < m_numberTransports; k++) {
+      m_vecTransports[k].setValue(dataToReceive[counter++]);
+    }
+    this->fulfillState();
+
+    //Refine cell and internal cell interfaces
+    m_split = dataSplitToReceive[counterSplit++];
+    if (m_split) {
+      bool refineExternalCellInterfaces(false);
+      this->refineCellAndCellInterfaces(nbCellsY, nbCellsZ, addPhys, model, refineExternalCellInterfaces);
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->getDataToSendAndRefine(dataToReceive, dataSplitToReceive, lvl, eos, counter, counterSplit, nbCellsY, nbCellsZ, addPhys, model);
+    }
+  }
+}
+
 //***************************************************************************
 
 void Cell::computeLoad(double &load) const
@@ -2327,20 +2379,6 @@ void Cell::updatePointersInternalCellInterfaces()
   bool foundCellInterface(false);
   for (int b = 0; b < m_childrenInternalCellInterfaces.size(); b++) {
     m_childrenInternalCellInterfaces[b]->updatePointersInternalCellInterfaces();
-
-    // //Left
-    // for (int b2 = 0; b2 < m_childrenInternalCellInterfaces[b]->getCellGauche()->getCellInterfacesSize(); b2++) {
-    //   if (m_childrenInternalCellInterfaces[b]->getCellGauche()->getCellInterface(b2) == m_childrenInternalCellInterfaces[b]) {
-    //     foundCellInterface = true; break;
-    //   }
-    // }
-    // if (!foundCellInterface) m_childrenInternalCellInterfaces[b]->getCellGauche()->addCellInterface(m_childrenInternalCellInterfaces[b]);
-
-    //Right
-
-    //Also check the children of my internal cell interfaces
-    //Do similar thing but inside CellInterface.cpp
-    //m_childrenInternalCellInterfaces[b]->updatePointersInternalCellInterfaces();
   }
 }
 

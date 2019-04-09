@@ -157,10 +157,26 @@ void PhaseThermalEq::fillBuffer(double *buffer, int &counter) const
 
 //***************************************************************************
 
+void PhaseThermalEq::fillBuffer(std::vector<double> &dataToSend) const
+{
+  dataToSend.push_back(m_alpha);
+  dataToSend.push_back(static_cast<double>(m_eos->getNumber()));
+}
+
+//***************************************************************************
+
 void PhaseThermalEq::getBuffer(double *buffer, int &counter, Eos **eos)
 {
   m_alpha = buffer[++counter];
   m_eos = eos[static_cast<int>(buffer[++counter])];
+}
+
+//***************************************************************************
+
+void PhaseThermalEq::getBuffer(std::vector<double> &dataToReceive, int &counter, Eos **eos)
+{
+  m_alpha = dataToReceive[counter++];
+  m_eos = eos[static_cast<int>(dataToReceive[counter++])];
 }
 
 //****************************************************************************

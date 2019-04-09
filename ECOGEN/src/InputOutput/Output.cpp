@@ -185,13 +185,13 @@ void Output::readTree(Mesh *mesh, std::vector<Cell *> *cellsLvl, std::vector<Cel
       for (unsigned int c = 0; c < cellsLvl[lvl].size(); c++) {
         fileStream >> splitCell;
         //Raffinement de la cellule
-        if (splitCell) mesh->refineCell(cellsLvl[lvl][c], addPhys, model, nbCellsTotalAMR);
+        if (splitCell) mesh->refineCellAndCellInterfaces(cellsLvl[lvl][c], addPhys, model, nbCellsTotalAMR);
       }
 
       if (Ncpu > 1) Errors::errorMessage("Output::readTree: Resuming with AMR not available");
 
-      //Building cells and interface cells vecors
-      //-----------------------------------------
+      //Building cells and interface cells vectors
+      //------------------------------------------
       if (lvl < mesh->getLvlMax()) {
         cellsLvl[lvl+1].clear();
         cellInterfacesLvl[lvl + 1].clear();

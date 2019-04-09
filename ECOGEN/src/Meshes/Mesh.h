@@ -102,7 +102,7 @@ public:
   //! \param     phase            number of requested phase (-1 for mixture, -2 for transport, -3 for xi, -4 for gradient density mixture)
   //! \param     jeuDonnees       double vector containing the extracted data
   virtual void setDataSet(std::vector<double> &jeuDonnees, std::vector<Cell *> *cellsLvl, const int var, int phase) const { Errors::errorMessage("setDataSet not available for requested mesh"); };
-  virtual void refineCell(Cell *cell, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR) { Errors::errorMessage("refineCell not available for requested mesh"); };;
+  virtual void refineCellAndCellInterfaces(Cell *cell, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR) { Errors::errorMessage("refineCellAndCellInterfaces not available for requested mesh"); };;
   //! \brief     Extracting absolute velocity for specific Moving Reference Frame computations
   //! \param     cellsLvl         data structure containing pointer to cells
   //! \param     sourceMRF        pointer to the corresponding MRF source
@@ -127,7 +127,7 @@ public:
   void communicationsTransports(const int &lvl);
 	virtual void finalizeParallele(const int &lvlMax);
   virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, std::vector<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model) {};
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos) {};
 
   
 protected:
