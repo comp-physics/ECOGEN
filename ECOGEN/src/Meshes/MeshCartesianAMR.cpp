@@ -598,7 +598,7 @@ void MeshCartesianAMR::procedureRaffinement(TypeMeshContainer<Cell *> *cellsLvl,
       //6) Mise a jour des communications persistantes au niveau lvl + 1
       //----------------------------------------------------------------
       parallel.communicationsNumberGhostCells(lvlPlus1);	//Communication des numbers d'elements a envoyer et a recevoir de chaque cote de la limite parallele
-      parallel.updatePersistentCommunicationsLvl(lvlPlus1, m_geometrie);
+      parallel.updatePersistentCommunicationsLvlAMR(lvlPlus1, m_geometrie);
     }
 
     //7) Reconstruction des tableaux de cells et cell interfaces lvl + 1
@@ -1161,7 +1161,7 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   for (int i = 0; i < cellsLvlGhost[0].size(); i++) { delete cellsLvlGhost[0][i]; }
   cellInterfacesLvl[0].clear();
   cellsLvlGhost[0].clear();
-  parallel.clearElementsAndSlopesToSendAndReceive(); //KS//BD// Comment for serial test
+  parallel.clearElementsAndSlopesToSendAndReceivePLusNeighbour();
   m_numberCellsCalcul = cellsLvl[0].size();
   createCellInterfacesFacesAndGhostCells(cellsLvl[0], cellsLvlGhost[0], cellInterfacesLvl[0], ordreCalcul);
   m_numberCellsTotal = cellsLvl[0].size() + cellsLvlGhost[0].size();
@@ -1296,35 +1296,17 @@ MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
   //Delete sent cells
   for (int i = 0; i < bufferSendCells.size(); i++) { delete bufferSendCells[i]; }
 
-  //11) Update persistent communications and refine ghost cells of lvl > 0
-  //----------------------------------------------------------------------
-
-    //Update persistent communications
-    // parallel.updatePersistentCommunicationsLvl(lvlPlus1, m_geometrie);
-
-
-//Do similar things for the ghost cells
-
-
-  // //7) Intialization of persistant communications for parallel computing
-  // //--------------------------------------------------------------------
-  // m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cellsLvl[0], m_order);
-    // USE updatePersistentCommunicationsLvl
-  // if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
-  
-  // //8) AMR initialization
-  // //---------------------
-  // m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order);
-
-
-
-
-  //12) Refine external cell interfaces
-  //-----------------------------------
+  //11) Update persistent communications of cells lvl 0
+  //---------------------------------------------------
   int dim(1);
   if (m_numberCellsZ != 1) { dim = 3; }
   else if (m_numberCellsY != 1) { dim = 2; }
+  parallel.updatePersistentCommunicationsAMR(dim);
+
+  //13) Refine external cell interfaces, refine ghost cells and update persistent communications of lvl > 0
+  //-------------------------------------------------------------------------------------------------------
   for (int lvl = 0; lvl < m_lvlMax; lvl++) {
+    //Refine external cell interfaces
     for (int i = 0; i < cellsLvl[lvl].size(); i++) {
       if (cellsLvl[lvl][i]->getSplit()) {
         for (int b = 0; b < cellsLvl[lvl][i]->getCellInterfacesSize(); b++) {
@@ -1336,19 +1318,26 @@ MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
         cellsLvl[lvl][i]->updatePointersInternalCellInterfaces();
       }
     }
+
+    //Refine ghost cells
+    parallel.communicationsSplit(lvl);
+    cellsLvlGhost[lvl + 1].clear();
+    for (unsigned int i = 0; i < cellsLvlGhost[lvl].size(); i++) { cellsLvlGhost[lvl][i]->chooseRefineDeraffineGhost(m_numberCellsY, m_numberCellsZ, addPhys, model, cellsLvlGhost); }
+    parallel.communicationsPrimitives(eos, lvl);
+
+    //Update of persistent communications of cells lvl + 1
+    parallel.communicationsNumberGhostCells(lvl + 1);
+    parallel.updatePersistentCommunicationsLvlAMR(lvl + 1, m_geometrie);
+
     //Reconstruction of the arrays of cells and cell interfaces of lvl + 1
-    if (lvl < m_lvlMax) {
-      cellsLvl[lvl + 1].clear();
-      cellInterfacesLvl[lvl + 1].clear();
-      for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->buildLvlCellsAndLvlInternalCellInterfacesArrays(cellsLvl, cellInterfacesLvl); }
-      for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->constructionTableauCellInterfacesExternesLvl(cellInterfacesLvl); }
-    }
+    cellsLvl[lvl + 1].clear();
+    cellInterfacesLvl[lvl + 1].clear();
+    for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->buildLvlCellsAndLvlInternalCellInterfacesArrays(cellsLvl, cellInterfacesLvl); }
+    for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->constructionTableauCellInterfacesExternesLvl(cellInterfacesLvl); }
   }
+  parallel.communicationsPrimitives(eos, m_lvlMax);
 
 MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-
-
-  //Ghost cells (refinement) + update persistent communications
 
   //Update nbCellsTotalAMR
 

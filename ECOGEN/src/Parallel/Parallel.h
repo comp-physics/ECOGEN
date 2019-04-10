@@ -52,7 +52,7 @@ public:
   void addElementToReceive(int neighbour, Cell* cell);
   void addSlopesToSend(int neighbour);
   void addSlopesToReceive(int neighbour);
-  void clearElementsAndSlopesToSendAndReceive();
+  void clearElementsAndSlopesToSendAndReceivePLusNeighbour();
   const TypeMeshContainer<Cell*> &getElementsToSend(int neighbour) const;
   TypeMeshContainer<Cell*> &getElementsToSend(int neighbour);
   TypeMeshContainer<Cell*> &getElementsToReceive(int neighbour);
@@ -90,7 +90,9 @@ public:
   //Methodes pour les variables AMR
   void initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax);
   void initializePersistentCommunicationsLvlAMR(const int &lvlMax);
-  void updatePersistentCommunicationsLvl(int lvl, const int &dim);
+  void clearRequestsAndBuffers(int lvl);
+  void updatePersistentCommunicationsAMR(const int &dim);
+  void updatePersistentCommunicationsLvlAMR(int lvl, const int &dim);
   void finalizeAMR(const int &lvlMax);
 
   void initializePersistentCommunicationsXi();
