@@ -2231,6 +2231,7 @@ void Cell::fillDataToSend(std::vector<double> &dataToSend, std::vector<int> &dat
     for (int k = 0; k < m_numberTransports; k++) {
       dataToSend.push_back(m_vecTransports[k].getValue());
     }
+    dataToSend.push_back(m_xi);
     dataSplitToSend.push_back(m_split);
   }
   else {
@@ -2254,6 +2255,7 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
       m_vecTransports[k].setValue(dataToReceive[counter++]);
     }
     this->fulfillState();
+    m_xi = dataToReceive[counter++];
 
     //Refine cell and internal cell interfaces
     m_split = dataSplitToReceive[counterSplit++];
