@@ -75,9 +75,18 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
   //--------------------
   m_decomp = decomposition::Decomposition({{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}}, Ncpu);
   auto keys = m_decomp.get_keys(rankCpu);
-
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" keys.size() "<<keys.size()
+<<std::endl;
+}
   for(unsigned int i = 0; i < keys.size(); ++i)
-  {    
+  {  
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" cKey i "<<i<<" "<<keys[i]
+<<std::endl;
+}  
     if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
     else { cells.push_back(new CellO2); }
     m_elements.push_back(new ElementCartesian());
@@ -145,7 +154,17 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
        offsets[2*d][d] =-1;
        offsets[2*d+1][d] =+1;
    }
-
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" cells.size() "<<cells.size()
+<<std::endl;
+for(unsigned int i = 0; i < cells.size(); ++i)
+{
+std::cout<<"cpu "<<rankCpu
+<<" cKey i "<<i<<" "<<cells[i]->getElement()->getKey()
+<<std::endl;
+}
+}
    for(unsigned int i = 0; i < cells.size(); ++i)
    {
        const auto coord = cells[i]->getElement()->getKey().coordinate();
@@ -295,6 +314,18 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
 
                        if (it2 == cellsGhost.end()) //Ghost cell does not exist
                        {
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" 2.2.1.0 i "<<i
+<<std::endl;
+std::cout<<"cpu "<<rankCpu
+<<" cKey "<<cells[i]->getElement()->getKey()
+<<std::endl;
+std::cout<<"cpu "<<rankCpu
+<<" nKey "<<nKey
+<<" neighbour "<<neighbour
+<<std::endl;
+}
                           //Create ghost cell and update cell interface
                          if (ordreCalcul == "FIRSTORDER") { cellsGhost.push_back(new CellGhost); }
                          else { cellsGhost.push_back(new CellO2Ghost); }
@@ -304,7 +335,11 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
                          cellsGhost.back()->pushBackSlope();
                          parallel.addSlopesToSend(neighbour);
                          parallel.addSlopesToReceive(neighbour);
-
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" 2.2.1.1 i "<<i
+<<std::endl;
+}
                          //Update parallel communications
                          parallel.setNeighbour(neighbour);
                          //Try to find the current cell into the already added cells to send
@@ -319,7 +354,11 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
                          }
                          parallel.addElementToReceive(neighbour, cellsGhost.back());
                          cellsGhost.back()->setRankOfNeighborCPU(neighbour);
-
+if (rankCpu == 29) { //KS//BD//
+std::cout<<"cpu "<<rankCpu
+<<" 2.2.1.2 i "<<i
+<<std::endl;
+}
                          const auto coord = nKey.coordinate();
                          const auto nix = coord.x(), niy = coord.y(), niz = coord.z();
 
@@ -878,7 +917,7 @@ void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
   const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos)
 {
-  //return; //KS//BD//
+  return; //KS//BD//
   int iter(0), counter(0), counterSplit(0);
   double idealLoadEndPosition(0.);
   double *loadPerCPU = new double[Ncpu];
@@ -889,16 +928,17 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   MPI_Request req_recvNeighborM1_2;
   MPI_Status status;
 
-for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
-if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
-std::cout<<"cpu "<<rankCpu
-<<" beginning is NaN....................................................................................................................... "
-<<std::endl;
-}
-}
+// for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
+// if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
+// std::cout<<"cpu "<<rankCpu
+// <<" beginning is NaN....................................................................................................................... "
+// <<cellsLvl[0][i]->getElement()->getKey()
+// <<std::endl;
+// }
+// }
 
   //LOOP over the following until global balance
   //while (CONDITION)
@@ -979,6 +1019,7 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
 
   //Determine and communicate what I can send/receive to/from neighbours (limited by current local cells/load)
   double possibleLoadShiftStart(0.), possibleLoadShiftEnd(0.);
+  double bufferPossibleLoadShiftStart(0.), bufferPossibleLoadShiftEnd(0.);
   int newStart(0);
   int numberOfCellsToSendStart(0), numberOfCellsToSendEnd(0);
   int numberOfCellsToReceiveStart(0), numberOfCellsToReceiveEnd(0);
@@ -987,12 +1028,20 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
   if (idealLoadShiftStart > 0.) {
     //Determine and send possible load shift start
     for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
-      if (possibleLoadShiftStart >= idealLoadShiftStart) {
+      bufferPossibleLoadShiftStart = possibleLoadShiftStart;
+      cellsLvl[0][i]->computeLoad(possibleLoadShiftStart);
+// std::cout<<"cpu "<<rankCpu
+// <<" idealLoadShiftStart "<<idealLoadShiftStart
+// <<" i "<<i
+// <<" bufferPossibleLoadShiftStart "<<bufferPossibleLoadShiftStart
+// <<" possibleLoadShiftStart "<<possibleLoadShiftStart
+// <<std::endl; //KS//BD//
+      if (possibleLoadShiftStart > idealLoadShiftStart) {
         newStart = i;
+        possibleLoadShiftStart = bufferPossibleLoadShiftStart;
+        numberOfCellsToSendStart = i;
         break;
       }
-      cellsLvl[0][i]->computeLoad(possibleLoadShiftStart);
-      numberOfCellsToSendStart = i + 1;
     }
     if (rankCpu != 0) {
       MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
@@ -1012,13 +1061,20 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
   //For load shift end
   if (idealLoadShiftEnd < 0.) {
     //Determine and send possible load shift end
-    for (int i = cellsLvl[0].size()-1; i >= newStart; i--) {
-      if (-possibleLoadShiftEnd <= (idealLoadShiftEnd)) {
-        possibleLoadShiftEnd = -possibleLoadShiftEnd;
+    for (int i = cellsLvl[0].size() - 1; i > newStart; i--) {
+      bufferPossibleLoadShiftEnd = possibleLoadShiftEnd;
+      cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd);
+// std::cout<<"cpu "<<rankCpu
+// <<" idealLoadShiftEnd "<<idealLoadShiftEnd
+// <<" i "<<i
+// <<" bufferPossibleLoadShiftEnd "<<bufferPossibleLoadShiftEnd
+// <<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
+// <<std::endl; //KS//BD//
+      if (-possibleLoadShiftEnd < idealLoadShiftEnd) {
+        possibleLoadShiftEnd = -bufferPossibleLoadShiftEnd;
+        numberOfCellsToSendEnd = cellsLvl[0].size() - 1 - i;
         break;
       }
-      cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd);
-      numberOfCellsToSendEnd = cellsLvl[0].size() - i;
     }
     if (rankCpu != Ncpu - 1) {
       MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
@@ -1163,13 +1219,16 @@ std::cout<<"cpu "<<rankCpu
   //-----------------------------------------------------------
   typename decomposition::Key<3>::value_type localStart = cellsLvl[0][0]->getElement()->getKey().getIndex();
   MPI_Allgather(&localStart, 1, MPI_UNSIGNED_LONG_LONG, startPerCPU, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
-if (rankCpu == 0) {
-for (int n = 0; n < Ncpu; n++) {
+// if (rankCpu == 0) {
+// for (int n = 0; n < Ncpu; n++) {
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// << " startPerCPU["<<n<<"] "<<decomposition::Key<3>(startPerCPU[n])
+// <<std::endl;
+// }
+// }
 std::cout<<"cpu "<<rankCpu //KS//BD//
-<< " startPerCPU["<<n<<"] "<<decomposition::Key<3>(startPerCPU[n])
+<< " startPerCPU["<<rankCpu<<"] "<<decomposition::Key<3>(startPerCPU[rankCpu])
 <<std::endl;
-}
-}
   for( int i = 0; i < Ncpu; ++i) {
     decomposition::Key<3> key_tmp(startPerCPU[i]);
     m_decomp.start_key(i) = key_tmp;
@@ -1187,146 +1246,150 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   createCellInterfacesFacesAndGhostCells(cellsLvl[0], cellsLvlGhost[0], cellInterfacesLvl[0], ordreCalcul);
   m_numberCellsTotal = cellsLvl[0].size() + cellsLvlGhost[0].size();
   m_numberFacesTotal = cellInterfacesLvl[0].size();
-// MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " m_numberCellsCalcul "<<m_numberCellsCalcul
-// << " m_numberCellsTotal "<<m_numberCellsTotal
-// << " m_numberFacesTotal "<<m_numberFacesTotal
-// <<std::endl;
+MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<< " m_numberCellsCalcul "<<m_numberCellsCalcul
+<< " m_numberCellsTotal "<<m_numberCellsTotal
+<< " m_numberFacesTotal "<<m_numberFacesTotal
+<<std::endl;
 
   //9) Allocate physical variables of cells and cell interfaces level 0
   //-------------------------------------------------------------------
   for (int i = 0; i < bufferReceiveCells.size(); i++) { bufferReceiveCells[i]->allocate(numberPhases, numberTransports, addPhys, model); }
   for (int i = 0; i < cellsLvlGhost[0].size(); i++) { cellsLvlGhost[0][i]->allocate(numberPhases, numberTransports, addPhys, model); }
+  for (int i = 0; i < bufferReceiveCells.size(); i++) { bufferReceiveCells[i]->getPhase(0)->setEos(eos[0]); }
+  for (int i = 0; i < bufferReceiveCells.size(); i++) { bufferReceiveCells[i]->getPhase(1)->setEos(eos[1]); }
+  for (int i = 0; i < cellsLvlGhost[0].size(); i++) { cellsLvlGhost[0][i]->getPhase(0)->setEos(eos[0]); }
+  for (int i = 0; i < cellsLvlGhost[0].size(); i++) { cellsLvlGhost[0][i]->getPhase(1)->setEos(eos[1]); }
   //Attribution model and slopes to faces
   int allocateSlopeLocal = 1;
   for (int b = 0; b < cellInterfacesLvl[0].size(); b++) {
     cellInterfacesLvl[0][b]->associeModel(model);
     cellInterfacesLvl[0][b]->allocateSlopes(numberPhases, numberTransports, allocateSlopeLocal);
   }
-for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
-if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
-std::cout<<"cpu "<<rankCpu
-<<" 9 is NaN....................................................................................................................... "
-<<std::endl;
-}
-}
+// for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
+// if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
+// std::cout<<"cpu "<<rankCpu
+// <<" 9 is NaN....................................................................................................................... "
+// <<std::endl;
+// }
+// }
   //10) Send/Receive physical values of cells lvl >= 0 and create new cells and new internal cell interfaces of lvl > 0
   //-------------------------------------------------------------------------------------------------------------------
   //Count and communicate number of data (physical values and cell trees) to send/receive + fill corresponding vectors
-  int numberSendStart(0), numberSendEnd(0), numberReceiveStart(0), numberReceiveEnd(0);
-  int numberSplitSendStart(0), numberSplitSendEnd(0), numberSplitReceiveStart(0), numberSplitReceiveEnd(0);
-  std::vector<double> dataToSendStart, dataToSendEnd;
-  std::vector<int> dataSplitToSendStart, dataSplitToSendEnd;
-  if (numberOfCellsToSendStart > 0) {
-    //Count and fill buffer vector send
-    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (int i = 0; i < bufferSendCellsStart.size(); i++) {
-        bufferSendCellsStart[i]->fillDataToSend(dataToSendStart, dataSplitToSendStart, lvl);
-      }
-    }
-    numberSendStart = dataToSendStart.size();
-    numberSplitSendStart = dataSplitToSendStart.size();
-    if (rankCpu != 0) {
-      MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
-    }
-  }
-  if (numberOfCellsToSendEnd > 0) {
-    //Count and fill buffer vector send
-    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (int i = 0; i < bufferSendCellsEnd.size(); i++) {
-        bufferSendCellsEnd[i]->fillDataToSend(dataToSendEnd, dataSplitToSendEnd, lvl);
-      }
-    }
-    numberSendEnd = dataToSendEnd.size();
-    numberSplitSendEnd = dataSplitToSendEnd.size();
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
-    }
-  }
-  if (numberOfCellsToReceiveStart > 0) {
-    if (rankCpu != 0) {
-      MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
-    }
-  }
-  if (numberOfCellsToReceiveEnd > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
-    }
-  }
+//   int numberSendStart(0), numberSendEnd(0), numberReceiveStart(0), numberReceiveEnd(0);
+//   int numberSplitSendStart(0), numberSplitSendEnd(0), numberSplitReceiveStart(0), numberSplitReceiveEnd(0);
+//   std::vector<double> dataToSendStart, dataToSendEnd;
+//   std::vector<int> dataSplitToSendStart, dataSplitToSendEnd;
+//   if (numberOfCellsToSendStart > 0) {
+//     //Count and fill buffer vector send
+//     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+//       for (int i = 0; i < bufferSendCellsStart.size(); i++) {
+//         bufferSendCellsStart[i]->fillDataToSend(dataToSendStart, dataSplitToSendStart, lvl);
+//       }
+//     }
+//     numberSendStart = dataToSendStart.size();
+//     numberSplitSendStart = dataSplitToSendStart.size();
+//     if (rankCpu != 0) {
+//       MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+//       MPI_Wait(&req_recvNeighborM1, &status);
+//       MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+//       MPI_Wait(&req_recvNeighborM1_2, &status);
+//     }
+//   }
+//   if (numberOfCellsToSendEnd > 0) {
+//     //Count and fill buffer vector send
+//     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+//       for (int i = 0; i < bufferSendCellsEnd.size(); i++) {
+//         bufferSendCellsEnd[i]->fillDataToSend(dataToSendEnd, dataSplitToSendEnd, lvl);
+//       }
+//     }
+//     numberSendEnd = dataToSendEnd.size();
+//     numberSplitSendEnd = dataSplitToSendEnd.size();
+//     if (rankCpu != Ncpu - 1) {
+//       MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+//       MPI_Wait(&req_sendNeighborP1, &status);
+//       MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+//       MPI_Wait(&req_sendNeighborP1_2, &status);
+//     }
+//   }
+//   if (numberOfCellsToReceiveStart > 0) {
+//     if (rankCpu != 0) {
+//       MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+//       MPI_Wait(&req_recvNeighborM1, &status);
+//       MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+//       MPI_Wait(&req_recvNeighborM1_2, &status);
+//     }
+//   }
+//   if (numberOfCellsToReceiveEnd > 0) {
+//     if (rankCpu != Ncpu - 1) {
+//       MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+//       MPI_Wait(&req_sendNeighborP1, &status);
+//       MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+//       MPI_Wait(&req_sendNeighborP1_2, &status);
+//     }
+//   }
 
-  //Send/Receive data
-  std::vector<double> dataToReceiveStart(numberReceiveStart), dataToReceiveEnd(numberReceiveEnd);
-  std::vector<int> dataSplitToReceiveStart(numberSplitReceiveStart), dataSplitToReceiveEnd(numberSplitReceiveEnd);
-  if (numberOfCellsToSendStart > 0) {
-    if (rankCpu != 0) {
-      MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
-    }
-  }
-  if (numberOfCellsToReceiveEnd > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
-    }
-    //Get buffer vector receive + Refine cells and internal cell interfaces
-    counter = 0; counterSplit = 0;
-    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (int i = 0; i < bufferReceiveCellsEnd.size(); i++) {
-        bufferReceiveCellsEnd[i]->getDataToSendAndRefine(dataToReceiveEnd, dataSplitToReceiveEnd, lvl, eos, counter, counterSplit, m_numberCellsY, m_numberCellsZ, addPhys, model);
-      }
-    }
-  }
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " numberSendStart "<<numberSendStart
-// << " numberSplitSendStart "<<numberSplitSendStart
-// << " numberReceiveEnd "<<numberReceiveEnd
-// << " numberSplitReceiveEnd "<<numberSplitReceiveEnd
-// << " counter "<<counter
-// << " counterSplit "<<counterSplit
-// <<std::endl;
-  if (numberOfCellsToSendEnd > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
-    }
-  }
-  if (numberOfCellsToReceiveStart > 0) {
-    if (rankCpu != 0) {
-      MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
-    }
-    //Get buffer vector receive + Refine cells and internal cell interfaces
-    counter = 0; counterSplit = 0;
-    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      for (int i = 0; i < bufferReceiveCellsStart.size(); i++) {
-        bufferReceiveCellsStart[i]->getDataToSendAndRefine(dataToReceiveStart, dataSplitToReceiveStart, lvl, eos, counter, counterSplit, m_numberCellsY, m_numberCellsZ, addPhys, model);
-      }
-    }
-  }
+//   //Send/Receive data
+//   std::vector<double> dataToReceiveStart(numberReceiveStart), dataToReceiveEnd(numberReceiveEnd);
+//   std::vector<int> dataSplitToReceiveStart(numberSplitReceiveStart), dataSplitToReceiveEnd(numberSplitReceiveEnd);
+//   if (numberOfCellsToSendStart > 0) {
+//     if (rankCpu != 0) {
+//       MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+//       MPI_Wait(&req_recvNeighborM1, &status);
+//       MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+//       MPI_Wait(&req_recvNeighborM1_2, &status);
+//     }
+//   }
+//   if (numberOfCellsToReceiveEnd > 0) {
+//     if (rankCpu != Ncpu - 1) {
+//       MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+//       MPI_Wait(&req_sendNeighborP1, &status);
+//       MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+//       MPI_Wait(&req_sendNeighborP1_2, &status);
+//     }
+//     //Get buffer vector receive + Refine cells and internal cell interfaces
+//     counter = 0; counterSplit = 0;
+//     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+//       for (int i = 0; i < bufferReceiveCellsEnd.size(); i++) {
+//         bufferReceiveCellsEnd[i]->getDataToSendAndRefine(dataToReceiveEnd, dataSplitToReceiveEnd, lvl, eos, counter, counterSplit, m_numberCellsY, m_numberCellsZ, addPhys, model);
+//       }
+//     }
+//   }
+// // std::cout<<"cpu "<<rankCpu //KS//BD//
+// // << " numberSendStart "<<numberSendStart
+// // << " numberSplitSendStart "<<numberSplitSendStart
+// // << " numberReceiveEnd "<<numberReceiveEnd
+// // << " numberSplitReceiveEnd "<<numberSplitReceiveEnd
+// // << " counter "<<counter
+// // << " counterSplit "<<counterSplit
+// // <<std::endl;
+//   if (numberOfCellsToSendEnd > 0) {
+//     if (rankCpu != Ncpu - 1) {
+//       MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
+//       MPI_Wait(&req_sendNeighborP1, &status);
+//       MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+//       MPI_Wait(&req_sendNeighborP1_2, &status);
+//     }
+//   }
+//   if (numberOfCellsToReceiveStart > 0) {
+//     if (rankCpu != 0) {
+//       MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+//       MPI_Wait(&req_recvNeighborM1, &status);
+//       MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+//       MPI_Wait(&req_recvNeighborM1_2, &status);
+//     }
+//     //Get buffer vector receive + Refine cells and internal cell interfaces
+//     counter = 0; counterSplit = 0;
+//     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+//       for (int i = 0; i < bufferReceiveCellsStart.size(); i++) {
+//         bufferReceiveCellsStart[i]->getDataToSendAndRefine(dataToReceiveStart, dataSplitToReceiveStart, lvl, eos, counter, counterSplit, m_numberCellsY, m_numberCellsZ, addPhys, model);
+//       }
+//     }
+//   }
 // std::cout<<"cpu "<<rankCpu //KS//BD//
 // << " numberSendEnd "<<numberSendEnd
 // << " numberSplitSendEnd "<<numberSplitSendEnd
@@ -1335,16 +1398,16 @@ std::cout<<"cpu "<<rankCpu
 // << " counter "<<counter
 // << " counterSplit "<<counterSplit
 // <<std::endl;
-for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
-if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
-std::cout<<"cpu "<<rankCpu
-<<" 10 is NaN....................................................................................................................... "
-<<std::endl;
-}
-}
+// for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
+// if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
+// std::cout<<"cpu "<<rankCpu
+// <<" 10 is NaN....................................................................................................................... "
+// <<std::endl;
+// }
+// }
 
   //Delete sent cells
   for (int i = 0; i < bufferSendCells.size(); i++) { delete bufferSendCells[i]; }
@@ -1405,36 +1468,36 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   delete[] loadPerCPU;
   delete[] startPerCPU;
 
-for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
-if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
-    isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
-    isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
-std::cout<<"cpu "<<rankCpu
-<<" end is NaN....................................................................................................................... "
-<<std::endl;
-}
-}
-for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
-if (cellsLvl[0][i]->getPhase(0)->getAlpha() > 1.e10 || cellsLvl[0][i]->getPhase(0)->getAlpha() < -1.e10 ||
-    cellsLvl[0][i]->getPhase(1)->getAlpha() > 1.e10 || cellsLvl[0][i]->getPhase(1)->getAlpha() < -1.e10 ||
-    cellsLvl[0][i]->getPhase(0)->getPressure() > 1.e10 || cellsLvl[0][i]->getPhase(0)->getPressure() < -1.e10 ||
-    cellsLvl[0][i]->getPhase(1)->getPressure() > 1.e10 || cellsLvl[0][i]->getPhase(1)->getPressure() < -1.e10) {
-std::cout<<"cpu "<<rankCpu
-<<" end is non-initialized....................................................................................................................... "
-<<std::endl;
-}
-}
-for (int i = 0; i < cellsLvlGhost[0].size(); i++) { //KS//BD//
-if (cellsLvlGhost[0][i]->getPhase(0)->getAlpha() > 1.e10 || cellsLvlGhost[0][i]->getPhase(0)->getAlpha() < -1.e10 ||
-    cellsLvlGhost[0][i]->getPhase(1)->getAlpha() > 1.e10 || cellsLvlGhost[0][i]->getPhase(1)->getAlpha() < -1.e10 ||
-    cellsLvlGhost[0][i]->getPhase(0)->getPressure() > 1.e10 || cellsLvlGhost[0][i]->getPhase(0)->getPressure() < -1.e10 ||
-    cellsLvlGhost[0][i]->getPhase(1)->getPressure() > 1.e10 || cellsLvlGhost[0][i]->getPhase(1)->getPressure() < -1.e10) {
-std::cout<<"cpu "<<rankCpu
-<<" end is non-initialized....................................................................................................................... "
-<<std::endl;
-}
-}
+// for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
+// if (isnan(cellsLvl[0][i]->getPhase(0)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getAlpha()) ||
+//     isnan(cellsLvl[0][i]->getPhase(0)->getPressure()) ||
+//     isnan(cellsLvl[0][i]->getPhase(1)->getPressure())) {
+// std::cout<<"cpu "<<rankCpu
+// <<" end is NaN....................................................................................................................... "
+// <<std::endl;
+// }
+// }
+// for (int i = 0; i < cellsLvl[0].size(); i++) { //KS//BD//
+// if (cellsLvl[0][i]->getPhase(0)->getAlpha() > 1.e10 || cellsLvl[0][i]->getPhase(0)->getAlpha() < -1.e10 ||
+//     cellsLvl[0][i]->getPhase(1)->getAlpha() > 1.e10 || cellsLvl[0][i]->getPhase(1)->getAlpha() < -1.e10 ||
+//     cellsLvl[0][i]->getPhase(0)->getPressure() > 1.e10 || cellsLvl[0][i]->getPhase(0)->getPressure() < -1.e10 ||
+//     cellsLvl[0][i]->getPhase(1)->getPressure() > 1.e10 || cellsLvl[0][i]->getPhase(1)->getPressure() < -1.e10) {
+// std::cout<<"cpu "<<rankCpu
+// <<" end is non-initialized....................................................................................................................... "
+// <<std::endl;
+// }
+// }
+// for (int i = 0; i < cellsLvlGhost[0].size(); i++) { //KS//BD//
+// if (cellsLvlGhost[0][i]->getPhase(0)->getAlpha() > 1.e10 || cellsLvlGhost[0][i]->getPhase(0)->getAlpha() < -1.e10 ||
+//     cellsLvlGhost[0][i]->getPhase(1)->getAlpha() > 1.e10 || cellsLvlGhost[0][i]->getPhase(1)->getAlpha() < -1.e10 ||
+//     cellsLvlGhost[0][i]->getPhase(0)->getPressure() > 1.e10 || cellsLvlGhost[0][i]->getPhase(0)->getPressure() < -1.e10 ||
+//     cellsLvlGhost[0][i]->getPhase(1)->getPressure() > 1.e10 || cellsLvlGhost[0][i]->getPhase(1)->getPressure() < -1.e10) {
+// std::cout<<"cpu "<<rankCpu
+// <<" end is non-initialized....................................................................................................................... "
+// <<std::endl;
+// }
+// }
 }
 
 //***********************************************************************

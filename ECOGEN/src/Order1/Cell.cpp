@@ -2275,9 +2275,13 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
 
 void Cell::computeLoad(double &load) const
 {
-  load += std::pow(2., m_lvl);
-  for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-    m_childrenCells[i]->computeLoad(load);
+  if (m_childrenCells.size() == 0) {
+    load += std::pow(2., m_lvl);
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->computeLoad(load);
+    }
   }
 }
 
