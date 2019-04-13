@@ -2249,6 +2249,7 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
   if (m_lvl == lvl) {
     for (int k = 0; k < m_numberPhases; k++) {
       m_vecPhases[k]->getBuffer(dataToReceive, counter, eos);
+      this->getPhase(k, vecPhasesO2)->setEos(m_vecPhases[k]->getEos());
     }
     m_mixture->getBuffer(dataToReceive, counter);
     for (int k = 0; k < m_numberTransports; k++) {
