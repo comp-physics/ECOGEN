@@ -136,52 +136,6 @@ void FluxKapila::buildCons(Phase **phases, const int &numberPhases, Mixture *mix
 
 void FluxKapila::buildPrim(Phase **phases, Mixture *mixture, const int &numberPhases)
 {
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(m_alpha[k]) ||
-//     isnan(m_masse[k]) ||
-//     isnan(m_energ[k])) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" buildPrim cons phases is NaN....................................................................................................................... "
-// <<m_alpha[k]<<" "
-// <<m_masse[k]<<" "
-// <<m_energ[k]<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(m_qdm.getX()) ||
-//     isnan(m_energMixture)) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" buildPrim cons mixture is NaN....................................................................................................................... "
-// <<m_qdm.getX()<<" "
-// <<m_energMixture<<" "
-// <<std::endl;
-// }
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(phases[k]->getAlpha()) ||
-//     isnan(phases[k]->getDensity()) ||
-//     isnan(phases[k]->getPressure())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" buildPrim phases is NaN....................................................................................................................... "
-// <<phases[k]->getAlpha()<<" "
-// <<phases[k]->getDensity()<<" "
-// <<phases[k]->getPressure()<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(mixture->getDensity()) ||
-//     isnan(mixture->getPressure()) ||
-//     isnan(mixture->getVelocity().getX())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" buildPrim mixture is NaN....................................................................................................................... "
-// <<mixture->getDensity()<<" "
-// <<mixture->getPressure()<<" "
-// <<mixture->getVelocity().getX()<<" "
-// <<std::endl;
-// }
   double pressure(0.), energieInterne(0.), rhoMel(0.);
   //Verification and correction if needed (alpha and mass for order 2)
   double un(0.);
@@ -212,52 +166,6 @@ void FluxKapila::buildPrim(Phase **phases, Mixture *mixture, const int &numberPh
       phases[k]->setPressure(pressure);
       phases[k]->verifyAndCorrectPhase();
   }
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(m_alpha[k]) ||
-//     isnan(m_masse[k]) ||
-//     isnan(m_energ[k])) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" mid buildPrim cons phases is NaN....................................................................................................................... "
-// <<m_alpha[k]<<" "
-// <<m_masse[k]<<" "
-// <<m_energ[k]<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(m_qdm.getX()) ||
-//     isnan(m_energMixture)) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" mid buildPrim cons mixture is NaN....................................................................................................................... "
-// <<m_qdm.getX()<<" "
-// <<m_energMixture<<" "
-// <<std::endl;
-// }
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(phases[k]->getAlpha()) ||
-//     isnan(phases[k]->getDensity()) ||
-//     isnan(phases[k]->getPressure())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" mid buildPrim phases is NaN....................................................................................................................... "
-// <<phases[k]->getAlpha()<<" "
-// <<phases[k]->getDensity()<<" "
-// <<phases[k]->getPressure()<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(mixture->getDensity()) ||
-//     isnan(mixture->getPressure()) ||
-//     isnan(mixture->getVelocity().getX())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" mid buildPrim mixture is NaN....................................................................................................................... "
-// <<mixture->getDensity()<<" "
-// <<mixture->getPressure()<<" "
-// <<mixture->getVelocity().getX()<<" "
-// <<std::endl;
-// }
   mixture->setVelocity(m_qdm.getX() / rhoMel, m_qdm.getY() / rhoMel, m_qdm.getZ() / rhoMel);
   //Erasing small velocity variations
   if (std::fabs(mixture->getU()) < 1.e-8) mixture->setU(0.);
@@ -271,52 +179,6 @@ void FluxKapila::buildPrim(Phase **phases, Mixture *mixture, const int &numberPh
   double totalEnergyMixture(0.);
   totalEnergyMixture = m_energMixture / rhoMel;
   mixture->setTotalEnergy(totalEnergyMixture);
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(m_alpha[k]) ||
-//     isnan(m_masse[k]) ||
-//     isnan(m_energ[k])) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" end buildPrim cons phases is NaN....................................................................................................................... "
-// <<m_alpha[k]<<" "
-// <<m_masse[k]<<" "
-// <<m_energ[k]<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(m_qdm.getX()) ||
-//     isnan(m_energMixture)) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" end buildPrim cons mixture is NaN....................................................................................................................... "
-// <<m_qdm.getX()<<" "
-// <<m_energMixture<<" "
-// <<std::endl;
-// }
-// for (int k = 0; k < numberPhases; k++) {
-// if (isnan(phases[k]->getAlpha()) ||
-//     isnan(phases[k]->getDensity()) ||
-//     isnan(phases[k]->getPressure())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" end buildPrim phases is NaN....................................................................................................................... "
-// <<phases[k]->getAlpha()<<" "
-// <<phases[k]->getDensity()<<" "
-// <<phases[k]->getPressure()<<" "
-// <<std::endl;
-// }
-// }
-// if (isnan(mixture->getDensity()) ||
-//     isnan(mixture->getPressure()) ||
-//     isnan(mixture->getVelocity().getX())) {
-// std::cout //KS//BS//
-// <<"cpu "<<rankCpu
-// <<" end buildPrim mixture is NaN....................................................................................................................... "
-// <<mixture->getDensity()<<" "
-// <<mixture->getPressure()<<" "
-// <<mixture->getVelocity().getX()<<" "
-// <<std::endl;
-// }
 }
 
 //***********************************************************************

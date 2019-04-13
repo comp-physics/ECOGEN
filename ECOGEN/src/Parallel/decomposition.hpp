@@ -78,9 +78,8 @@ public: //Ctors
             const int level= static_cast<int >(std::log2(nCells_global_[d]))+1;
             if(level>base_level_) base_level_=level;
         }
-
-int total(0);
-        float chunks = static_cast<float>(nCells_t)/nProcs;
+        
+        float chunks = static_cast<float>(nCells_t+0.5)/nProcs;
         key_type key(0,0,0,base_level_);
         for ( int i=0; i<nProcs;++i )
         {
@@ -90,17 +89,7 @@ int total(0);
             int count=0;
             key_rank_map_.emplace_back(key);
             nCells_per_rank_.emplace_back(nlocal);
-if (rankCpu == 29) { //KS//BD//
-total += nlocal;
-std::cout<<"cpu "<<rankCpu
-<<" i "<<i
-<<" nlocal "<<nlocal
-<<" total "<<total
-<<" nCells_t "<<nCells_t
-<<" start "<<start
-<<" end "<<end
-<<std::endl;
-}  
+
             while(count < nlocal)
             {
                 if(is_valid(key)) ++count;

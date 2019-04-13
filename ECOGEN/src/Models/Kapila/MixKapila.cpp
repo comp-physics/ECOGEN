@@ -168,16 +168,6 @@ void MixKapila::computeMixtureVariables(Phase **vecPhase, const int &numberPhase
   m_frozenSoundSpeed = sqrt(m_frozenSoundSpeed);
   m_woodSoundSpeed = 1. / sqrt(m_density*m_woodSoundSpeed);
   //m_totalEnergy cannot be computed here because depending on extra additional energies
-
-// if (isnan(m_density) || //KS//BS//
-//     isnan(m_pressure) ||
-//     isnan(m_frozenSoundSpeed) ||
-//     isnan(m_energie) ||
-//     isnan(m_woodSoundSpeed)) {
-// std::cout
-// <<" computeMixtureVariables is NaN....................................................................................................................... "
-// <<std::endl;
-// }
 }
 
 //***************************************************************************

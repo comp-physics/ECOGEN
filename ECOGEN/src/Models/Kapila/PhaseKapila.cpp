@@ -97,22 +97,6 @@ void PhaseKapila::extendedCalculusPhase(const Coord &velocity)
   m_temperature = m_eos->computeTemperature(m_density, m_pressure);
   m_energie = m_eos->computeEnergy(m_density, m_pressure);
   m_soundSpeed = m_eos->computeSoundSpeed(m_density, m_pressure);
-// if (isnan(m_alpha) ||
-//     isnan(m_density) ||
-//     isnan(m_pressure) ||
-//     isnan(m_temperature) ||
-//     isnan(m_energie) ||
-//     isnan(m_soundSpeed)) {
-// std::cout //KS//BS//
-// <<" extendedCalculusPhase is NaN....................................................................................................................... "
-// <<m_alpha<<" "
-// <<m_density<<" "
-// <<m_pressure<<" "
-// <<m_temperature<<" "
-// <<m_energie<<" "
-// <<m_soundSpeed<<" "
-// <<std::endl;
-// }
 }
 
 //****************************************************************************
@@ -238,7 +222,7 @@ void PhaseKapila::getBuffer(std::vector<double> &dataToReceive, int &counter, Eo
   m_alpha = dataToReceive[counter++];
   m_density = dataToReceive[counter++];
   m_pressure = dataToReceive[counter++];
-  m_eos = eos[static_cast<int>(dataToReceive[counter++])];
+  m_eos = eos[static_cast<int>(std::round(dataToReceive[counter++]))];
 }
 
 //****************************************************************************
