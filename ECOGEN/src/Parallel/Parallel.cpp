@@ -1160,7 +1160,11 @@ void Parallel::initializePersistentCommunicationsSplit()
       m_reqSendSplit[0][neighbour] = new MPI_Request;
       m_bufferSendSplit[0][neighbour] = new bool[numberSend];
       MPI_Send_init(m_bufferSendSplit[0][neighbour], numberSend, MPI_C_BOOL, neighbour, neighbour, MPI_COMM_WORLD, m_reqSendSplit[0][neighbour]);
-
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<<" to "<<neighbour
+<<" numberSend "<<numberSend
+<< " numberReceive "<<numberReceive
+<<std::endl;
       //New receiving request and its associated buffer
       m_reqReceiveSplit[0][neighbour] = new MPI_Request;
       m_bufferReceiveSplit[0][neighbour] = new bool[numberReceive];
@@ -1210,14 +1214,61 @@ void Parallel::communicationsSplit(const int &lvl)
         //Automatic filing of m_bufferSendSplit
         m_elementsToSend[neighbour][i]->fillBufferSplit(m_bufferSendSplit[lvl][neighbour], count, lvl, neighbour);
       }
-
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<<" to "<<neighbour
+<< " fill "<<count
+<<std::endl;
       //Sending request
       MPI_Start(m_reqSendSplit[lvl][neighbour]);
+//       MPI_Wait(m_reqSendSplit[lvl][neighbour], &status);
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// <<" to "<<neighbour
+// << " send status.MPI_TAG "<<status.MPI_TAG
+// << " status.MPI_SOURCE "<<status.MPI_SOURCE
+// <<std::endl;
       //Receiving request
       MPI_Start(m_reqReceiveSplit[lvl][neighbour]);
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<<" to "<<neighbour
+<< " start "
+<<std::endl;
       //Waiting
+// int flag;
+//MPI_Request_get_status(*m_reqReceiveSplit[lvl][neighbour], &flag, &status);
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// <<" to "<<neighbour
+// << " before status.MPI_TAG "<<status.MPI_TAG
+// << " status.MPI_SOURCE "<<status.MPI_SOURCE
+// <<std::endl;
       MPI_Wait(m_reqSendSplit[lvl][neighbour], &status);
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<<" to "<<neighbour
+<< " send status.MPI_TAG "<<status.MPI_TAG
+<< " status.MPI_SOURCE "<<status.MPI_SOURCE
+<<std::endl;
       MPI_Wait(m_reqReceiveSplit[lvl][neighbour], &status);
+std::cout<<"cpu "<<rankCpu //KS//BD//
+<<" to "<<neighbour
+<< " recv status.MPI_TAG "<<status.MPI_TAG
+<< " status.MPI_SOURCE "<<status.MPI_SOURCE
+<<std::endl;
+
+// MPI_Request req_sendNeighbor;
+// MPI_Request req_recvNeighbor;
+// MPI_Status status;
+// if (lvl ==0) {
+// MPI_Isend(&m_bufferSendSplit[lvl][neighbour], m_numberElementsToSendToNeighbour[neighbour], MPI_INT, neighbour, neighbour, MPI_COMM_WORLD, &req_recvNeighbor);
+// MPI_Wait(&req_recvNeighbor, &status);
+// MPI_Irecv(&m_bufferReceiveSplit[lvl][neighbour], m_numberElementsToReceiveFromNeighbour[neighbour], MPI_INT, neighbour, rankCpu, MPI_COMM_WORLD, &req_sendNeighbor);
+// MPI_Wait(&req_sendNeighbor, &status);
+// }
+// else{
+// MPI_Isend(&m_bufferSendSplit[lvl][neighbour], m_bufferNumberElementsToSendToNeighbor[neighbour], MPI_INT, neighbour, neighbour, MPI_COMM_WORLD, &req_recvNeighbor);
+// MPI_Wait(&req_recvNeighbor, &status);
+// MPI_Irecv(&m_bufferReceiveSplit[lvl][neighbour], m_bufferNumberElementsToReceiveFromNeighbour[neighbour], MPI_INT, neighbour, rankCpu, MPI_COMM_WORLD, &req_sendNeighbor);
+// MPI_Wait(&req_sendNeighbor, &status);
+// }
+
 
       //Receivings
       count = -1;

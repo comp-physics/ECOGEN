@@ -1315,7 +1315,7 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   else if (m_numberCellsY != 1) { dim = 2; }
   parallel.updatePersistentCommunicationsAMR(dim);
 
-  //13) Refine external cell interfaces, refine ghost cells and update persistent communications of lvl > 0
+  //12) Refine external cell interfaces, refine ghost cells and update persistent communications of lvl > 0
   //-------------------------------------------------------------------------------------------------------
   for (int lvl = 0; lvl < m_lvlMax; lvl++) {
     //Refine external cell interfaces

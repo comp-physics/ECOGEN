@@ -5,6 +5,7 @@
 EXECUTABLE = ECOGEN
 CXX = mpicxx
 CXXFLAGS = -O3 -std=c++11
+#CXXFLAGS = -g -std=c++11
 # LDFLAGS =
 
 dirs = $(shell find . -type d)
