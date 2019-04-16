@@ -883,10 +883,8 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   double idealLoadEndPosition(0.);
   double *loadPerCPU = new double[Ncpu];
   typename decomposition::Key<3>::value_type *startPerCPU = new typename decomposition::Key<3>::value_type[Ncpu];
-  MPI_Request req_sendNeighborP1;
-  MPI_Request req_recvNeighborM1;
-  MPI_Request req_sendNeighborP1_2;
-  MPI_Request req_recvNeighborM1_2;
+  MPI_Request req_neighborP1;
+  MPI_Request req_neighborM1;
   MPI_Status status;
 
   //LOOP over the following until global balance
@@ -957,11 +955,11 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
 
   //Communicate what I wish to send/receive to/from neighbours
   double idealLoadShiftStart(0.);
-  if (rankCpu != Ncpu - 1) MPI_Isend(&idealLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-  if (rankCpu != 0)        MPI_Irecv(&idealLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
+  if (rankCpu != Ncpu - 1) MPI_Isend(&idealLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+  if (rankCpu != 0)        MPI_Irecv(&idealLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
 
-  if (rankCpu != Ncpu - 1) MPI_Wait(&req_sendNeighborP1, &status);
-  if (rankCpu != 0)        MPI_Wait(&req_recvNeighborM1, &status);
+  if (rankCpu != Ncpu - 1) MPI_Wait(&req_neighborP1, &status);
+  if (rankCpu != 0)        MPI_Wait(&req_neighborM1, &status);
 
   //3) Compute and communicate possible shifts (real balance)
   //---------------------------------------------------------
@@ -987,17 +985,19 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
       }
     }
     if (rankCpu != 0) {
-      MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
+      MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }       
   }
   else {
     //Receive possible load shift start
     if (rankCpu != 0) {
-      MPI_Irecv(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
+      MPI_Irecv(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }    
   }
 
@@ -1014,17 +1014,19 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
       }
     }
     if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
+      MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
   else {
     //Receive possible load shift end
     if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
+      MPI_Irecv(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
 
@@ -1058,8 +1060,8 @@ std::cout<<"cpu "<<rankCpu
       indicesSendStart[i] = cellsLvl[0][i]->getElement()->getKey().getIndex();
     }
     if (rankCpu != 0) {
-      MPI_Isend(indicesSendStart, numberOfCellsToSendStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
+      MPI_Isend(indicesSendStart, numberOfCellsToSendStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
     delete[] indicesSendStart;
   }
@@ -1067,8 +1069,8 @@ std::cout<<"cpu "<<rankCpu
   typename decomposition::Key<3>::value_type *indicesReceiveEnd = new typename decomposition::Key<3>::value_type[numberOfCellsToReceiveEnd];
   if (numberOfCellsToReceiveEnd > 0) {
     if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(indicesReceiveEnd, numberOfCellsToReceiveEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
+      MPI_Irecv(indicesReceiveEnd, numberOfCellsToReceiveEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
 
@@ -1080,8 +1082,8 @@ std::cout<<"cpu "<<rankCpu
       ++counter;
     }
     if (rankCpu != Ncpu - 1) {
-      MPI_Isend(indicesSendEnd, numberOfCellsToSendEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
+      MPI_Isend(indicesSendEnd, numberOfCellsToSendEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
     delete[] indicesSendEnd;
   }
@@ -1090,8 +1092,8 @@ std::cout<<"cpu "<<rankCpu
   typename decomposition::Key<3>::value_type *indicesReceiveStart = new typename decomposition::Key<3>::value_type[numberOfCellsToReceiveStart];
   if (numberOfCellsToReceiveStart > 0) {
     if (rankCpu != 0) {
-      MPI_Irecv(indicesReceiveStart, numberOfCellsToReceiveStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
+      MPI_Irecv(indicesReceiveStart, numberOfCellsToReceiveStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
   }
 
@@ -1156,9 +1158,6 @@ std::cout<<"cpu "<<rankCpu
   //-----------------------------------------------------------
   typename decomposition::Key<3>::value_type localStart = cellsLvl[0][0]->getElement()->getKey().getIndex();
   MPI_Allgather(&localStart, 1, MPI_UNSIGNED_LONG_LONG, startPerCPU, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
-std::cout<<"cpu "<<rankCpu //KS//BD//
-<< " startPerCPU["<<rankCpu<<"] "<<decomposition::Key<3>(startPerCPU[rankCpu])
-<<std::endl;
   for( int i = 0; i < Ncpu; ++i) {
     decomposition::Key<3> key_tmp(startPerCPU[i]);
     m_decomp.start_key(i) = key_tmp;
@@ -1182,11 +1181,6 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
 << " m_numberCellsTotal "<<m_numberCellsTotal
 << " m_numberFacesTotal "<<m_numberFacesTotal
 <<std::endl;
-// int sum(0); //KS//BD//
-// MPI_Allreduce(&m_numberCellsCalcul, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// << " sum "<<sum
-// <<std::endl;
 
   //9) Allocate physical variables of cells and cell interfaces level 0
   //-------------------------------------------------------------------
@@ -1216,10 +1210,18 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
     numberSendStart = dataToSendStart.size();
     numberSplitSendStart = dataSplitToSendStart.size();
     if (rankCpu != 0) {
-      MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
+      MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+    }
+  }
+  if (numberOfCellsToReceiveEnd > 0) {
+    if (rankCpu != Ncpu - 1) {
+      MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
   if (numberOfCellsToSendEnd > 0) {
@@ -1232,26 +1234,18 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
     numberSendEnd = dataToSendEnd.size();
     numberSplitSendEnd = dataSplitToSendEnd.size();
     if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
+      MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
   if (numberOfCellsToReceiveStart > 0) {
     if (rankCpu != 0) {
-      MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
-    }
-  }
-  if (numberOfCellsToReceiveEnd > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
+      MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
   }
 
@@ -1260,18 +1254,18 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   std::vector<int> dataSplitToReceiveStart(numberSplitReceiveStart), dataSplitToReceiveEnd(numberSplitReceiveEnd);
   if (numberOfCellsToSendStart > 0) {
     if (rankCpu != 0) {
-      MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
+      MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
   }
   if (numberOfCellsToReceiveEnd > 0) {
     if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
+      MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
     //Get buffer vector receive + Refine cells and internal cell interfaces
     counter = 0; counterSplit = 0;
@@ -1283,18 +1277,18 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   }
   if (numberOfCellsToSendEnd > 0) {
     if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1);
-      MPI_Wait(&req_sendNeighborP1, &status);
-      MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_sendNeighborP1_2);
-      MPI_Wait(&req_sendNeighborP1_2, &status);
+      MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
+      MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
   if (numberOfCellsToReceiveStart > 0) {
     if (rankCpu != 0) {
-      MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1);
-      MPI_Wait(&req_recvNeighborM1, &status);
-      MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_recvNeighborM1_2);
-      MPI_Wait(&req_recvNeighborM1_2, &status);
+      MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
+      MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
     //Get buffer vector receive + Refine cells and internal cell interfaces
     counter = 0; counterSplit = 0;
