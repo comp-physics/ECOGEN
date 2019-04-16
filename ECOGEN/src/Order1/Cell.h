@@ -242,6 +242,7 @@ class Cell
         void computeLoad(double &load) const;
         void clearExternalCellInterfaces(const int &nbCellsY, const int &nbCellsZ);
         void updatePointersInternalCellInterfaces();
+        void updateNbCellsTotalAMR(int &nbCellsTotalAMR);
 
     protected:
       int m_numberPhases;

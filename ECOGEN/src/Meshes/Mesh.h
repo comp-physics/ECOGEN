@@ -127,7 +127,7 @@ public:
   void communicationsTransports(const int &lvl);
 	virtual void finalizeParallele(const int &lvlMax);
   virtual void parallelLoadBalancingAMR(std::vector<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, std::vector<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos) {};
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init = false) {};
 
   
 protected:

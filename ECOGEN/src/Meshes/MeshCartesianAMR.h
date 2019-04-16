@@ -74,7 +74,12 @@ public:
   virtual void initializePersistentCommunications(const int numberPhases, const int numberTransports, const TypeMeshContainer<Cell *> &cells, std::string ordreCalcul);
   virtual void finalizeParallele(const int &lvlMax);
   virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos);
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init = false);
+  virtual void computePotentialBalancing(TypeMeshContainer<Cell *> *cellsLvl, bool init, bool &balance,
+    int &numberOfCellsToSendStart, int &numberOfCellsToSendEnd, int &numberOfCellsToReceiveStart, int &numberOfCellsToReceiveEnd);
+  virtual void balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos,
+    const int &numberOfCellsToSendStart, const int &numberOfCellsToSendEnd, const int &numberOfCellsToReceiveStart, const int &numberOfCellsToReceiveEnd, int &nbCellsTotalAMR);
 
 private:
   int m_lvlMax;                               //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

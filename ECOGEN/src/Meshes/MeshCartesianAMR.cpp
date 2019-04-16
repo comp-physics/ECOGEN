@@ -513,7 +513,6 @@ void MeshCartesianAMR::procedureRaffinementInitialization(TypeMeshContainer<Cell
       for (int lvl = 0; lvl < m_lvlMax; lvl++) {
         if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
         this->procedureRaffinement(cellsLvl, cellsLvlGhost, cellInterfacesLvl, lvl, addPhys, model, nbCellsTotalAMR, eos);
-        if (Ncpu > 1) { this->parallelLoadBalancingAMR(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model, eos); }
         for (unsigned int i = 0; i < cellsLvl[lvl + 1].size(); i++) {
           cellsLvl[lvl + 1][i]->fill(domains, m_lvlMax);
         }
@@ -531,6 +530,7 @@ void MeshCartesianAMR::procedureRaffinementInitialization(TypeMeshContainer<Cell
         if (!cellsLvl[lvl][i]->getSplit()) { cellsLvl[lvl][i]->completeFulfillState(); }
       }
     }
+    if (Ncpu > 1) { this->parallelLoadBalancingAMR(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model, eos, nbCellsTotalAMR, true); }
   }
 }
 
@@ -877,20 +877,28 @@ void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 //***********************************************************************
 
 void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-  const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos)
+  const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init)
 {
-  //return; //KS//BD//
-  int iter(0), counter(0), counterSplit(0);
-  double idealLoadEndPosition(0.);
-  double *loadPerCPU = new double[Ncpu];
-  typename decomposition::Key<3>::value_type *startPerCPU = new typename decomposition::Key<3>::value_type[Ncpu];
-  MPI_Request req_neighborP1;
-  MPI_Request req_neighborM1;
-  MPI_Status status;
+  int numberOfCellsToSendStart(0), numberOfCellsToSendEnd(0);
+  int numberOfCellsToReceiveStart(0), numberOfCellsToReceiveEnd(0);
+  bool balance(false);
 
-  //LOOP over the following until global balance
-  //while (CONDITION)
+  do {
+    balance = false;
+    this->computePotentialBalancing(cellsLvl, init, balance, numberOfCellsToSendStart, numberOfCellsToSendEnd, numberOfCellsToReceiveStart, numberOfCellsToReceiveEnd);
 
+    if (balance) {
+      this->balance(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model, eos,
+        numberOfCellsToSendStart, numberOfCellsToSendEnd, numberOfCellsToReceiveStart, numberOfCellsToReceiveEnd, nbCellsTotalAMR);
+    }
+  } while (balance);
+}
+
+//***********************************************************************
+
+void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cellsLvl, bool init, bool &balance,
+  int &numberOfCellsToSendStart, int &numberOfCellsToSendEnd, int &numberOfCellsToReceiveStart, int &numberOfCellsToReceiveEnd)
+{
   //Typical example of one situation for CPU 1 (during 1 balance iteration):
   //
   //                CPU 0       CPU 1                                 CPU 2                           
@@ -920,6 +928,10 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   // Note that the possible load shift start gives birth of a new start that may
   // constrain the possible load shift end (situation not present in this example).
 
+  MPI_Request req_neighborP1;
+  MPI_Request req_neighborM1;
+  MPI_Status status;
+
   //1) Compute and communicate loads and positions
   //----------------------------------------------
 
@@ -930,20 +942,18 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   }
 
   //Communicate overall loads
+  double *loadPerCPU = new double[Ncpu];
   MPI_Allgather(&localLoad, 1, MPI_DOUBLE, loadPerCPU, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
-  //Compute ideal load end position (only for the first iteration)
-  if (iter == 0) {
-    for (int i = 0; i < Ncpu; ++i) { idealLoadEndPosition += loadPerCPU[i]; }
-std::cout<<"cpu "<<rankCpu<<" totalLoad "<<idealLoadEndPosition<<std::endl; //KS//BD//
-    idealLoadEndPosition *= static_cast<double>(rankCpu + 1) / Ncpu;
-std::cout<<"cpu "<<rankCpu<<" idealLoadEndPosition "<<idealLoadEndPosition<<std::endl; //KS//BD//
-  }
+  //Compute ideal load end position
+  double idealLoadEndPosition(0.);
+  for (int i = 0; i < Ncpu; ++i) { idealLoadEndPosition += loadPerCPU[i]; }
+  idealLoadEndPosition *= static_cast<double>(rankCpu + 1) / Ncpu;
 
   //Compute local load end position
   double localLoadEndPosition(0.);
   for (int i = 0; i <= rankCpu; ++i) { localLoadEndPosition += loadPerCPU[i]; }
-std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std::endl; //KS//BD//
+  delete[] loadPerCPU;
 
   //2) Compute and communicate ideal shifts
   //---------------------------------------
@@ -972,11 +982,11 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
   double possibleLoadShiftStart(0.), possibleLoadShiftEnd(0.);
   double bufferPossibleLoadShiftStart(0.), bufferPossibleLoadShiftEnd(0.);
   int newStart(0);
-  int numberOfCellsToSendStart(0), numberOfCellsToSendEnd(0);
-  int numberOfCellsToReceiveStart(0), numberOfCellsToReceiveEnd(0);
+  numberOfCellsToSendStart = 0; numberOfCellsToSendEnd = 0;
+  numberOfCellsToReceiveStart = 0; numberOfCellsToReceiveEnd = 0;
 
   //For load shift start
-  if (std::fabs(idealLoadShiftStart) > 1e-10) {
+  if (std::fabs(idealLoadShiftStart) > 1.e-10) {
     if (idealLoadShiftStart > 0.) {
       //Determine and send possible load shift start
       for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
@@ -1008,7 +1018,7 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
   }
 
   //For load shift end
-  if (std::fabs(idealLoadShiftEnd) > 1e-10) {
+  if (std::fabs(idealLoadShiftEnd) > 1.e-10) {
     if (idealLoadShiftEnd < 0.) {
       //Determine and send possible load shift end
       for (int i = cellsLvl[0].size() - 1; i > newStart; i--) {
@@ -1038,28 +1048,51 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
     }
   }
 
-  //Final load......
-MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-std::cout<<"cpu "<<rankCpu
-<<" idealLoadShiftStart "<<idealLoadShiftStart<<" idealLoadShiftEnd "<<idealLoadShiftEnd
-<<" possibleLoadShiftStart "<<possibleLoadShiftStart<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
-<<std::endl; //KS//BD//
-  double localLoadStartPosition = localLoadEndPosition - loadPerCPU[rankCpu];
-  localLoadStartPosition += possibleLoadShiftStart;
-  localLoadEndPosition += possibleLoadShiftEnd;
-  double finalLocalLoad =localLoadEndPosition-localLoadStartPosition;
-MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-std::cout<<"cpu "<<rankCpu<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
-<<" initialLocalLoad "<<loadPerCPU[rankCpu]
-<<" finalLocalLoad "<<finalLocalLoad<<std::endl; //KS//BD//
+  // std::cout<<"cpu "<<rankCpu
+  // <<" idealLoadShiftStart "<<idealLoadShiftStart<<" idealLoadShiftEnd "<<idealLoadShiftEnd
+  // <<" possibleLoadShiftStart "<<possibleLoadShiftStart<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
+  // <<std::endl;
+  // double localLoadStartPosition = localLoadEndPosition - localLoad;
+  // localLoadStartPosition += possibleLoadShiftStart;
+  // localLoadEndPosition += possibleLoadShiftEnd;
+  // double finalLocalLoad =localLoadEndPosition-localLoadStartPosition;
+  // std::cout<<"cpu "<<rankCpu<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
+  // <<" initialLocalLoad "<<localLoad
+  // <<" finalLocalLoad "<<finalLocalLoad<<std::endl;
+  // std::cout<<"cpu "<<rankCpu
+  // <<" numberOfCellsToSendStart "<<numberOfCellsToSendStart<<" numberOfCellsToSendEnd "<<numberOfCellsToSendEnd
+  // <<" numberOfCellsToReceiveStart "<<numberOfCellsToReceiveStart<<" numberOfCellsToReceiveEnd "<<numberOfCellsToReceiveEnd
+  // <<std::endl;
 
-  //4) Send/Receive indices of base cell keys (lvl = 0)
+  //4) Update criterion to balance
+  //------------------------------
+  double relativePossibleLoadShiftMax(0.), relativePossibleLoadShiftMaxLocal(0.);
+  relativePossibleLoadShiftMaxLocal = std::fmax(std::fabs(possibleLoadShiftStart), std::fabs(possibleLoadShiftEnd));
+  relativePossibleLoadShiftMaxLocal /= localLoad;
+  MPI_Allreduce(&relativePossibleLoadShiftMaxLocal, &relativePossibleLoadShiftMax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+  if (init) {
+    if (relativePossibleLoadShiftMax > 1.e-10) { balance = true; }
+  }
+  else {
+    if (relativePossibleLoadShiftMax > 0.01) { balance = true; }
+  }
+}
+
+//***********************************************************************
+
+void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
+  const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos,
+  const int &numberOfCellsToSendStart, const int &numberOfCellsToSendEnd, const int &numberOfCellsToReceiveStart, const int &numberOfCellsToReceiveEnd, int &nbCellsTotalAMR)
+{
+  int counter(0), counterSplit(0);
+  typename decomposition::Key<3>::value_type *startPerCPU = new typename decomposition::Key<3>::value_type[Ncpu];
+  MPI_Request req_neighborP1;
+  MPI_Request req_neighborM1;
+  MPI_Status status;
+
+  //1) Send/Receive indices of base cell keys (lvl = 0)
   //---------------------------------------------------
-MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-std::cout<<"cpu "<<rankCpu
-<<" numberOfCellsToSendStart "<<numberOfCellsToSendStart<<" numberOfCellsToSendEnd "<<numberOfCellsToSendEnd
-<<" numberOfCellsToReceiveStart "<<numberOfCellsToReceiveStart<<" numberOfCellsToReceiveEnd "<<numberOfCellsToReceiveEnd
-<<std::endl; //KS//BD//
 
   //Send indices of the base cell keys
   if (numberOfCellsToSendStart > 0) {
@@ -1105,7 +1138,7 @@ std::cout<<"cpu "<<rankCpu
     }
   }
 
-  //5) Create the corresponding base cells (received)
+  //2) Create the corresponding base cells (received)
   //-------------------------------------------------
   //Create and insert cells and elements
   TypeMeshContainer<Cell *> bufferReceiveCellsStart(numberOfCellsToReceiveStart);
@@ -1142,7 +1175,7 @@ std::cout<<"cpu "<<rankCpu
   bufferReceiveCells.insert(bufferReceiveCells.end(), bufferReceiveCellsStart.begin(), bufferReceiveCellsStart.end());
   bufferReceiveCells.insert(bufferReceiveCells.end(), bufferReceiveCellsEnd.begin(), bufferReceiveCellsEnd.end());
 
-  //6) Erase the pointers to the corresponding base cells from cellsLvl (cells are not deleted yet)
+  //3) Erase the pointers to the corresponding base cells from cellsLvl (cells are not deleted yet)
   //-----------------------------------------------------------------------------------------------
   TypeMeshContainer<Cell *> bufferSendCellsStart(numberOfCellsToSendStart);
   TypeMeshContainer<Cell *> bufferSendCellsEnd(numberOfCellsToSendEnd);
@@ -1162,7 +1195,7 @@ std::cout<<"cpu "<<rankCpu
   bufferSendCells.insert(bufferSendCells.end(), bufferSendCellsStart.begin(), bufferSendCellsStart.end());
   bufferSendCells.insert(bufferSendCells.end(), bufferSendCellsEnd.begin(), bufferSendCellsEnd.end());
 
-  //7) Update the domain decomposition with new starts and ends
+  //4) Update the domain decomposition with new starts and ends
   //-----------------------------------------------------------
   typename decomposition::Key<3>::value_type localStart = cellsLvl[0][0]->getElement()->getKey().getIndex();
   MPI_Allgather(&localStart, 1, MPI_UNSIGNED_LONG_LONG, startPerCPU, 1, MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
@@ -1170,8 +1203,9 @@ std::cout<<"cpu "<<rankCpu
     decomposition::Key<3> key_tmp(startPerCPU[i]);
     m_decomp.start_key(i) = key_tmp;
   }
+  delete[] startPerCPU;
 
-  //8) Create cell interfaces, faces and ghost cells of level 0
+  //5) Create cell interfaces, faces and ghost cells of level 0
   //-----------------------------------------------------------
   for (int b = 0; b < cellInterfacesLvl[0].size(); b++) { delete cellInterfacesLvl[0][b]; }
   for (int i = 0; i < cellsLvl[0].size(); i++) { cellsLvl[0][i]->clearExternalCellInterfaces(m_numberCellsY, m_numberCellsZ); }
@@ -1183,14 +1217,13 @@ std::cout<<"cpu "<<rankCpu
   createCellInterfacesFacesAndGhostCells(cellsLvl[0], cellsLvlGhost[0], cellInterfacesLvl[0], ordreCalcul);
   m_numberCellsTotal = cellsLvl[0].size() + cellsLvlGhost[0].size();
   m_numberFacesTotal = cellInterfacesLvl[0].size();
-MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-std::cout<<"cpu "<<rankCpu //KS//BD//
-<< " m_numberCellsCalcul "<<m_numberCellsCalcul
-<< " m_numberCellsTotal "<<m_numberCellsTotal
-<< " m_numberFacesTotal "<<m_numberFacesTotal
-<<std::endl;
+  // std::cout<<"cpu "<<rankCpu
+  // << " m_numberCellsCalcul "<<m_numberCellsCalcul
+  // << " m_numberCellsTotal "<<m_numberCellsTotal
+  // << " m_numberFacesTotal "<<m_numberFacesTotal
+  // <<std::endl;
 
-  //9) Allocate physical variables of cells and cell interfaces level 0
+  //6) Allocate physical variables of cells and cell interfaces level 0
   //-------------------------------------------------------------------
   for (int i = 0; i < bufferReceiveCells.size(); i++) { bufferReceiveCells[i]->allocate(numberPhases, numberTransports, addPhys, model); }
   for (int i = 0; i < cellsLvlGhost[0].size(); i++) { cellsLvlGhost[0][i]->allocate(numberPhases, numberTransports, addPhys, model); }
@@ -1201,8 +1234,8 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
     cellInterfacesLvl[0][b]->allocateSlopes(numberPhases, numberTransports, allocateSlopeLocal);
   }
 
-  //10) Send/Receive physical values of cells lvl >= 0 and create new cells and new internal cell interfaces of lvl > 0
-  //-------------------------------------------------------------------------------------------------------------------
+  //7) Send/Receive physical values of cells lvl >= 0 and create new cells and new internal cell interfaces of lvl > 0
+  //------------------------------------------------------------------------------------------------------------------
   //Count and communicate number of data (physical values and cell trees) to send/receive + fill corresponding vectors
   int numberSendStart(0), numberSendEnd(0), numberReceiveStart(0), numberReceiveEnd(0);
   int numberSplitSendStart(0), numberSplitSendEnd(0), numberSplitReceiveStart(0), numberSplitReceiveEnd(0);
@@ -1310,15 +1343,15 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
   //Delete sent cells
   for (int i = 0; i < bufferSendCells.size(); i++) { delete bufferSendCells[i]; }
 
-  //11) Update persistent communications of cells lvl 0
-  //---------------------------------------------------
+  //8) Update persistent communications of cells lvl 0
+  //--------------------------------------------------
   int dim(1);
   if (m_numberCellsZ != 1) { dim = 3; }
   else if (m_numberCellsY != 1) { dim = 2; }
   parallel.updatePersistentCommunicationsAMR(dim);
 
-  //12) Refine external cell interfaces, refine ghost cells and update persistent communications of lvl > 0
-  //-------------------------------------------------------------------------------------------------------
+  //9) Refine external cell interfaces, refine ghost cells and update persistent communications of lvl > 0
+  //------------------------------------------------------------------------------------------------------
   for (int lvl = 0; lvl < m_lvlMax; lvl++) {
     //Refine external cell interfaces
     for (int i = 0; i < cellsLvl[lvl].size(); i++) {
@@ -1351,21 +1384,8 @@ std::cout<<"cpu "<<rankCpu //KS//BD//
     for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->constructionTableauCellInterfacesExternesLvl(cellInterfacesLvl); }
   }
   parallel.communicationsPrimitives(eos, m_lvlMax);
-
-  //Update nbCellsTotalAMR
-
-  //NEED to verify final load...
-
-
-  //END OF LOOP - Do a loop outside of this function with the criteria - Cut this function in two for this purpose
-
-MPI_Barrier(MPI_COMM_WORLD); //KS//BD//
-std::cout<<"cpu "<<rankCpu //KS//BD//
-<< " GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD!!! "
-<<std::endl;
-
-  delete[] loadPerCPU;
-  delete[] startPerCPU;
+  nbCellsTotalAMR = 0;
+  for (int i = 0; i < cellsLvl[0].size(); i++) { cellsLvl[0][i]->updateNbCellsTotalAMR(nbCellsTotalAMR); }
 }
 
 //***********************************************************************

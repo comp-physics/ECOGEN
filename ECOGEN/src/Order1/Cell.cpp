@@ -2390,3 +2390,17 @@ void Cell::updatePointersInternalCellInterfaces()
 }
 
 //***************************************************************************
+
+void Cell::updateNbCellsTotalAMR(int &nbCellsTotalAMR)
+{
+  if (m_childrenCells.size() == 0) {
+    ++nbCellsTotalAMR;
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->updateNbCellsTotalAMR(nbCellsTotalAMR);
+    }
+  }
+}
+
+//***************************************************************************
