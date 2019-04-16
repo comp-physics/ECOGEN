@@ -57,7 +57,8 @@ Output::Output(std::string casTest, std::string nameRun, XMLElement *element, st
   m_infoMesh = "infoMesh";
   m_treeStructure = "treeStructure";
   m_fileNameResults = "result";
-  m_fileNameCollection = "collection";
+  m_fileNameCollectionParaview = "collectionParaview";
+  m_fileNameCollectionVisIt = "collectionVisIt";
 
   m_folderOutput = "./results/" + m_folderOutput + "/";
   m_folderSavesInput = m_folderOutput + "savesInput/";
@@ -254,7 +255,7 @@ void Output::ecritJeuDonnees(std::vector<double> jeuDonnees, std::ofstream &file
       break;
     case INT:
       for (unsigned int k = 0; k < jeuDonnees.size(); k++) {
-        donneeInt = static_cast<int>(jeuDonnees[k]);
+        donneeInt = static_cast<int>(std::round(jeuDonnees[k]));
         IO::ajouteAlaChaine(chaineTampon, index, donneeInt);
       }
       break;

@@ -57,10 +57,10 @@ void OutputXML::prepareSortieSpecifique()
 {
   try {
     std::ofstream fileStream;
-    //Création du file de sortie collection
-    m_fichierCollection = m_folderOutput + creationNameFichierXML(m_fileNameCollection.c_str());
-    fileStream.open(m_fichierCollection.c_str(), std::ios::trunc);
-    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollection, __FILE__, __LINE__); }
+    //Creation du file de sortie collection Paraview
+    m_fichierCollectionParaview = m_folderOutput + creationNameFichierXML(m_fileNameCollectionParaview.c_str());
+    fileStream.open(m_fichierCollectionParaview.c_str(), std::ios::trunc);
+    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollectionParaview, __FILE__, __LINE__); }
     fileStream << "<?xml version=\"1.0\"?>" << std::endl;
     fileStream << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"";
     if (!m_ecritBinaire) { fileStream << "LittleEndian\" "; }
@@ -69,6 +69,12 @@ void OutputXML::prepareSortieSpecifique()
     fileStream << std::endl << "  <Collection>" << std::endl;
     fileStream << std::endl << "  </Collection>" << std::endl;
     fileStream << "</VTKFile>" << std::endl;
+    fileStream.close();
+    //Creation du file de sortie collection VisIt
+    m_fichierCollectionVisIt = m_folderOutput + creationNameFichierXML(m_fileNameCollectionVisIt.c_str(), 0, -1, -1, "visit");
+    fileStream.open(m_fichierCollectionVisIt.c_str(), std::ios::trunc);
+    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollectionVisIt, __FILE__, __LINE__); }
+    fileStream << "!NBLOCKS " << Ncpu << std::endl;
     fileStream.close();
   }
   catch (ErrorECOGEN &) { throw; }
@@ -230,7 +236,7 @@ std::string OutputXML::creationNameFichierXML(const char* name, Mesh *mesh, int 
     if (m_donneesSeparees) { throw ErrorECOGEN("OutputXML::creationNameFichierXML : donnees Separees non prevu", __FILE__, __LINE__); }
     num << name;
     //Gestion nameVariable
-    if (nameVariable != "defaut") num << "_" << nameVariable << "_";
+    if ((nameVariable != "defaut") && (nameVariable != "visit")) num << "_" << nameVariable << "_";
     //Gestion binary
     if (m_ecritBinaire) num << "B64";
     //Gestion cpu
@@ -238,7 +244,10 @@ std::string OutputXML::creationNameFichierXML(const char* name, Mesh *mesh, int 
     //Gestion number de file resultat
     if (numFichier != -1) num << "_TIME" << numFichier;
     //Gestion extension
-    if(mesh==0) num << ".pvd"; //Extension pour la collection
+    if(mesh == 0) {
+      if (nameVariable == "defaut") num << ".pvd";   //Extension pour la collection Paraview
+      if (nameVariable == "visit")  num << ".visit"; //Extension pour la collection VisIt
+    }
     else {
       num << "." << prefix;
       switch (mesh->getType()) {
@@ -319,9 +328,9 @@ void OutputXML::ecritCollectionXML(Mesh *mesh)
     //ifstream fileStream2((m_folderOutput + m_infoCalcul).c_str()); //For real-time file name
     //double realTime, a, b, c, d, e, f, g, h, i, j, k, l, m;          //For real-time file name
     //double realTime, a, b, c, d;                                     //For real-time file name
-    //Creation du file de sortie collection
-    fileStream.open(m_fichierCollection.c_str(), std::ios::trunc);
-    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollection, __FILE__, __LINE__); }
+    //Creation du file de sortie collection Paraview
+    fileStream.open(m_fichierCollectionParaview.c_str(), std::ios::trunc);
+    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollectionParaview, __FILE__, __LINE__); }
     fileStream << "<?xml version=\"1.0\"?>" << std::endl;
     fileStream << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"";
     if (!m_ecritBinaire) { fileStream << "LittleEndian\" "; }
@@ -341,6 +350,18 @@ void OutputXML::ecritCollectionXML(Mesh *mesh)
     fileStream << "</VTKFile>" << std::endl;
     fileStream.close();
     //fileStream2.close(); //For real-time file name
+
+    //Creation du file de sortie collection VisIt
+    fileStream.open(m_fichierCollectionVisIt.c_str(), std::ios::trunc);
+    if (!fileStream) { throw ErrorECOGEN("Impossible d ouvrir le file " + m_fichierCollectionVisIt, __FILE__, __LINE__); }
+    fileStream << "!NBLOCKS " << Ncpu << std::endl;
+    for (int time = 0; time <= m_numFichier; time++) {
+      for (int p = 0; p < Ncpu; p++) {
+          std::string file = "datasets/" + creationNameFichierXML(m_fileNameResults.c_str(), mesh, p, time);
+          fileStream << file.c_str() << std::endl;
+      }
+    }
+    fileStream.close();
   }
   catch (ErrorXML &) { throw; } // Renvoi au niveau suivant
 }
@@ -476,6 +497,21 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
       fileStream << " format=\"" << format << "\">" << std::endl;
       mesh->extractAbsVeloxityMRF(cellsLvl, jeuDonnees, m_run->m_sources[m_run->m_MRF]);
       this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
+      fileStream << std::endl;
+      fileStream << "        </" << prefix << "DataArray>" << std::endl;
+    }
+    else { fileStream << "\"/>" << std::endl; }
+  }
+
+  //7) CPU rank
+  //-----------
+  if (mesh->getType() == AMR) {
+    int CPUrank = -5;
+    fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
+    if (!parallel) {
+      fileStream << " format=\"" << format << "\">" << std::endl;
+      mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
+      this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
       fileStream << std::endl;
       fileStream << "        </" << prefix << "DataArray>" << std::endl;
     }

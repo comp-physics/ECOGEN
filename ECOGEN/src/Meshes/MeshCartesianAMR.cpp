@@ -781,6 +781,7 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
           else if (phase == -2) { jeuDonnees.push_back(cellsLvl[lvl][i]->getTransport(var - 1).getValue()); }
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
+          else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); }
           else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles

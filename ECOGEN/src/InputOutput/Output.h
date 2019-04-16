@@ -104,14 +104,16 @@ class Output
     std::string m_infoMesh;                                         //!<Name fichiers pour stocker les infos de mesh
     std::string m_treeStructure;                                       //!<File name for tree structure backup
     std::string m_fileNameResults;                                 //!<Name du file de sortie resultat
-    std::string m_fileNameCollection;                                //!<Name de la collection regroupant les fichiers resultats
+    std::string m_fileNameCollectionParaview;                                //!<Name de la collection regroupant les fichiers resultats (for Paraview)
+    std::string m_fileNameCollectionVisIt;                                //!<Name de la collection regroupant les fichiers resultats (for VisIt)
     std::string m_folderOutput;                                       //!<Dossier pour enregistrement des resultats
     std::string m_folderSavesInput;                           //!<Dossier pour copier les fichiers entrees
     std::string m_folderDatasets;                             //!<Folder to save the datasets
     std::string m_folderInfoMesh;                      //!<Dossier pour stocker les infos de mesh
     std::string m_folderCuts;                                       //!<cuts results folder location
     std::string m_folderProbes;                                        //!<probes results folder location
-    std::string m_fichierCollection;                                   //!<Chemin du file collection regroupant les fichiers resultats
+    std::string m_fichierCollectionParaview;                                   //!<Chemin du file collection regroupant les fichiers resultats (for Paraview)
+    std::string m_fichierCollectionVisIt;                                   //!<Chemin du file collection regroupant les fichiers resultats (for VisIt)
      
     //attribut parametres d print
     bool m_ecritBinaire;                                //!<Choix print binary/ASCII
