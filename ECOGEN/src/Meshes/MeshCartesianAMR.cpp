@@ -955,11 +955,14 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
 
   //Communicate what I wish to send/receive to/from neighbours
   double idealLoadShiftStart(0.);
-  if (rankCpu != Ncpu - 1) MPI_Isend(&idealLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-  if (rankCpu != 0)        MPI_Irecv(&idealLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-
-  if (rankCpu != Ncpu - 1) MPI_Wait(&req_neighborP1, &status);
-  if (rankCpu != 0)        MPI_Wait(&req_neighborM1, &status);
+  if (rankCpu != Ncpu - 1) {
+    MPI_Isend(&idealLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
+  }
+  if (rankCpu != 0) {
+    MPI_Irecv(&idealLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
+  }
 
   //3) Compute and communicate possible shifts (real balance)
   //---------------------------------------------------------
@@ -972,61 +975,65 @@ std::cout<<"cpu "<<rankCpu<<" localLoadEndPosition "<<localLoadEndPosition<<std:
   int numberOfCellsToReceiveStart(0), numberOfCellsToReceiveEnd(0);
 
   //For load shift start
-  if (idealLoadShiftStart > 0.) {
-    //Determine and send possible load shift start
-    for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
-      bufferPossibleLoadShiftStart = possibleLoadShiftStart;
-      cellsLvl[0][i]->computeLoad(possibleLoadShiftStart);
-      if (possibleLoadShiftStart > idealLoadShiftStart) {
-        newStart = i;
-        possibleLoadShiftStart = bufferPossibleLoadShiftStart;
-        numberOfCellsToSendStart = i;
-        break;
+  if (std::fabs(idealLoadShiftStart) > 1e-10) {
+    if (idealLoadShiftStart > 0.) {
+      //Determine and send possible load shift start
+      for (unsigned int i = 0; i < cellsLvl[0].size(); i++) {
+        bufferPossibleLoadShiftStart = possibleLoadShiftStart;
+        cellsLvl[0][i]->computeLoad(possibleLoadShiftStart);
+        if (possibleLoadShiftStart > idealLoadShiftStart) {
+          newStart = i;
+          possibleLoadShiftStart = bufferPossibleLoadShiftStart;
+          numberOfCellsToSendStart = i;
+          break;
+        }
       }
+      if (rankCpu != 0) {
+        MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+        MPI_Wait(&req_neighborM1, &status);
+        MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+        MPI_Wait(&req_neighborM1, &status);
+      }       
     }
-    if (rankCpu != 0) {
-      MPI_Isend(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }       
-  }
-  else {
-    //Receive possible load shift start
-    if (rankCpu != 0) {
-      MPI_Irecv(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }    
+    else {
+      //Receive possible load shift start
+      if (rankCpu != 0) {
+        MPI_Irecv(&possibleLoadShiftStart, 1, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+        MPI_Wait(&req_neighborM1, &status);
+        MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+        MPI_Wait(&req_neighborM1, &status);
+      }    
+    }
   }
 
   //For load shift end
-  if (idealLoadShiftEnd < 0.) {
-    //Determine and send possible load shift end
-    for (int i = cellsLvl[0].size() - 1; i > newStart; i--) {
-      bufferPossibleLoadShiftEnd = possibleLoadShiftEnd;
-      cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd);
-      if (-possibleLoadShiftEnd < idealLoadShiftEnd) {
-        possibleLoadShiftEnd = -bufferPossibleLoadShiftEnd;
-        numberOfCellsToSendEnd = cellsLvl[0].size() - 1 - i;
-        break;
+  if (std::fabs(idealLoadShiftEnd) > 1e-10) {
+    if (idealLoadShiftEnd < 0.) {
+      //Determine and send possible load shift end
+      for (int i = cellsLvl[0].size() - 1; i > newStart; i--) {
+        bufferPossibleLoadShiftEnd = possibleLoadShiftEnd;
+        cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd);
+        if (-possibleLoadShiftEnd < idealLoadShiftEnd) {
+          possibleLoadShiftEnd = -bufferPossibleLoadShiftEnd;
+          numberOfCellsToSendEnd = cellsLvl[0].size() - 1 - i;
+          break;
+        }
+      }
+      if (rankCpu != Ncpu - 1) {
+        MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+        MPI_Wait(&req_neighborP1, &status);
+        MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+        MPI_Wait(&req_neighborP1, &status);
       }
     }
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
-  }
-  else {
-    //Receive possible load shift end
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
+    else {
+      //Receive possible load shift end
+      if (rankCpu != Ncpu - 1) {
+        MPI_Irecv(&possibleLoadShiftEnd, 1, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+        MPI_Wait(&req_neighborP1, &status);
+        MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+        MPI_Wait(&req_neighborP1, &status);
+      }
     }
   }
 
