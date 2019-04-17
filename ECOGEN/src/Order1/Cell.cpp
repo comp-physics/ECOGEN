@@ -1545,7 +1545,7 @@ bool Cell::lvlNeighborTooLow()
 
 //***********************************************************************
 
-void Cell::buildLvlCellsAndLvlInternalCellInterfacesArrays(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl) //KS// name!
+void Cell::buildLvlCellsAndLvlInternalCellInterfacesArrays(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl)
 {
   for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
     cellsLvl[m_lvl + 1].push_back(m_childrenCells[i]);
@@ -1954,7 +1954,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
           idx = 2;
       int direction_j = dim==3 ? 2:1;
       int direction_i = (dim==2 || dim==3) ? 2:1; 
-      for (int i =0; i<direction_i; ++i) //KS//BD// Not sure about 1D test case... To look at this loop (careful on creating cells and also cell interfaces)
+      for (int i =0; i<direction_i; ++i)
       {
         for (int j =0; j<direction_j; ++j)
         {

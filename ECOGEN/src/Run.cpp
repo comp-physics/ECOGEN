@@ -291,7 +291,9 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
     m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);
-    if (Ncpu > 1) { if (lvl == 0) { if (m_iteration % 5 == 0) { m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model, m_eos, nbCellsTotalAMR); } } }
+    if (Ncpu > 1) { if (lvl == 0) { if (m_iteration % (static_cast<int>(1./m_cfl/0.6) + 1) == 0) {
+      m_mesh->parallelLoadBalancingAMR(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_order, m_numberPhases, m_numberTransports, m_addPhys, m_model, m_eos, nbCellsTotalAMR);
+    } } }
     m_stat.endAMRTime();
   }
 

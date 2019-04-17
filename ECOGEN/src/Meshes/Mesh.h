@@ -133,7 +133,7 @@ public:
 protected:
   mutable int m_numFichier;
 
-  int m_geometrie;                         /*indicateur 2D/3D*/
+  int m_geometrie;                         /*indicator 1D/2D/3D*/
   int m_numberElements;                    /*Number d'elements au total (cells de computes internes de dimension n + elements limites de dimension n-1 + ghost cells de dimensions n)*/
   int m_numberFacesTotal;                  /*Number de faces entre deux cells ou entre une cell et une limite*/
   int m_numberCellsCalcul;                 /*Number de cells de compute internes au domain*/

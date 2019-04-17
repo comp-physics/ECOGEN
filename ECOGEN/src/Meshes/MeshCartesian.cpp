@@ -1057,8 +1057,7 @@ void MeshCartesian::decoupageParallele(std::string ordreCalcul, TypeMeshContaine
   int maille_par_cpu, reste, iMaille, neighbour;
   int numberElements, compteMaillesParallele(0), countElements(0);
   int *elements_rec, *elements_env;
-
-  //KS// voir pour regrouper les differents cas pour faire quelque chose de plus general. La difference devrait etre pour le decoupage seulement
+  
   if (m_geometrie == 1) {
     //1D Cartesian Processor Topology
     //-------------------------------
