@@ -33,6 +33,7 @@
 //! \date      February 19 2019
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "MeshCartesianAMR.h"
 
@@ -135,9 +136,16 @@ void MeshCartesianAMR::createCellInterfacesFacesAndGhostCells(TypeMeshContainer<
 TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
 {
   double posX=0, posY=0., posZ=0.;
-  using coordinate_type = decomposition::Key<3>::coordinate_type;
-  std::array<decomposition::Key<3>::coordinate_type,6> offsets;
+  using key_type=decomposition::Key<3>;
+  using coordinate_type = key_type::coordinate_type;
+  std::array<coordinate_type,6> offsets;
   std::fill(offsets.begin(), offsets.end(), coordinate_type(0));
+
+  std::unordered_map<key_type,Cell*,key_type::hash_functor> cell_map;
+  //std::map<key_type,Cell*> cell_map;
+  for(auto c: cells)
+      auto p=cell_map.insert(std::make_pair(c->getElement()->getKey(),c));
+    
 
   for(int d = 0; d < 3; d++)
   {
@@ -272,17 +280,22 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
           m_faces.back()->setPos(posX, posY, posZ);
 
           //Try to find the neighbor cell into the non-ghost cells
-          auto it = std::find_if(cells.begin(), cells.end(),
-                  [&nKey](Cell* _k0){ 
-                  return _k0->getElement()->getKey() == nKey;
-                  });
+          //auto it = std::find_if(cells.begin(), cells.end(),
+          //        [&nKey](Cell* _k0){ 
+          //        return _k0->getElement()->getKey() == nKey;
+          //        });
+          auto it_pair= cell_map.find(nKey);
 
-          if (it != cells.end()) //Neighbor cell is a non-ghost cell
+          //if (it != cells.end()) //Neighbor cell is a non-ghost cell
+          if (it_pair != cell_map.end()) //Neighbor cell is a non-ghost cell
           {
+
+          auto it=it_pair->second;
             //Update cell interface
-            cellInterfaces.back()->initialize(cells[i], *it);
+            cellInterfaces.back()->initialize(cells[i], it);
             cells[i]->addCellInterface(cellInterfaces.back());
-            (*it)->addCellInterface(cellInterfaces.back());
+            //(*it)->addCellInterface(cellInterfaces.back());
+            it->addCellInterface(cellInterfaces.back());
           }
           else //Neighbor cell is a ghost cell
           {
@@ -366,12 +379,15 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
         else //Negative offset
         {
           //Try to find the neighbor cell into the non-ghost cells
-          auto it = std::find_if(cells.begin(), cells.end(),
-                  [&nKey](Cell* _k0){ 
-                  return _k0->getElement()->getKey() == nKey;
-                  });
+            auto it_pair= cell_map.find(nKey);
 
-          if (it == cells.end()) //Neighbor cell is a ghost cell
+          //auto it = std::find_if(cells.begin(), cells.end(),
+          //        [&nKey](Cell* _k0){ 
+          //        return _k0->getElement()->getKey() == nKey;
+          //        });
+
+          if (it_pair == cell_map.end()) //Neighbor cell is a ghost cell
+          //if (it == cells.end()) //Neighbor cell is a non-ghost cell
           {
             //Create cell interface related to the ghost cell
             if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }

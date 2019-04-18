@@ -44,6 +44,7 @@
 namespace decomposition
 {
 
+
 template<int Dim=3>
 struct Key
 {
@@ -60,6 +61,16 @@ public: // member types
     using level_type = bitmask_t::level_type;
     using real_scalar_coordinate_type = float_type;
     using real_coordinate_type = vector_type<float_type>;
+
+    struct hash_functor
+    {
+        std::size_t operator()(Key const& n) const noexcept
+        {
+            return std::hash<value_type>()(n._index);
+        }
+    };
+
+
 
 public: // static
 
