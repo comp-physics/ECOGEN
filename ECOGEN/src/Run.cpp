@@ -278,6 +278,11 @@ void Run::solver()
   if (rankCpu == 0) std::cout << "T" << m_numTest << " | ---------------------------------------" << std::endl;
   MPI_Barrier(MPI_COMM_WORLD);
   std::cout << "T" << m_numTest << " | Maximum cells number on CPU " << rankCpu << " : " << nbCellsTotalAMRMax << std::endl;
+// double localLoad(0.);
+// for (unsigned int i = 0; i < m_cellsLvl[0].size(); i++) {
+// m_cellsLvl[0][i]->computeLoad(localLoad);
+// }
+// std::cout<<"cpu "<<rankCpu<<" localLoad "<<localLoad<<std::endl;
 }
 
 //***********************************************************************
