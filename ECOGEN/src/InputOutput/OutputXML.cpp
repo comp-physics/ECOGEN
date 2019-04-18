@@ -383,7 +383,8 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
 
   //1) Ecriture des variables des phases
   //------------------------------------
-  for (int phase = 0; phase < m_run->getNumberPhases(); phase++)
+  //for (int phase = 0; phase < m_run->getNumberPhases(); phase++)
+  for (int phase = 0; phase < 1; phase++)
   {
     //Ecriture des variables scalars
     for (int var = 1; var <= m_cellRef.getPhase(phase)->getNumberScalars(); var++) {
@@ -445,36 +446,36 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
     }
   } //Fin mixture
 
-  //3) Ecriture des transports et autres...
-  //---------------------------------------
-  int transport = -2;
-  for (int var = 1; var <= m_run->m_numberTransports; var++)
-  {
-    fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"T" << var << "\"";
-    if (!parallel) {
-      fileStream << " format=\"" << format << "\">" << std::endl;
-      mesh->recupereDonnees(cellsLvl, jeuDonnees, var, transport);
-      this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
-      fileStream << std::endl;
-      fileStream << "        </" << prefix << "DataArray>" << std::endl;
-    }
-    else { fileStream << "\"/>" << std::endl; }
-  }
+  // //3) Ecriture des transports et autres...
+  // //---------------------------------------
+  // int transport = -2;
+  // for (int var = 1; var <= m_run->m_numberTransports; var++)
+  // {
+  //   fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"T" << var << "\"";
+  //   if (!parallel) {
+  //     fileStream << " format=\"" << format << "\">" << std::endl;
+  //     mesh->recupereDonnees(cellsLvl, jeuDonnees, var, transport);
+  //     this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
+  //     fileStream << std::endl;
+  //     fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  //   }
+  //   else { fileStream << "\"/>" << std::endl; }
+  // }
 
-  //4) Ecriture indicateur xi
-  //-------------------------
-  if (mesh->getType() == AMR) {
-    int xi = -3;
-    fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"Xi\"";
-    if (!parallel) {
-      fileStream << " format=\"" << format << "\">" << std::endl;
-      mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, xi);
-      this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
-      fileStream << std::endl;
-      fileStream << "        </" << prefix << "DataArray>" << std::endl;
-    }
-    else { fileStream << "\"/>" << std::endl; }
-  }
+  // //4) Ecriture indicateur xi
+  // //-------------------------
+  // if (mesh->getType() == AMR) {
+  //   int xi = -3;
+  //   fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"Xi\"";
+  //   if (!parallel) {
+  //     fileStream << " format=\"" << format << "\">" << std::endl;
+  //     mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, xi);
+  //     this->ecritJeuDonnees(jeuDonnees, fileStream, FLOAT);
+  //     fileStream << std::endl;
+  //     fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  //   }
+  //   else { fileStream << "\"/>" << std::endl; }
+  // }
 
   //5) Ecriture gradient rho
   //------------------------
@@ -503,20 +504,20 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
     else { fileStream << "\"/>" << std::endl; }
   }
 
-  //7) CPU rank
-  //-----------
-  if (mesh->getType() == AMR) {
-    int CPUrank = -5;
-    fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
-    if (!parallel) {
-      fileStream << " format=\"" << format << "\">" << std::endl;
-      mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
-      this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
-      fileStream << std::endl;
-      fileStream << "        </" << prefix << "DataArray>" << std::endl;
-    }
-    else { fileStream << "\"/>" << std::endl; }
-  }
+  // //7) CPU rank
+  // //-----------
+  // if (mesh->getType() == AMR) {
+  //   int CPUrank = -5;
+  //   fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
+  //   if (!parallel) {
+  //     fileStream << " format=\"" << format << "\">" << std::endl;
+  //     mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
+  //     this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
+  //     fileStream << std::endl;
+  //     fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  //   }
+  //   else { fileStream << "\"/>" << std::endl; }
+  // }
 
   //Fin
   fileStream << "      </" << prefix << "CellData>" << std::endl;
