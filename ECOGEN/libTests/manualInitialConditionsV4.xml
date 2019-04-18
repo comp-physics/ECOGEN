@@ -60,6 +60,10 @@ Available geometrical domains are: entireDomain, halfSpace, disc, rectangle, pav
 <dataRectangle axe1="x" axe2="y" lAxe1="0.3" lAxe2="0.2">
   <posInferiorVertex x="0.4" y="0.5" z="0."/>
 </dataRectangle>
+<!-- type=ellipse -->
+<dataEllipse axe1="x" axe2="y" radius1="1." radius2="1.5">
+  <center x="0." y="0." z="0."/>
+</dataEllipse>
 <!-- type=pavement -->
 <dataPavement lAxeX="1." lAxeY="1." lAxeZ="0.5">
   <posInferiorVertex x="1." y="0.5" z="0.5"/>
@@ -68,6 +72,10 @@ Available geometrical domains are: entireDomain, halfSpace, disc, rectangle, pav
 <dataSphere radius="0.5">
   <center x="1." y="0.5" z="0.5"/>
 </dataSphere>
+<!-- type=ellipsoid -->
+<dataEllipsoid axe1="x" axe2="y" axe3="z" radius1="1." radius2="1.5" radius3="1.5">
+  <center x="0." y="0." z="0."/>
+</dataEllipsoid>
 ******************
 Additional feature for geometrical domain: It is possible to use physicalIdentity number coming from mesh software to initialize a geometrical domain.
 Example:

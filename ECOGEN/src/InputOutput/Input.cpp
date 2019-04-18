@@ -804,6 +804,7 @@ void Input::entreeConditionsInitiales(std::string casTest, std::vector<Geometric
       else if (typeDomaine == "RECTANGLE")                       { domains.push_back(new GDRectangle(nameDomaine, statesPhases, stateMixture, statesTransport, element, physicalEntity, fileName.str())); }
       else if (typeDomaine == "PAVEMENT")                        { domains.push_back(new GDPavement(nameDomaine, statesPhases, stateMixture, statesTransport, element, physicalEntity, fileName.str())); }
       else if (typeDomaine == "SPHERE")                          { domains.push_back(new GDSphere(nameDomaine, statesPhases, stateMixture, statesTransport, element, physicalEntity, fileName.str())); }
+      else if (typeDomaine == "ELLIPSOID")                       { domains.push_back(new GDEllipsoid(nameDomaine, statesPhases, stateMixture, statesTransport, element, physicalEntity, fileName.str())); }
       else{ throw ErrorXMLDomaineInconnu(typeDomaine, fileName.str(), __FILE__, __LINE__); } //Cas ou le domain n a pas ete implemente
       domaineTrouve++;
       //Domaine suivant

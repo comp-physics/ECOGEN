@@ -42,6 +42,7 @@
 #include "GDDisc.h"
 #include "GDEllipse.h"
 #include "GDSphere.h"
+#include "GDEllipsoid.h"
 #include "GDRectangle.h"
 #include "GDPavement.h"
 

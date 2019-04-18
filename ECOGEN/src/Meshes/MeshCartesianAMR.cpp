@@ -33,8 +33,8 @@
 //! \date      February 19 2019
 
 #include <algorithm>
-//#include <unordered_map>
-#include <map>
+#include <unordered_map> //For hash
+//#include <map> //For ordered map
 
 #include "MeshCartesianAMR.h"
 
@@ -142,8 +142,8 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
   std::array<coordinate_type,6> offsets;
   std::fill(offsets.begin(), offsets.end(), coordinate_type(0));
 
-  //std::unordered_map<key_type, Cell*, key_type::hash_functor> cell_map;
-  std::map<key_type, Cell*> cell_map;
+  std::unordered_map<key_type, Cell*, key_type::hash_functor> cell_map; //For hash
+  //std::map<key_type, Cell*> cell_map; //For ordered map
   for (auto c: cells) {
     auto p=cell_map.insert(std::make_pair(c->getElement()->getKey(), c));
   }

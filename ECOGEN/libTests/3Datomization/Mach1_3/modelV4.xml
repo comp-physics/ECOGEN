@@ -1,0 +1,11 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<model>
+  <flowModel name="Kapila" numberPhases="2" numberTransports="1" alphaNull="true"/>
+  <EOS name="IG_air.xml"/>
+  <EOS name="SG_water_ApplaudMedical.xml"/>
+  <transport name="color"/>
+  <additionalPhysic type="surfaceTension" >
+    <dataSurfaceTension transport="color" sigma="72.e-3"/>
+    <reinitializationTransport phase="SG_water_ApplaudMedical.xml"/>
+  </additionalPhysic>
+</model>
