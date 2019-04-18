@@ -33,7 +33,8 @@
 //! \date      February 19 2019
 
 #include <algorithm>
-#include <unordered_map>
+//#include <unordered_map>
+#include <map>
 
 #include "MeshCartesianAMR.h"
 
@@ -141,23 +142,23 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
   std::array<coordinate_type,6> offsets;
   std::fill(offsets.begin(), offsets.end(), coordinate_type(0));
 
-  std::unordered_map<key_type,Cell*,key_type::hash_functor> cell_map;
-  //std::map<key_type,Cell*> cell_map;
-  for(auto c: cells)
-      auto p=cell_map.insert(std::make_pair(c->getElement()->getKey(),c));
-    
+  //std::unordered_map<key_type, Cell*, key_type::hash_functor> cell_map;
+  std::map<key_type, Cell*> cell_map;
+  for (auto c: cells) {
+    auto p=cell_map.insert(std::make_pair(c->getElement()->getKey(), c));
+  }
 
-  for(int d = 0; d < 3; d++)
+  for (int d = 0; d < 3; d++)
   {
     offsets[2*d][d] =-1;
     offsets[2*d+1][d] =+1;
   }
 
-  for(unsigned int i = 0; i < cells.size(); ++i)
+  for (unsigned int i = 0; i < cells.size(); ++i)
   {
     const auto coord = cells[i]->getElement()->getKey().coordinate();
     const auto ix = coord.x(), iy = coord.y(), iz = coord.z();
-    for(int idx = 0; idx < 2*m_geometrie; idx++)
+    for (int idx = 0; idx < 2*m_geometrie; idx++)
     {
       const auto offset=offsets[idx];
 
@@ -280,13 +281,8 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
           m_faces.back()->setPos(posX, posY, posZ);
 
           //Try to find the neighbor cell into the non-ghost cells
-          //auto it = std::find_if(cells.begin(), cells.end(),
-          //        [&nKey](Cell* _k0){ 
-          //        return _k0->getElement()->getKey() == nKey;
-          //        });
           auto it_pair= cell_map.find(nKey);
 
-          //if (it != cells.end()) //Neighbor cell is a non-ghost cell
           if (it_pair != cell_map.end()) //Neighbor cell is a non-ghost cell
           {
 
@@ -294,7 +290,6 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
             //Update cell interface
             cellInterfaces.back()->initialize(cells[i], it);
             cells[i]->addCellInterface(cellInterfaces.back());
-            //(*it)->addCellInterface(cellInterfaces.back());
             it->addCellInterface(cellInterfaces.back());
           }
           else //Neighbor cell is a ghost cell
@@ -379,15 +374,9 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
         else //Negative offset
         {
           //Try to find the neighbor cell into the non-ghost cells
-            auto it_pair= cell_map.find(nKey);
-
-          //auto it = std::find_if(cells.begin(), cells.end(),
-          //        [&nKey](Cell* _k0){ 
-          //        return _k0->getElement()->getKey() == nKey;
-          //        });
+          auto it_pair= cell_map.find(nKey);
 
           if (it_pair == cell_map.end()) //Neighbor cell is a ghost cell
-          //if (it == cells.end()) //Neighbor cell is a non-ghost cell
           {
             //Create cell interface related to the ghost cell
             if (ordreCalcul == "FIRSTORDER") { cellInterfaces.push_back(new CellInterface); }
@@ -505,7 +494,7 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
   } //Internal, non-ghost cells
 
   if (Ncpu > 1) {
-    for(int i=0;i<Ncpu;++i)
+    for (int i=0;i<Ncpu;++i)
     {
       std::sort(parallel.getElementsToReceive(i).begin(),parallel.getElementsToReceive(i).end(),[&]( Cell* child0, Cell* child1 )
       {
