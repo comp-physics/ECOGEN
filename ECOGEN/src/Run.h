@@ -91,12 +91,12 @@ class Run
 
     //Specific solvers
     void integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsTotalAMR);
-    void advancingProcedure(double &dt, int &lvl, double &dtMax) const;
-    void solveHyperbolic(double &dt, int &lvl, double &dtMax) const;
-    void solveHyperbolicO2(double &dt, int &lvl, double &dtMax) const;
-    void solveAdditionalPhysics(double &dt, int &lvl) const;
-    void solveSourceTerms(double &dt, int &lvl) const;
-    void solveRelaxations(int &lvl) const;
+    void advancingProcedure(double &dt, int &lvl, double &dtMax);
+    void solveHyperbolic(double &dt, int &lvl, double &dtMax);
+    void solveHyperbolicO2(double &dt, int &lvl, double &dtMax);
+    void solveAdditionalPhysics(double &dt, int &lvl);
+    void solveSourceTerms(double &dt, int &lvl);
+    void solveRelaxations(int &lvl);
     void verifyErrors() const;
 
     int m_numTest;                             //!<Number of the simulation

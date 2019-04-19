@@ -82,6 +82,7 @@ class APKSurfaceTension : public APKapila
     virtual void addSymmetricTermsRadialAxeOnY(Cell *cell, const int &numberPhases);
 
     virtual void reinitializeColorFunction(std::vector<Cell *> *cellsLvl, int &lvl);
+    virtual bool reinitializationActivated() { return m_reinitializationActivated; };
 
     virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
     virtual int getNumTransportAssociated() const;

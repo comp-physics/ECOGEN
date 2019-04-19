@@ -358,6 +358,10 @@ void Parallel::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
       MPI_Start(m_reqSend[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceive[lvl][neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSend[lvl][neighbour], &status);
       MPI_Wait(m_reqReceive[lvl][neighbour], &status);
@@ -441,6 +445,10 @@ void Parallel::communicationsSlopes(const int &lvl)
       MPI_Start(m_reqSendSlopes[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceiveSlopes[lvl][neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSendSlopes[lvl][neighbour], &status);
       MPI_Wait(m_reqReceiveSlopes[lvl][neighbour], &status);
@@ -579,6 +587,10 @@ void Parallel::communicationsVector(std::string nameVector, const int &dim, cons
       MPI_Start(m_reqSendVector[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceiveVector[lvl][neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSendVector[lvl][neighbour], &status);
       MPI_Wait(m_reqReceiveVector[lvl][neighbour], &status);
@@ -663,6 +675,10 @@ void Parallel::communicationsTransports(const int &lvl)
       MPI_Start(m_reqSendTransports[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceiveTransports[lvl][neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSendTransports[lvl][neighbour], &status);
       MPI_Wait(m_reqReceiveTransports[lvl][neighbour], &status);
@@ -1130,6 +1146,10 @@ void Parallel::communicationsXi(const int &lvl)
       MPI_Start(m_reqSendXi[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceiveXi[lvl][neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSendXi[lvl][neighbour], &status);
       MPI_Wait(m_reqReceiveXi[lvl][neighbour], &status);
@@ -1215,7 +1235,10 @@ void Parallel::communicationsSplit(const int &lvl)
       MPI_Start(m_reqSendSplit[lvl][neighbour]);
       //Receiving request
       MPI_Start(m_reqReceiveSplit[lvl][neighbour]);
-
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqSendSplit[lvl][neighbour], &status);
       MPI_Wait(m_reqReceiveSplit[lvl][neighbour], &status);
@@ -1309,21 +1332,32 @@ void Parallel::communicationsNumberGhostCells(const int &lvl)
       MPI_Start(m_reqNumberElementsToSendToNeighbor[neighbour]);
       //Receiving request
       MPI_Start(m_reqNumberElementsToReceiveFromNeighbour[neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++)
+  {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqNumberElementsToSendToNeighbor[neighbour], &status);
       MPI_Wait(m_reqNumberElementsToReceiveFromNeighbour[neighbour], &status);
-
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++)
+  {
+    if (m_isNeighbour[neighbour]) {
       //For slopes
       //Sending request
       MPI_Start(m_reqNumberSlopesToSendToNeighbor[neighbour]);
       //Receiving request
       MPI_Start(m_reqNumberSlopesToReceiveFromNeighbour[neighbour]);
+    }
+  }
+  for (int neighbour = 0; neighbour < Ncpu; neighbour++)
+  {
+    if (m_isNeighbour[neighbour]) {
       //Waiting
       MPI_Wait(m_reqNumberSlopesToSendToNeighbor[neighbour], &status);
       MPI_Wait(m_reqNumberSlopesToReceiveFromNeighbour[neighbour], &status);
-
-      //No supplementary receivings to treat
-
     }
   }
 }

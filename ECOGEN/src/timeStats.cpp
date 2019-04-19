@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      timeStats.h
-//! \author    F. Petitpas
+//! \author    F. Petitpas, K. Schmidmayer
 //! \version   1.0
-//! \date      September 07 2018
+//! \date      April 19 2019
 
 #include "timeStats.h"
 #include <iostream>
@@ -50,6 +50,7 @@ void timeStats::initialize()
   m_InitialTime = clock();
   m_computationTime = 0;
   m_AMRTime = 0;
+  m_communicationTime = 0;
 }
 
 //***********************************************************************
@@ -76,6 +77,20 @@ void timeStats::endAMRTime()
 
 //***********************************************************************
 
+void timeStats::startCommunicationTime()
+{
+  m_communicationRefTime = clock();
+}
+
+//***********************************************************************
+
+void timeStats::endCommunicationTime()
+{
+  m_communicationTime += (clock() - m_communicationRefTime);
+}
+
+//***********************************************************************
+
 void timeStats::setCompTime(const clock_t &time) { m_computationTime = time; }
 
 //***********************************************************************
@@ -88,6 +103,7 @@ void timeStats::printScreenStats(const int &numTest) const
 {
   printScreenTime(m_computationTime, "Elapsed time", numTest);
   printScreenTime(m_AMRTime, "AMR time", numTest);
+  printScreenTime(m_communicationTime, "Communication time", numTest);
 
   //Estimation temps restant
   //A faire...

@@ -31,9 +31,9 @@
 #define TIMESTATS_H
 
 //! \file      timeStats.h
-//! \author    F. Petitpas
+//! \author    F. Petitpas, K. Schmidmayer
 //! \version   1.0
-//! \date      September 07 2018
+//! \date      April 19 2019
 
 #include <ctime>
 #include <string>
@@ -50,6 +50,9 @@ class timeStats
     void startAMRTime();
     void endAMRTime();
 
+    void startCommunicationTime();
+    void endCommunicationTime();
+
     void setCompTime(const clock_t &time);
     clock_t getComputationTime() const;
     void printScreenStats(const int &numTest) const;
@@ -58,10 +61,13 @@ class timeStats
   private:
     //Time analysis - Attributes are stored in miliseconds (to be divided by CLOCKS_PER_SEC)
     clock_t m_InitialTime;
-    clock_t m_computationTime;            //!<Computation time
+    clock_t m_computationTime;            //!<Computational time
     
     clock_t m_AMRRefTime;
-    clock_t m_AMRTime;                    //!<AMR additional time
+    clock_t m_AMRTime;                    //!<AMR time among computational time
+
+    clock_t m_communicationRefTime;
+    clock_t m_communicationTime;          //!<Communication time among computational time
 
 };
 

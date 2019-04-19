@@ -60,7 +60,7 @@ class AddPhys
 
     //! \brief     Compute and send back mass energie linked to the physic (0 if no linked energy)
     //! \param     QPA                  corresponding additional physic quantities
-    virtual double computeEnergyAddPhys(QuantitiesAddPhys* QPA) { return 0.;  };
+    virtual double computeEnergyAddPhys(QuantitiesAddPhys* QPA) { return 0.; };
     //! \brief     Compute the additional physic flux between two cells
     //! \param     cellInterface        cell interface
     //! \param     numberPhases         number of phases
@@ -108,6 +108,9 @@ class AddPhys
     //! \param     cellsLvl             cells vector for every level
     //! \param     lvl                  level
     virtual void reinitializeColorFunction(std::vector<Cell *> *cellsLvl, int &lvl) {};
+
+    //! \brief     Send back true if the reinitialization of the color function is activated
+    virtual bool reinitializationActivated() { return false; };
 
     //! \brief     Communication of the additional physics quantities for parallel purposes with Adaptive Mesh Refinement
     //! \param     cells                cells vector

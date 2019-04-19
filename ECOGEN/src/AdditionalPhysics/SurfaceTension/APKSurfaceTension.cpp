@@ -356,10 +356,8 @@ void APKSurfaceTension::addSymmetricTermsRadialAxeOnY(Cell *cell, const int &num
 
 void APKSurfaceTension::reinitializeColorFunction(std::vector<Cell *> *cellsLvl, int &lvl)
 {
-  if (m_reinitializationActivated) {
-    for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
-      if (!cellsLvl[lvl][i]->getSplit()) { cellsLvl[lvl][i]->reinitializeColorFunction(m_numTransportAssociated, m_numPhaseAssociated); }
-    }
+  for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+    if (!cellsLvl[lvl][i]->getSplit()) { cellsLvl[lvl][i]->reinitializeColorFunction(m_numTransportAssociated, m_numPhaseAssociated); }
   }
 }
 
