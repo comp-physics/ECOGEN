@@ -79,6 +79,7 @@ void timeStats::endAMRTime()
 
 void timeStats::startCommunicationTime()
 {
+  MPI_Barrier(MPI_COMM_WORLD);
   m_communicationRefTime = clock();
 }
 
@@ -86,6 +87,7 @@ void timeStats::startCommunicationTime()
 
 void timeStats::endCommunicationTime()
 {
+  MPI_Barrier(MPI_COMM_WORLD);
   m_communicationTime += (clock() - m_communicationRefTime);
 }
 

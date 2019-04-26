@@ -2274,14 +2274,28 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
 
 //***************************************************************************
 
-void Cell::computeLoad(double &load) const
+void Cell::computeLoad(double &load, int lvl) const
 {
-  if (m_childrenCells.size() == 0) {
-    load += std::pow(2.5, m_lvl);
+  if (!m_split) {
+    if (m_lvl == lvl) { load += 1.; }
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      m_childrenCells[i]->computeLoad(load);
+      m_childrenCells[i]->computeLoad(load, lvl);
+    }
+  }
+}
+
+//***************************************************************************
+
+void Cell::computeLvlMax(int &lvlMax) const
+{
+  if (!m_split) {
+    if (m_lvl > lvlMax) { lvlMax = m_lvl; }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->computeLvlMax(lvlMax);
     }
   }
 }

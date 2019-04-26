@@ -106,42 +106,6 @@ void Mesh::initializePersistentCommunications(const int numberPhases, const int 
 
 //***********************************************************************
 
-void Mesh::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
-{
-	parallel.communicationsPrimitives(eos, lvl, type);
-}
-
-//***********************************************************************
-
-void Mesh::communicationsSlopes(const int &lvl)
-{
-	parallel.communicationsSlopes(lvl);
-}
-
-//***********************************************************************
-
-void Mesh::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
-{
-	parallel.communicationsVector(nameVector, m_geometrie, lvl, num, index);
-}
-
-//***********************************************************************
-
-void Mesh::communicationsAddPhys(const std::vector<AddPhys*> &addPhys, const int &lvl)
-{
-	for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhys(m_numberPhases, m_geometrie, lvl); }
-}
-
-//***********************************************************************
-
-void Mesh::communicationsTransports(const int &lvl)
-{
-  parallel.communicationsTransports(lvl);
-}
-
-
-//***********************************************************************
-
 void Mesh::finalizeParallele(const int &lvlMax)
 {
 	parallel.finalize(lvlMax);

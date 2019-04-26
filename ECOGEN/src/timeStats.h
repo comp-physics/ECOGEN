@@ -37,6 +37,7 @@
 
 #include <ctime>
 #include <string>
+#include <mpi.h>
 
 class timeStats
 {

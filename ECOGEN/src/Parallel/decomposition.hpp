@@ -39,6 +39,7 @@
 #include <numeric>
 #include <functional>
 #include "key.hpp"
+#include <map>
 
 namespace decomposition
 {
@@ -87,7 +88,7 @@ public: //Ctors
             size_t end= ((i+1)*chunks);
             const int nlocal=end-start;
             int count=0;
-            key_rank_map_.emplace_back(key);
+            key_rank_map_.emplace(key, i);
             nCells_per_rank_.emplace_back(nlocal);
 
             while(count < nlocal)
@@ -100,16 +101,18 @@ public: //Ctors
             if(i==nProcs-1)
             {
                 nCells_per_rank_.emplace_back(0);
-                key_rank_map_.emplace_back(key);
+                key_rank_map_.emplace(key, i);
             }
         }
     }
 
     std::vector<key_type> get_keys( int _rank ) const noexcept
     {
-        auto key=key_rank_map_[_rank];
+        auto key_it=key_rank_map_.begin();
+        std::advance(key_it, _rank);
+        auto key=key_it->first;
         auto nCells=nCells_per_rank_[_rank];
-         std::vector<key_type> keys(nCells);
+        std::vector<key_type> keys(nCells);
 
         for(int i =0; i<nCells;++i)
         {
@@ -129,12 +132,14 @@ public: //Ctors
 
     int get_rank(const key_type _key)
     {
-      for(std::size_t i=0; i< key_rank_map_.size();++i) 
-      {
-          if(_key < key_rank_map_[i] )
-              return i-1;
-      }
-     return -1;
+        auto range = key_rank_map_.equal_range(_key);
+        if (range.first->first == range.second->first) {
+            auto it = range.first;
+            return (--it)->second;
+        }
+        else {
+            return range.first->second;
+        }
     }
 
     bool is_valid( const key_type& _key ) const noexcept
@@ -165,15 +170,73 @@ public: //Ctors
        return true;
     }
 
+    void addKeyAndRankToMap(key_type _key, int _rank) //KS//BD//
+    {
+        auto it = key_rank_map_.emplace(_key, _rank);
+        if (!(it.second)) it.first->second = _rank;
+    }
 
-    const key_type& start_key(int i) const noexcept{return key_rank_map_[i];}
-    key_type& start_key(int i) noexcept{return key_rank_map_[i];}
+    void recombineStarts() //KS//BD//
+    {
+        auto it = key_rank_map_.begin(), itPrev = it;
+        while (it != key_rank_map_.end()) {
+            itPrev = it;
+            ++it;
+            if (it->second == itPrev->second) {
+                it = key_rank_map_.erase(it);
+            }
+        }
+    }
+
+    void communicateMaps(int _nCpu, std::vector<typename key_type::value_type> &localKeys, std::vector<int> &localRanks, int rank) //KS//BD//
+    {
+           std::cout<<"BLA -1"<<std::endl;
+        //Decompose local map into keys and values (ranks)
+        int localMapSize = localKeys.size();
+
+        //All gather sizes of maps
+        std::vector<int> mapSizes(_nCpu);
+        MPI_Allgather(&localMapSize, 1, MPI_INT, &mapSizes[0], 1, MPI_INT, MPI_COMM_WORLD);
+
+        //All gather maps (keys and ranks)
+        std::vector<int> displacements(_nCpu);
+        int sumMapSizes = 0;
+        for (int i = 0; i < _nCpu; ++i)
+        {
+            displacements[i] = sumMapSizes;
+            sumMapSizes += mapSizes[i];
+        }
+            std::cout<<"BLA1"<<std::endl;
+        std::vector<typename key_type::value_type> globalKeys(sumMapSizes);
+        std::vector<int> globalRanks(sumMapSizes);
+        MPI_Allgatherv(&localKeys[0],  localMapSize, MPI_UNSIGNED_LONG_LONG, &globalKeys[0],  &mapSizes[0], &displacements[0], MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
+        MPI_Allgatherv(&localRanks[0], localMapSize, MPI_INT,                &globalRanks[0], &mapSizes[0], &displacements[0], MPI_INT,                MPI_COMM_WORLD);
+        std::ofstream ofs("test.out");
+        //Recompose global map from keys and ranks
+        key_rank_map_.clear();
+        for (std::size_t i = 0; i < globalKeys.size(); ++i)
+        {
+            key_rank_map_.emplace(globalKeys[i], globalRanks[i]);
+            // if(rank==0)
+            // {
+            //     ofs<<globalKeys[i]<<" "<<globalRanks[i]<<std::endl;
+            // }
+        }
+        if(rank==0){
+        for(auto& e : key_rank_map_)ofs<<e.first<<" "<<e.second<<std::endl;
+            }
+        std::ofstream ofs1("test_rank"+std::to_string(rank)+".out");
+        for (std::size_t i = 0; i < localKeys.size(); ++i)
+        {
+            ofs1<<localKeys[i]<<" "<<localRanks[i]<<std::endl;
+        }
+    }
 
 
 private:
     int base_level_=-1;
     std::array<int,Dim> nCells_global_;
-    std::vector<key_type> key_rank_map_;
+    std::map<key_type, int> key_rank_map_;
     std::vector<int> nCells_per_rank_; //Not updated once the starts are changed
 
 };

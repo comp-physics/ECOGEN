@@ -112,7 +112,7 @@ void Run::initialize(int argc, char* argv[])
   //7) Intialization of persistant communications for parallel computing
   //--------------------------------------------------------------------
 	m_mesh->initializePersistentCommunications(m_numberPhases, m_numberTransports, m_cellsLvl[0], m_order);
-  if (Ncpu > 1) { m_mesh->communicationsPrimitives(m_eos, 0); }
+  if (Ncpu > 1) { parallel.communicationsPrimitives(m_eos, 0); }
   
 	//8) AMR initialization
 	//---------------------
@@ -182,7 +182,7 @@ void Run::resumeSimulation()
 
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-      //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(cells, eos, lvl); }
+      //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(m_eos, lvl); }
       for (unsigned int i = 0; i < m_cellsLvl[lvl + 1].size(); i++) {
         m_cellsLvl[lvl + 1][i]->completeFulfillState(resume);
       }
@@ -193,9 +193,7 @@ void Run::resumeSimulation()
   }
 
   //Initial communications
-  if (Ncpu > 1) {
-    m_mesh->communicationsPrimitives( m_eos, 0);
-  }
+  if (Ncpu > 1) { parallel.communicationsPrimitives(m_eos, 0); }
 
   std::cout << " ...OK" << std::endl;
 }
@@ -279,8 +277,10 @@ void Run::solver()
   MPI_Barrier(MPI_COMM_WORLD);
   if (m_mesh->getType() == AMR) {
     double localLoad(0.);
-    for (unsigned int i = 0; i < m_cellsLvl[0].size(); i++) {
-    m_cellsLvl[0][i]->computeLoad(localLoad);
+    for (int lvl = m_lvlMax; lvl >= 0; lvl--) {
+      for (unsigned int i = 0; i < m_cellsLvl[0].size(); i++) {
+      m_cellsLvl[0][i]->computeLoad(localLoad, lvl);
+      }
     }
     std::cout << "T" << m_numTest << " | Final local load on CPU " << rankCpu << " : " << localLoad << std::endl;
   }
@@ -309,8 +309,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
     for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
     if (Ncpu > 1) {
       m_stat.startCommunicationTime();
-      m_mesh->communicationsSlopes(lvl);
-      if (lvl > 0) { m_mesh->communicationsSlopes(lvl - 1); } //Comble un defaut d'un cas particulier non communique a temps (fantome niveau quelconque, cell lvl l, cell lvl l+1)
+      parallel.communicationsSlopes(lvl);
+      if (lvl > 0) { parallel.communicationsSlopes(lvl - 1); } //Comble un defaut d'un cas particulier non communique a temps (fantome niveau quelconque, cell lvl l, cell lvl l+1)
       //KS//FP// A reflechir si mieux a faire (a appliquer sur les 3 communications des slopes)
       m_stat.endCommunicationTime();
     }
@@ -332,8 +332,8 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
       for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports); } }
       if (Ncpu > 1) {
         m_stat.startCommunicationTime();
-        m_mesh->communicationsSlopes(lvl);
-        if (lvl > 0) { m_mesh->communicationsSlopes(lvl - 1); }
+        parallel.communicationsSlopes(lvl);
+        if (lvl > 0) { parallel.communicationsSlopes(lvl - 1); }
         m_stat.endCommunicationTime();
       }
     }
@@ -360,7 +360,7 @@ void Run::advancingProcedure(double &dt, int &lvl, double &dtMax)
   //6) Final communications
   if (Ncpu > 1) {
     m_stat.startCommunicationTime();
-    m_mesh->communicationsPrimitives(m_eos, lvl);
+    parallel.communicationsPrimitives(m_eos, lvl);
     m_stat.endCommunicationTime();
   }
   //Only for few test case
@@ -397,7 +397,7 @@ void Run::solveHyperbolicO2(double &dt, int &lvl, double &dtMax)
   //-----------------------------
   if (Ncpu > 1) {
     m_stat.startCommunicationTime();
-    m_mesh->communicationsPrimitives(m_eos, lvl, vecPhasesO2);
+    parallel.communicationsPrimitives(m_eos, lvl, vecPhasesO2);
     m_stat.endCommunicationTime();
   }
 
@@ -406,8 +406,8 @@ void Run::solveHyperbolicO2(double &dt, int &lvl, double &dtMax)
   for (unsigned int i = 0; i < m_cellInterfacesLvl[lvl].size(); i++) { if (!m_cellInterfacesLvl[lvl][i]->getSplit()) { m_cellInterfacesLvl[lvl][i]->computeSlopes(m_numberPhases, m_numberTransports, vecPhasesO2); } }
   if (Ncpu > 1) {
     m_stat.startCommunicationTime();
-    m_mesh->communicationsSlopes(lvl);
-    if (lvl > 0) { m_mesh->communicationsSlopes(lvl - 1); }
+    parallel.communicationsSlopes(lvl);
+    if (lvl > 0) { parallel.communicationsSlopes(lvl - 1); }
     m_stat.endCommunicationTime();
   }
 
@@ -455,13 +455,13 @@ void Run::solveAdditionalPhysics(double &dt, int &lvl)
   //-------------------------------------------------------------------------------------------
   if (Ncpu > 1) {
     m_stat.startCommunicationTime();
-    m_mesh->communicationsPrimitives(m_eos, lvl);
+    parallel.communicationsPrimitives(m_eos, lvl);
     m_stat.endCommunicationTime();
   }
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
   if (Ncpu > 1) {
     m_stat.startCommunicationTime();
-    m_mesh->communicationsAddPhys(m_addPhys,  lvl);
+    for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { m_addPhys[pa]->communicationsAddPhys(m_numberPhases, m_dimension, lvl); }
     m_stat.endCommunicationTime();
   }
 
@@ -511,7 +511,7 @@ void Run::solveRelaxations(int &lvl)
       m_addPhys[pa]->reinitializeColorFunction(m_cellsLvl, lvl);
       if (Ncpu > 1) {
         m_stat.startCommunicationTime();
-        m_mesh->communicationsTransports(lvl);
+        parallel.communicationsTransports(lvl);
         m_stat.endCommunicationTime();
       }
     }
