@@ -101,7 +101,8 @@ public: //Ctors
             if(i==nProcs-1)
             {
                 nCells_per_rank_.emplace_back(0);
-                key_rank_map_.emplace(key, i);
+                key_rank_map_.emplace(--key, i);
+                std::cout<<key<<std::endl;
             }
         }
     }
@@ -130,7 +131,19 @@ public: //Ctors
         return keys;
     }
 
-    int get_rank(const key_type _key)
+    bool areConsecutive(key_type _key0,key_type _key1)
+    {
+            while(true)
+            {
+                if(is_valid(_key0) )  
+                {
+                    return  _key0==_key1;
+                }
+                ++_key0;
+            }
+    }
+
+    int get_rank(const key_type& _key)
     {
         auto range = key_rank_map_.equal_range(_key);
         if (range.first->first == range.second->first) {
@@ -170,27 +183,29 @@ public: //Ctors
        return true;
     }
 
-    void addKeyAndRankToMap(key_type _key, int _rank) //KS//BD//
+    void addKeyAndRankToMap(key_type _key, int _rank)
     {
         auto it = key_rank_map_.emplace(_key, _rank);
         if (!(it.second)) it.first->second = _rank;
     }
 
-    void recombineStarts() //KS//BD//
+    void recombineStarts()
     {
-        auto it = key_rank_map_.begin(), itPrev = it;
-        while (it != key_rank_map_.end()) {
-            itPrev = it;
-            ++it;
+return; //KS//BD//
+        auto it = key_rank_map_.begin(), itPrev = it++;
+        while (it != --(key_rank_map_.end())) {
             if (it->second == itPrev->second) {
                 it = key_rank_map_.erase(it);
+            }
+            else {
+                itPrev = it;
+                ++it;
             }
         }
     }
 
-    void communicateMaps(int _nCpu, std::vector<typename key_type::value_type> &localKeys, std::vector<int> &localRanks, int rank) //KS//BD//
+    void communicateMaps(int _nCpu, std::vector<typename key_type::value_type> &localKeys, std::vector<int> &localRanks, int rank)
     {
-           std::cout<<"BLA -1"<<std::endl;
         //Decompose local map into keys and values (ranks)
         int localMapSize = localKeys.size();
 
@@ -206,30 +221,33 @@ public: //Ctors
             displacements[i] = sumMapSizes;
             sumMapSizes += mapSizes[i];
         }
-            std::cout<<"BLA1"<<std::endl;
         std::vector<typename key_type::value_type> globalKeys(sumMapSizes);
         std::vector<int> globalRanks(sumMapSizes);
         MPI_Allgatherv(&localKeys[0],  localMapSize, MPI_UNSIGNED_LONG_LONG, &globalKeys[0],  &mapSizes[0], &displacements[0], MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
         MPI_Allgatherv(&localRanks[0], localMapSize, MPI_INT,                &globalRanks[0], &mapSizes[0], &displacements[0], MPI_INT,                MPI_COMM_WORLD);
-        std::ofstream ofs("test.out");
+
+if(rank==0){ //KS//BD//
+    std::ofstream ofs2("before.out");
+for(auto& e : key_rank_map_) ofs2<<e.first<<" "<<e.second<<std::endl;
+}
         //Recompose global map from keys and ranks
+        auto keyRankEnd = *(key_rank_map_.rbegin());
         key_rank_map_.clear();
+        key_rank_map_.emplace(keyRankEnd);
         for (std::size_t i = 0; i < globalKeys.size(); ++i)
         {
             key_rank_map_.emplace(globalKeys[i], globalRanks[i]);
-            // if(rank==0)
-            // {
-            //     ofs<<globalKeys[i]<<" "<<globalRanks[i]<<std::endl;
-            // }
         }
-        if(rank==0){
-        for(auto& e : key_rank_map_)ofs<<e.first<<" "<<e.second<<std::endl;
-            }
-        std::ofstream ofs1("test_rank"+std::to_string(rank)+".out");
-        for (std::size_t i = 0; i < localKeys.size(); ++i)
-        {
-            ofs1<<localKeys[i]<<" "<<localRanks[i]<<std::endl;
-        }
+
+if(rank==0){ //KS//BD//
+    std::ofstream ofs("after.out");
+for(auto& e : key_rank_map_) ofs<<e.first<<" "<<e.second<<std::endl;
+}
+std::ofstream ofs1("test_rank"+std::to_string(rank)+".out");
+for (std::size_t i = 0; i < localKeys.size(); ++i)
+{
+ofs1<<localKeys[i]<<" "<<localRanks[i]<<std::endl;
+}
     }
 
 
