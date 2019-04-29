@@ -76,12 +76,10 @@ public:
   virtual void parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
     const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init = false);
   virtual void computePotentialBalancing(TypeMeshContainer<Cell *> *cellsLvl, bool init, int lvl, bool &balance, std::string ordreCalcul,
-    int &numberOfCellsToSendStartGlobal, int &numberOfCellsToSendEndGlobal, int &numberOfCellsToReceiveStartGlobal, int &numberOfCellsToReceiveEndGlobal,
     std::vector<typename decomposition::Key<3>::value_type> &indicesSendStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesSendEndGlobal,
     std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveEndGlobal);
   virtual void balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
-    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos,
-    const int &numberOfCellsToSendStartGlobal, const int &numberOfCellsToSendEndGlobal, const int &numberOfCellsToReceiveStartGlobal, const int &numberOfCellsToReceiveEndGlobal, int &nbCellsTotalAMR,
+    const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR,
     std::vector<typename decomposition::Key<3>::value_type> &indicesSendStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesSendEndGlobal,
     std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveEndGlobal);
 
@@ -91,7 +89,6 @@ private:
 	bool m_varRho, m_varP, m_varU, m_varAlpha;  //!<Choix sur quelle variation on (de)raffine
 	double m_xiSplit, m_xiJoin;                 //!<Valeur de xi pour split ou join les mailles
   decomposition::Decomposition m_decomp;      //!<Parallel domain decomposition based on keys
-  std::vector<int> m_cellRanks;               //!<Rank of each cell, used for domain decomposition
 
 };
 

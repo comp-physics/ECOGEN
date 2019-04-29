@@ -102,7 +102,6 @@ public: //Ctors
             {
                 nCells_per_rank_.emplace_back(0);
                 key_rank_map_.emplace(--key, i);
-                std::cout<<key<<std::endl;
             }
         }
     }
@@ -146,11 +145,11 @@ public: //Ctors
     int get_rank(const key_type& _key)
     {
         
-        for(auto it=key_rank_map_.begin();it!=key_rank_map_.end();++it)
-        {
-            if(_key < it->first) return (--it)->second;
-            else if(_key == it->first) return (it)->second;
-        }
+        //for(auto it=key_rank_map_.begin();it!=key_rank_map_.end();++it)
+        //{
+        //    if(_key < it->first) return (--it)->second;
+        //    else if(_key == it->first) return (it)->second;
+        //}
         auto range = key_rank_map_.equal_range(_key);
         if (range.first->first == range.second->first) {
             auto it = range.first;
@@ -232,10 +231,6 @@ return; //KS//BD//
         MPI_Allgatherv(&localKeys[0],  localMapSize, MPI_UNSIGNED_LONG_LONG, &globalKeys[0],  &mapSizes[0], &displacements[0], MPI_UNSIGNED_LONG_LONG, MPI_COMM_WORLD);
         MPI_Allgatherv(&localRanks[0], localMapSize, MPI_INT,                &globalRanks[0], &mapSizes[0], &displacements[0], MPI_INT,                MPI_COMM_WORLD);
 
-if(rank==0){ //KS//BD//
-    std::ofstream ofs2("before.out");
-for(auto& e : key_rank_map_) ofs2<<e.first.coordinate()<<" "<<e.second<<std::endl;
-}
         //Compose global map from keys and ranks
         auto keyRankEnd = *(key_rank_map_.rbegin());
         key_rank_map_.clear();
@@ -244,16 +239,6 @@ for(auto& e : key_rank_map_) ofs2<<e.first.coordinate()<<" "<<e.second<<std::end
         {
             key_rank_map_.emplace(globalKeys[i], globalRanks[i]);
         }
-
-if(rank==0){ //KS//BD//
-    std::ofstream ofs("after.out");
-for(auto& e : key_rank_map_) ofs<<e.first.coordinate()<<" "<<e.second<<std::endl;
-}
-std::ofstream ofs1("test_rank"+std::to_string(rank)+".out");
-for (std::size_t i = 0; i < localKeys.size(); ++i)
-{
-ofs1<<localKeys[i]<<" "<<localRanks[i]<<std::endl;
-}
     }
 
 
