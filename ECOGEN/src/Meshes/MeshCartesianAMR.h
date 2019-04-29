@@ -83,8 +83,7 @@ public:
     const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos,
     const int &numberOfCellsToSendStartGlobal, const int &numberOfCellsToSendEndGlobal, const int &numberOfCellsToReceiveStartGlobal, const int &numberOfCellsToReceiveEndGlobal, int &nbCellsTotalAMR,
     std::vector<typename decomposition::Key<3>::value_type> &indicesSendStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesSendEndGlobal,
-    std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveEndGlobal,
-    std::vector<typename decomposition::Key<3>::value_type> &localKeys, std::vector<int> &localRanks);
+    std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveStartGlobal, std::vector<typename decomposition::Key<3>::value_type> &indicesReceiveEndGlobal);
 
 private:
   int m_lvlMax;                               //!<Niveau maximal sur l arbre AMR (si m_lvlMax = 0, pas d AMR)

@@ -2,8 +2,8 @@
 <computationParam>
 	<run>kapila2DairShockHeliumBubble</run>
 	<outputMode format="XML" binary="false" precision="10"/>
-	<timeControlMode iterations="false">
-		<iterations number="10" iterFreq="1"/>
+	<timeControlMode iterations="true">
+		<iterations number="200" iterFreq="100"/>
 		<physicalTime totalTime="700.e-6" timeFreq="700.e-7"/>
 	</timeControlMode>
 	<computationControl CFL="0.8"/>

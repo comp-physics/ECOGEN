@@ -133,18 +133,24 @@ public: //Ctors
 
     bool areConsecutive(key_type _key0,key_type _key1)
     {
-            while(true)
+        while(true)
+        {
+            ++_key0;
+            if(is_valid(_key0) )  
             {
-                if(is_valid(_key0) )  
-                {
-                    return  _key0==_key1;
-                }
-                ++_key0;
+                return  _key0==_key1;
             }
+        }
     }
 
     int get_rank(const key_type& _key)
     {
+        
+        for(auto it=key_rank_map_.begin();it!=key_rank_map_.end();++it)
+        {
+            if(_key < it->first) return (--it)->second;
+            else if(_key == it->first) return (it)->second;
+        }
         auto range = key_rank_map_.equal_range(_key);
         if (range.first->first == range.second->first) {
             auto it = range.first;
@@ -228,9 +234,9 @@ return; //KS//BD//
 
 if(rank==0){ //KS//BD//
     std::ofstream ofs2("before.out");
-for(auto& e : key_rank_map_) ofs2<<e.first<<" "<<e.second<<std::endl;
+for(auto& e : key_rank_map_) ofs2<<e.first.coordinate()<<" "<<e.second<<std::endl;
 }
-        //Recompose global map from keys and ranks
+        //Compose global map from keys and ranks
         auto keyRankEnd = *(key_rank_map_.rbegin());
         key_rank_map_.clear();
         key_rank_map_.emplace(keyRankEnd);
@@ -241,7 +247,7 @@ for(auto& e : key_rank_map_) ofs2<<e.first<<" "<<e.second<<std::endl;
 
 if(rank==0){ //KS//BD//
     std::ofstream ofs("after.out");
-for(auto& e : key_rank_map_) ofs<<e.first<<" "<<e.second<<std::endl;
+for(auto& e : key_rank_map_) ofs<<e.first.coordinate()<<" "<<e.second<<std::endl;
 }
 std::ofstream ofs1("test_rank"+std::to_string(rank)+".out");
 for (std::size_t i = 0; i < localKeys.size(); ++i)
