@@ -182,14 +182,10 @@ public: //Ctors
        return true;
     }
 
-    void addKeyAndRankToMap(key_type _key, int _rank)
-    {
-        auto it = key_rank_map_.emplace(_key, _rank);
-        if (!(it.second)) it.first->second = _rank;
-    }
 
     void recombineStarts()
     {
+        return; //KS//BD//;
         auto it = key_rank_map_.begin(), itPrev = it++;
         while (it != --(key_rank_map_.end())) {
             if (it->second == itPrev->second) {
