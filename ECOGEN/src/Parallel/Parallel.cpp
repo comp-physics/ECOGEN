@@ -171,14 +171,14 @@ void Parallel::addElementToReceive(int neighbour, Cell* cell)
 
 void Parallel::addSlopesToSend(int neighbour)
 {
-  m_numberSlopesToSendToNeighbour[neighbour]+=1;
+  m_numberSlopesToSendToNeighbour[neighbour] += 1;
 }
 
 //***********************************************************************
 
 void Parallel::addSlopesToReceive(int neighbour)
 {
-  m_numberSlopesToReceiveFromNeighbour[neighbour]+=1;
+  m_numberSlopesToReceiveFromNeighbour[neighbour] += 1;
 }
 
 //***********************************************************************

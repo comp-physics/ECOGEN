@@ -240,7 +240,7 @@ class Cell
         void getBufferSplit(bool *buffer, int &counter, const int &lvl);
         void fillNumberElementsToSendToNeighbour(int &numberElementsToSendToNeighbor, int &numberSlopesToSendToNeighbor, const int &lvl, const int &neighbour, int numberNeighboursOfCPUneighbour);
         void fillDataToSend(std::vector<double> &dataToSend, std::vector<int> &dataSplitToSend, const int &lvl) const;
-        void getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
+        void getDataToReceiveAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
             const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model);
         void computeLoad(double &load, int lvl) const;
         void computeLvlMax(int &lvlMax) const;

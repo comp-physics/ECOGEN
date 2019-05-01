@@ -19,6 +19,6 @@
         <stretch startAt="6.e-3" endAt="9.e-3" factor="1.02" numberCells="30"/>
       </ZStretching>
     </meshStretching>
-    <AMR lvlMax="2" criteriaVar="0.02" varRho="true" varP="true" varU="true" varAlpha="true" xiSplit="0.11" xiJoin="0.21"/>
+    <AMR lvlMax="2" criteriaVar="0.04" varRho="true" varP="true" varU="true" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>
   </cartesianMesh>
 </mesh>

@@ -476,6 +476,14 @@ double Cell::selectScalar(std::string nameVariable, int num) const
     }
     else { return 1.; }
   }
+  else if (nameVariable == "U") {
+    if (m_numberPhases > 1) {
+      return m_mixture->getVelocity().norm();
+    }
+    else {
+      return m_vecPhases[num]->getVelocity().norm();
+    }
+  }
   else if (nameVariable == "u") {
     if (m_numberPhases > 1) {
       return m_mixture->getVelocity().getX();
@@ -2243,7 +2251,7 @@ void Cell::fillDataToSend(std::vector<double> &dataToSend, std::vector<int> &dat
 
 //***********************************************************************
 
-void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
+void Cell::getDataToReceiveAndRefine(std::vector<double> &dataToReceive, std::vector<int> &dataSplitToReceive, const int &lvl, Eos **eos, int &counter, int &counterSplit,
   const int &nbCellsY, const int &nbCellsZ, const std::vector<AddPhys*> &addPhys, Model *model)
 {
   if (m_lvl == lvl) {
@@ -2267,7 +2275,7 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
-      m_childrenCells[i]->getDataToSendAndRefine(dataToReceive, dataSplitToReceive, lvl, eos, counter, counterSplit, nbCellsY, nbCellsZ, addPhys, model);
+      m_childrenCells[i]->getDataToReceiveAndRefine(dataToReceive, dataSplitToReceive, lvl, eos, counter, counterSplit, nbCellsY, nbCellsZ, addPhys, model);
     }
   }
 }
@@ -2277,8 +2285,8 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
 void Cell::computeLoad(double &load, int lvl) const
 {
   if (!m_split) {
-     //if (m_lvl == lvl) { load += 1.; } //KS//BD//
-    load += 1.; //KS//BD//
+    if (m_lvl == lvl) { load += 1.; } //For levelwise balancing
+    //load += 1.; //For global balancing
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {

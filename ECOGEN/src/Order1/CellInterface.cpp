@@ -237,7 +237,7 @@ void CellInterface::computeXi(const double &criteriaVar, const bool &varRho, con
     if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "P"); }
   }
   if (varU) {
-    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "u"); }
+    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "U"); }
   }
   if (varAlpha) {
     if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "ALPHA", 1); }
@@ -255,7 +255,10 @@ void CellInterface::computeCritereAMR(const double &criteriaVar, std::string nam
 
   // Valeur de la variation
   valueMin = std::min(std::fabs(cd), std::fabs(cg));
-  if (valueMin < 1.e-2) { valueMin = 1.e-2; } //Utile pour alpha (quasi-seulement) ou velocity
+  if (valueMin < 1.e-2) { //Utile pour alpha (quasi-seulement) ou velocity
+    if (nameVariable == "U") { valueMin = 1.e-1; }
+    else {                     valueMin = 1.e-2; }
+  }
   variation = std::fabs(cd - cg) / valueMin;
 
   //Mise a jour de xi si la variation est superieure au criteria
