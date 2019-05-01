@@ -887,16 +887,15 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
   bool balance(false);
   do {
     balance = false;
-        std::vector<typename decomposition::Key<3>::value_type> indicesSendStartGlobal;
-        std::vector<typename decomposition::Key<3>::value_type> indicesSendEndGlobal;
-        std::vector<typename decomposition::Key<3>::value_type> indicesReceiveStartGlobal;
-        std::vector<typename decomposition::Key<3>::value_type> indicesReceiveEndGlobal;
-    for (int lvl = 0; lvl <= m_lvlMax; ++lvl) { //KS//BD//
-        //int lvl(0);
-        this->computePotentialBalancing(cellsLvl, init, lvl, balance, ordreCalcul,
-                indicesSendStartGlobal, indicesSendEndGlobal, 
-                indicesReceiveStartGlobal, indicesReceiveEndGlobal);
-    } //KS//BD//
+    std::vector<typename decomposition::Key<3>::value_type> indicesSendStartGlobal;
+    std::vector<typename decomposition::Key<3>::value_type> indicesSendEndGlobal;
+    std::vector<typename decomposition::Key<3>::value_type> indicesReceiveStartGlobal;
+    std::vector<typename decomposition::Key<3>::value_type> indicesReceiveEndGlobal;
+    for (int lvl = 0; lvl <= m_lvlMax; ++lvl) {
+      this->computePotentialBalancing(cellsLvl, init, lvl, balance, ordreCalcul,
+        indicesSendStartGlobal, indicesSendEndGlobal, 
+        indicesReceiveStartGlobal, indicesReceiveEndGlobal);
+    }
 
     if (balance) {
       this->balance(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model, eos,
@@ -1011,17 +1010,13 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
         if (static_cast<int>(std::round(possibleLoadShiftStart)) >= static_cast<int>(std::round(idealLoadShiftStart))) break;
       }
       if (numberOfCellsToSendStart != 0) --numberOfCellsToSendStart;
-      if (rankCpu != 0) {
-        MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-        MPI_Wait(&req_neighborM1, &status);
-      }
+      MPI_Isend(&numberOfCellsToSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
     else {
       //Receive possible load shift start
-      if (rankCpu != 0) {
-        MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-        MPI_Wait(&req_neighborM1, &status);
-      }    
+      MPI_Irecv(&numberOfCellsToReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+      MPI_Wait(&req_neighborM1, &status);
     }
   }
 
@@ -1037,42 +1032,43 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
           ++numberOfCellsToSendEnd;
          }
         if (static_cast<int>(std::round(-possibleLoadShiftEnd)) <= static_cast<int>(std::round(idealLoadShiftEnd)) ||
-            (numberOfCellsToSendEnd+ numberOfCellsToSendStart) +1 == cellsLvl[0].size()
+            (numberOfCellsToSendEnd + numberOfCellsToSendStart + 1) == cellsLvl[0].size()
             ) break;
       }
       if (numberOfCellsToSendEnd != 0) --numberOfCellsToSendEnd;
-      if (rankCpu != Ncpu - 1) {
-        MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-        MPI_Wait(&req_neighborP1, &status);
-      }
+      MPI_Isend(&numberOfCellsToSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
     else {
       //Receive possible load shift end
-      if (rankCpu != Ncpu - 1) {
-        MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-        MPI_Wait(&req_neighborP1, &status);
-      }
+      MPI_Irecv(&numberOfCellsToReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+      MPI_Wait(&req_neighborP1, &status);
     }
   }
-  //<<" possibleLoadShiftStart "<<possibleLoadShiftStart<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
-  //<<std::endl;
+// if (rankCpu == 2) { //KS//BD//
+//   std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl
+//   <<" idealLoadShiftStart "<<idealLoadShiftStart<<" idealLoadShiftEnd "<<idealLoadShiftEnd
+//   <<" possibleLoadShiftStart "<<possibleLoadShiftStart<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
+//   <<std::endl;
+// }
   // double localLoadStartPosition = localLoadEndPosition - localLoad;
   // localLoadStartPosition += possibleLoadShiftStart;
   // localLoadEndPosition += possibleLoadShiftEnd;
   // double finalLocalLoad =localLoadEndPosition-localLoadStartPosition;
-  // std::cout<<"cpu "<<rankCpu<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
+  // std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
   // <<" initialLocalLoad "<<localLoad
   // <<" finalLocalLoad "<<finalLocalLoad<<std::endl;
-  // std::cout<<"cpu "<<rankCpu
-  // <<" numberOfCellsToSendStart "<<numberOfCellsToSendStart<<" numberOfCellsToSendEnd "<<numberOfCellsToSendEnd
-  // <<" numberOfCellsToReceiveStart "<<numberOfCellsToReceiveStart<<" numberOfCellsToReceiveEnd "<<numberOfCellsToReceiveEnd
-  // <<std::endl;
-
+// if (rankCpu == 2) { //KS//BD//
+//   std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl
+//   <<" numberOfCellsToSendStart "<<numberOfCellsToSendStart<<" numberOfCellsToSendEnd "<<numberOfCellsToSendEnd
+//   <<" numberOfCellsToReceiveStart "<<numberOfCellsToReceiveStart<<" numberOfCellsToReceiveEnd "<<numberOfCellsToReceiveEnd
+//   <<std::endl;
+// }
   //4) Update criterion to balance
   //------------------------------
   double relativePossibleLoadShiftMax(0.), relativePossibleLoadShiftLocal(0.);
   relativePossibleLoadShiftLocal = std::max(std::max(numberOfCellsToSendStart, numberOfCellsToReceiveStart), std::max(numberOfCellsToSendEnd,numberOfCellsToReceiveEnd));
-  relativePossibleLoadShiftLocal /= localLoad;
+  if (localLoad > 1.e-8) { relativePossibleLoadShiftLocal /= localLoad; }
   MPI_Allreduce(&relativePossibleLoadShiftLocal, &relativePossibleLoadShiftMax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
   if (init) {
@@ -1082,7 +1078,7 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
     if (relativePossibleLoadShiftMax > 0.05) { balance = true; }
   }
 
-  if (!balance )return;
+  if (!balance ) return;
 
   //5) Send/Receive indices of base cell keys (lvl = 0) and partially update the domain decomposition with new starts and ends
   //--------------------------------------------------------------------------------------------------------------------------
@@ -1098,18 +1094,14 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
         if (indicesSendStart.size() == numberOfCellsToSendStart) { break; }
        }
     }
-    if (rankCpu != 0) {
-      MPI_Isend(&indicesSendStart[0], numberOfCellsToSendStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Isend(&indicesSendStart[0], numberOfCellsToSendStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
   }
 
   std::vector<typename decomposition::Key<3>::value_type> indicesReceiveEnd(numberOfCellsToReceiveEnd);
   if (numberOfCellsToReceiveEnd > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&indicesReceiveEnd[0], numberOfCellsToReceiveEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Irecv(&indicesReceiveEnd[0], numberOfCellsToReceiveEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
   }
 
   std::vector<typename decomposition::Key<3>::value_type> indicesSendEnd;
@@ -1122,18 +1114,14 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
         if (indicesSendEnd.size() == numberOfCellsToSendEnd) { break; }
        }
     }
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&indicesSendEnd[0], numberOfCellsToSendEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Isend(&indicesSendEnd[0], numberOfCellsToSendEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
   }
 
   std::vector<typename decomposition::Key<3>::value_type> indicesReceiveStart(numberOfCellsToReceiveStart);
   if (numberOfCellsToReceiveStart > 0) {
-    if (rankCpu != 0) {
-      MPI_Irecv(&indicesReceiveStart[0], numberOfCellsToReceiveStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Irecv(&indicesReceiveStart[0], numberOfCellsToReceiveStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
   }
 
   //Accumulation of send/receive of each level
@@ -1164,9 +1152,6 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
   const auto numberOfCellsToReceiveEndGlobal=indicesReceiveEndGlobal.size();
   const auto numberOfCellsToSendStartGlobal=indicesSendStartGlobal.size();
   const auto numberOfCellsToSendEndGlobal=indicesSendEndGlobal.size();
-
-//for(auto& e: indicesSendStartGlobal) std::cout<<"cpu "<<rankCpu<<" indicesSendStartGlobal: "<<decomposition::Key<3>(e).coordinate()<<std::endl; //KS//BD//
-//for(auto& e: indicesSendEndGlobal)  std::cout<<"cpu "<<rankCpu<<" indicesSendEndGlobal: "<<decomposition::Key<3>(e).coordinate()<<std::endl;
 
   //1) Create the corresponding base cells (received)
   //-------------------------------------------------
@@ -1207,11 +1192,6 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
 
   bufferReceiveCells.insert(bufferReceiveCells.end(), bufferReceiveCellsStart.begin(), bufferReceiveCellsStart.end());
   bufferReceiveCells.insert(bufferReceiveCells.end(), bufferReceiveCellsEnd.begin(), bufferReceiveCellsEnd.end());
-
-  //std::sort(bufferReceiveCells.begin(),bufferReceiveCells.end(),[&]( Cell* child0, Cell* child1 ) //KS//BD//
-  //    {
-  //      return child0->getElement()->getKey()< child1->getElement()->getKey();
-  //    });
 
   //2) Erase the pointers to the corresponding base cells from cellsLvl (cells are not deleted yet)
   //-----------------------------------------------------------------------------------------------
@@ -1277,7 +1257,14 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
 
   //Recombine starts of all CPU
   m_decomp.recombineStarts();
-
+// if (rankCpu == 2) {
+// std::cout<<"cpu "<<rankCpu
+// <<" numberOfCellsToSendStartGlobal "<<numberOfCellsToSendStartGlobal
+// <<" numberOfCellsToSendEndGlobal "<<numberOfCellsToSendEndGlobal
+// <<" numberOfCellsToReceiveStartGlobal "<<numberOfCellsToReceiveStartGlobal
+// <<" numberOfCellsToReceiveEndGlobal "<<numberOfCellsToReceiveEndGlobal
+// <<std::endl;
+// } //KS//BD//
   //4) Create cell interfaces, faces and ghost cells of level 0
   //-----------------------------------------------------------
   for (int b = 0; b < cellInterfacesLvl[0].size(); b++) { delete cellInterfacesLvl[0][b]; }
@@ -1290,11 +1277,11 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
   createCellInterfacesFacesAndGhostCells(cellsLvl[0], cellsLvlGhost[0], cellInterfacesLvl[0], ordreCalcul);
   m_numberCellsTotal = cellsLvl[0].size() + cellsLvlGhost[0].size();
   m_numberFacesTotal = cellInterfacesLvl[0].size();
-  // std::cout<<"cpu "<<rankCpu
-  // << " m_numberCellsCalcul "<<m_numberCellsCalcul
-  // << " m_numberCellsTotal "<<m_numberCellsTotal
-  // << " m_numberFacesTotal "<<m_numberFacesTotal
-  // <<std::endl;
+//   std::cout<<"cpu "<<rankCpu
+//   << " m_numberCellsCalcul "<<m_numberCellsCalcul
+//   << " m_numberCellsTotal "<<m_numberCellsTotal
+//   << " m_numberFacesTotal "<<m_numberFacesTotal
+//   <<std::endl;
 
   //5) Allocate physical variables of cells and cell interfaces level 0
   //-------------------------------------------------------------------
@@ -1323,20 +1310,16 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
     }
     numberSendStart = dataToSendStart.size();
     numberSplitSendStart = dataSplitToSendStart.size();
-    if (rankCpu != 0) {
-      MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Isend(&numberSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
+    MPI_Isend(&numberSplitSendStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
   }
   if (numberOfCellsToReceiveEndGlobal > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Irecv(&numberReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
+    MPI_Irecv(&numberSplitReceiveEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
   }
   if (numberOfCellsToSendEndGlobal > 0) {
     //Count and fill buffer vector send
@@ -1347,40 +1330,32 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
     }
     numberSendEnd = dataToSendEnd.size();
     numberSplitSendEnd = dataSplitToSendEnd.size();
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Isend(&numberSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
+    MPI_Isend(&numberSplitSendEnd, 1, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
   }
   if (numberOfCellsToReceiveStartGlobal > 0) {
-    if (rankCpu != 0) {
-      MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Irecv(&numberReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
+    MPI_Irecv(&numberSplitReceiveStart, 1, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
   }
 
   //Send/Receive data
   std::vector<double> dataToReceiveStart(numberReceiveStart), dataToReceiveEnd(numberReceiveEnd);
   std::vector<int> dataSplitToReceiveStart(numberSplitReceiveStart), dataSplitToReceiveEnd(numberSplitReceiveEnd);
   if (numberOfCellsToSendStartGlobal > 0) {
-    if (rankCpu != 0) {
-      MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Isend(&dataToSendStart[0], numberSendStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
+    MPI_Isend(&dataSplitToSendStart[0], numberSplitSendStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
   }
   if (numberOfCellsToReceiveEndGlobal > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Irecv(&dataToReceiveEnd[0], numberReceiveEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
+    MPI_Irecv(&dataSplitToReceiveEnd[0], numberSplitReceiveEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
     //Get buffer vector receive + Refine cells and internal cell interfaces
     counter = 0; counterSplit = 0;
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
@@ -1390,20 +1365,16 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
     }
   }
   if (numberOfCellsToSendEndGlobal > 0) {
-    if (rankCpu != Ncpu - 1) {
-      MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-      MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
-      MPI_Wait(&req_neighborP1, &status);
-    }
+    MPI_Isend(&dataToSendEnd[0], numberSendEnd, MPI_DOUBLE, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
+    MPI_Isend(&dataSplitToSendEnd[0], numberSplitSendEnd, MPI_INT, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
+    MPI_Wait(&req_neighborP1, &status);
   }
   if (numberOfCellsToReceiveStartGlobal > 0) {
-    if (rankCpu != 0) {
-      MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-      MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
-      MPI_Wait(&req_neighborM1, &status);
-    }
+    MPI_Irecv(&dataToReceiveStart[0], numberReceiveStart, MPI_DOUBLE, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
+    MPI_Irecv(&dataSplitToReceiveStart[0], numberSplitReceiveStart, MPI_INT, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
+    MPI_Wait(&req_neighborM1, &status);
     //Get buffer vector receive + Refine cells and internal cell interfaces
     counter = 0; counterSplit = 0;
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) {

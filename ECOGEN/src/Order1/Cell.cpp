@@ -2277,8 +2277,7 @@ void Cell::getDataToSendAndRefine(std::vector<double> &dataToReceive, std::vecto
 void Cell::computeLoad(double &load, int lvl) const
 {
   if (!m_split) {
-     //KS//BD//if (m_lvl == lvl) { load += 1.; }
-     { load += 1.; }
+     if (m_lvl == lvl) { load += 1.; }
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {

@@ -148,15 +148,6 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 	}
 
 	if (s == -1) {
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// <<" ghostCellCoord "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
-// <<" refIndex "<<refIndex
-// <<" cellInterfaceRefCoord "<<cellInterfaceRef.getFace()->getPos().getX()<<" "<<cellInterfaceRef.getFace()->getPos().getY()
-// <<" coordBuffer "<<coordBuffer.getX()<<" "<<coordBuffer.getY()
-// <<std::endl;
-// for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) { //KS//BD//
-// std::cout<<"m_indexCellInterface["<<b<<"] "<<m_indexCellInterface[b]<<std::endl;
-// }
 		refIndex = -1;
 		for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) {
 			if (m_indexCellInterface[b] == refIndex) {
@@ -164,12 +155,8 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 				break;
 			}
 		}
-// std::cout<<"cpu "<<rankCpu //KS//BD//
-// <<" "<<m_vecPhasesSlopesGhost[s][0]->getAlpha()<<" "<<m_vecPhasesSlopesGhost[s][0]->getDensity()<<" "<<m_vecPhasesSlopesGhost[s][0]->getPressure()
-// <<" "<<m_vecPhasesSlopesGhost[s][1]->getAlpha()<<" "<<m_vecPhasesSlopesGhost[s][1]->getDensity()<<" "<<m_vecPhasesSlopesGhost[s][1]->getPressure()
-// <<" "<<m_mixtureSlopesGhost[s]->getVelocity().getX()<<" "<<m_mixtureSlopesGhost[s]->getVelocity().getY()<<" "<<m_mixtureSlopesGhost[s]->getVelocity().getZ()
-// <<std::endl; //KS//BD//
 	}
+
 	//Mise a zero des slopes locales
 	//------------------------------
 	double sommeCoeff(0.);
@@ -203,22 +190,7 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 		slopesMixtureLocal1->divide(sommeCoeff);
 		for (int k = 0; k < numberTransports; k++) { slopesTransportLocal1[k] /= sommeCoeff; }
 	}
-// for (int k = 0; k < numberPhases; k++) { //KS//BD//
-// 	slopesPhasesLocal1[k]->setToZero();
-// }
-// slopesMixtureLocal1->setToZero();
-// for (int k = 0; k < numberTransports; k++) {
-// 	slopesTransportLocal1[k] = 0.;
-// }
-// if (refIndex == -1) {
-// for (int k = 0; k < numberPhases; k++) { //KS//BD//
-// 	m_vecPhasesSlopesGhost[s][k]->setToZero();
-// }
-// m_mixtureSlopesGhost[s]->setToZero();
-// for (int k = 0; k < numberTransports; k++) {
-// 	m_vecTransportsSlopesGhost[s][k] = 0.;
-// }
-// }
+
 	//Limitations des slopes
 	//----------------------
 	if (m_indexCellInterface[s] != -1) { //Slope stores in ghost cell is from a cell interface of type cellInterfaceO2 or BoundCondWallO2

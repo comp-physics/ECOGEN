@@ -219,16 +219,7 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
 		for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] /= sommeCoeff2; }
     alphaCellAfterOppositeSide /= sommeCoeff2;
 	}
-// for (int k = 0; k < numberPhases; k++) { //KS//BD//
-//   slopesPhasesLocal1[k]->setToZero();
-//   slopesPhasesLocal2[k]->setToZero();
-// }
-// slopesMixtureLocal1->setToZero();
-// slopesMixtureLocal2->setToZero();
-// for (int k = 0; k < numberTransports; k++) {
-//   slopesTransportLocal1[k] = 0.;
-//   slopesTransportLocal2[k] = 0.;
-// }
+
 	//Limitations des slopes
 	//----------------------
   //Detection of the interface location
@@ -337,16 +328,7 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
     slopesMixtureLocal2->divide(sommeCoeff2);
     for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] /= sommeCoeff2; }
   }
-// for (int k = 0; k < numberPhases; k++) { //KS//BD//
-//   slopesPhasesLocal1[k]->setToZero();
-//   slopesPhasesLocal2[k]->setToZero();
-// }
-// slopesMixtureLocal1->setToZero();
-// slopesMixtureLocal2->setToZero();
-// for (int k = 0; k < numberTransports; k++) {
-//   slopesTransportLocal1[k] = 0.;
-//   slopesTransportLocal2[k] = 0.;
-// }
+
   //Limitations des slopes
   //----------------------
   //Detection of the interface location
@@ -649,13 +631,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, cons
           }
         }
       }
-// if ((slopeIndex == -1) && !m_split) { //KS//BD//
-// std::cout<<"cpu "<<rankCpu
-// <<" innerCellCoord "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
-// <<" slopeIndex "<<slopeIndex
-// <<" cellInterfacesWithNeighboringGhostCell["<<b2<<"]"
-// <<std::endl; //KS//BD//
-// }
+
   		//Normalization of the slope
   		//--------------------------
   		if (sommeCoeff > 1.e-8) {
@@ -664,13 +640,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, cons
   			for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] /= sommeCoeff; }
         alphaCellAfterOppositeSide /= sommeCoeff;
   		}
-// for (int k = 0; k < m_numberPhases; k++) { //KS//BD//
-//   slopesPhasesLocal1[k]->setToZero();
-// }
-// slopesMixtureLocal1->setToZero();
-// for (int k = 0; k < m_numberTransports; k++) {
-//   slopesTransportLocal1[k] = 0.;
-// }
+
   		//Fill buffer to send
   		//-------------------
   		for (int k = 0; k < m_numberPhases; k++) {
