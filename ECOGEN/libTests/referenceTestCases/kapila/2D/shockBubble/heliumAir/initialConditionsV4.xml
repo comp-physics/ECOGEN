@@ -18,7 +18,7 @@
         <boundCond name="CLXm" type="abs" number="1"/>
         <boundCond name="CLXp" type="abs" number="2"/>
         <boundCond name="CLYm" type="symmetry" number="3"/>
-        <boundCond name="CLYp" type="wall" number="4"/>
+        <boundCond name="CLYp" type="abs" number="4"/>
     </boundaryConditions>
     
     <!--  LIST OF STATES  -->

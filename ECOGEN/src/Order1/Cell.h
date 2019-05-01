@@ -152,9 +152,12 @@ class Cell
 
         //Not used for first order cells
         //------------------------------
-        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface) {};  /*!< Does nothing for first order cells */
-        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter) {};  /*!< Does nothing for first order cells */
-        virtual void computeMultiSlope(const int &numberPhases, CellInterface *cellInterface, Limiter *globalLimiter) {};                   /*!< Does nothing for first order cells */
+        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface,
+            Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+            double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface) {};           /*!< Does nothing for first order cells */
+        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterface,
+            Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+            double &epsInterface) {};                                                                                                       /*!< Does nothing for first order cells */
         virtual Phase* getSlopes(const int &phaseNumber) const { return 0; };                                                               /*!< Does nothing for first order cells */
         virtual Transport* getSlopesTransport(const int &numberTransport) const { return 0; };                                              /*!< Does nothing for first order cells */
         virtual void saveCons(const int &numberPhases, const int &numberTransports) {};                                                     /*!< Does nothing for first order cells */

@@ -46,9 +46,12 @@ class CellO2 : public Cell
         virtual ~CellO2();
         virtual void allocate(const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model);
         virtual void copyPhase(const int &phaseNumber, Phase *phase);
-        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface);
-        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter);
-        //virtual void computeMultiSlope(const int &numberPhases, CellInterface *cellInterface, Limiter *globalLimiter);
+        virtual void computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef,
+            Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+            double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface);
+        virtual void computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef,
+            Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+            double &epsInterface);
         virtual void saveCons(const int &numberPhases, const int &numberTransports);
         virtual void recuperationCons(const int &numberPhases, const int &numberTransports);
         virtual void predictionOrdre2(const double &dt, const int &numberPhases, const int &numberTransports, Symmetry *symmetry);

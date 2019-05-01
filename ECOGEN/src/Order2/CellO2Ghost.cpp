@@ -126,20 +126,50 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 {
 	//Find the corresponding slopes store inside this ghost cell
 	//----------------------------------------------------------
-	int s(0);
+	int s(-1);
 	int refIndex=-1;
-	if (m_indexCellInterface.size() != 1) {
-		if      (cellInterfaceRef.getFace()->getNormal().getX() > 0.5) { refIndex = 0; }
-		else if (cellInterfaceRef.getFace()->getNormal().getY() > 0.5) { refIndex = 2; }
-		else                                                           { refIndex = 4; }
+	double epsilon(1.e-08), scalarDiff(0.);
+    Coord coordBuffer(0.);
+	scalarDiff = m_element->getPosition().scalar(cellInterfaceRef.getFace()->getNormal()) -
+	     cellInterfaceRef.getFace()->getPos().scalar(cellInterfaceRef.getFace()->getNormal());
+	coordBuffer=scalarDiff*cellInterfaceRef.getFace()->getNormal();
+	if      (coordBuffer.getX() < -epsilon) refIndex=0;
+	else if (coordBuffer.getX() >  epsilon) refIndex=1;
+	else if (coordBuffer.getY() < -epsilon) refIndex=2;
+	else if (coordBuffer.getY() >  epsilon) refIndex=3;
+	else if (coordBuffer.getZ() < -epsilon) refIndex=4;
+	else if (coordBuffer.getZ() >  epsilon) refIndex=5;
+
+	for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) {
+		if (m_indexCellInterface[b] == refIndex) {
+			s = b;
+			break;
+		}
+	}
+
+	if (s == -1) {
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// <<" ghostCellCoord "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
+// <<" refIndex "<<refIndex
+// <<" cellInterfaceRefCoord "<<cellInterfaceRef.getFace()->getPos().getX()<<" "<<cellInterfaceRef.getFace()->getPos().getY()
+// <<" coordBuffer "<<coordBuffer.getX()<<" "<<coordBuffer.getY()
+// <<std::endl;
+// for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) { //KS//BD//
+// std::cout<<"m_indexCellInterface["<<b<<"] "<<m_indexCellInterface[b]<<std::endl;
+// }
+		refIndex = -1;
 		for (unsigned int b = 0; b < m_indexCellInterface.size(); b++) {
-			if ((m_indexCellInterface[b] == refIndex) || (m_indexCellInterface[b] == refIndex + 1)) {
+			if (m_indexCellInterface[b] == refIndex) {
 				s = b;
 				break;
 			}
 		}
+// std::cout<<"cpu "<<rankCpu //KS//BD//
+// <<" "<<m_vecPhasesSlopesGhost[s][0]->getAlpha()<<" "<<m_vecPhasesSlopesGhost[s][0]->getDensity()<<" "<<m_vecPhasesSlopesGhost[s][0]->getPressure()
+// <<" "<<m_vecPhasesSlopesGhost[s][1]->getAlpha()<<" "<<m_vecPhasesSlopesGhost[s][1]->getDensity()<<" "<<m_vecPhasesSlopesGhost[s][1]->getPressure()
+// <<" "<<m_mixtureSlopesGhost[s]->getVelocity().getX()<<" "<<m_mixtureSlopesGhost[s]->getVelocity().getY()<<" "<<m_mixtureSlopesGhost[s]->getVelocity().getZ()
+// <<std::endl; //KS//BD//
 	}
-
 	//Mise a zero des slopes locales
 	//------------------------------
 	double sommeCoeff(0.);
@@ -153,8 +183,7 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 
 	//Boucle sur les cell interfaces pour la determination de la slope du cote de cellInterfaceRef
 	//--------------------------------------------------------------------------------------------
-	Coord coordBuffer(0.);
-	double epsilon(1.e-15);
+	coordBuffer = 0.;
 	for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
 		if (!m_cellInterfaces[b]->getSplit()) {
 			coordBuffer = m_cellInterfaces[b]->getFace()->getNormal().abs() - cellInterfaceRef.getFace()->getNormal();
@@ -169,39 +198,58 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 
 	//Normalisation des slopes
 	//------------------------
-	if (sommeCoeff > 1.e-5) {
+	if (sommeCoeff > 1.e-8) {
 		for (int k = 0; k < numberPhases; k++) { slopesPhasesLocal1[k]->divide(sommeCoeff); }
 		slopesMixtureLocal1->divide(sommeCoeff);
 		for (int k = 0; k < numberTransports; k++) { slopesTransportLocal1[k] /= sommeCoeff; }
 	}
-  
+// for (int k = 0; k < numberPhases; k++) { //KS//BD//
+// 	slopesPhasesLocal1[k]->setToZero();
+// }
+// slopesMixtureLocal1->setToZero();
+// for (int k = 0; k < numberTransports; k++) {
+// 	slopesTransportLocal1[k] = 0.;
+// }
+// if (refIndex == -1) {
+// for (int k = 0; k < numberPhases; k++) { //KS//BD//
+// 	m_vecPhasesSlopesGhost[s][k]->setToZero();
+// }
+// m_mixtureSlopesGhost[s]->setToZero();
+// for (int k = 0; k < numberTransports; k++) {
+// 	m_vecTransportsSlopesGhost[s][k] = 0.;
+// }
+// }
 	//Limitations des slopes
 	//----------------------
 	if (m_indexCellInterface[s] != -1) { //Slope stores in ghost cell is from a cell interface of type cellInterfaceO2 or BoundCondWallO2
 		alphaCellAfterOppositeSide = m_alphaCellAfterOppositeSide[s]; //Detection of the interface and THINC method are simplified in parallel
-		if ((alphaCell >= epsInterface) && (alphaCell <= 1. - epsInterface) &&
-		   ((alphaCellOtherInterfaceSide - alphaCell)*(alphaCell - alphaCellAfterOppositeSide) >= 1.e-8)) {
-			for (int k = 0; k < numberPhases; k++) {
-				slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], interfaceLimiter, interfaceVolumeFractionLimiter);
-			}
-			slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], interfaceLimiter);
-			for (int k = 0; k < numberTransports; k++) {
-				slopesTransportLocal1[k] = interfaceVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
-			}
+	}
+	else { //KS//BD//
+		alphaCellAfterOppositeSide = m_vecPhases[0]->getAlpha();
+	}
+	if ((alphaCell >= epsInterface) && (alphaCell <= 1. - epsInterface) &&
+	   ((alphaCellOtherInterfaceSide - alphaCell)*(alphaCell - alphaCellAfterOppositeSide) >= 1.e-8)) {
+		for (int k = 0; k < numberPhases; k++) {
+			slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], interfaceLimiter, interfaceVolumeFractionLimiter);
 		}
-		else {
-			for (int k = 0; k < numberPhases; k++) {
-				slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], globalLimiter, globalVolumeFractionLimiter);
-			}
-			slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], globalLimiter);
-			for (int k = 0; k < numberTransports; k++) {
-				slopesTransportLocal1[k] = globalVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
-			}
+		slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], interfaceLimiter);
+		for (int k = 0; k < numberTransports; k++) {
+			slopesTransportLocal1[k] = interfaceVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
 		}
 	}
 	else {
-		alphaCellAfterOppositeSide = m_vecPhases[0]->getAlpha();
+		for (int k = 0; k < numberPhases; k++) {
+			slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *m_vecPhasesSlopesGhost[s][k], globalLimiter, globalVolumeFractionLimiter);
+		}
+		slopesMixtureLocal1->limitSlopes(*slopesMixtureLocal1, *m_mixtureSlopesGhost[s], globalLimiter);
+		for (int k = 0; k < numberTransports; k++) {
+			slopesTransportLocal1[k] = globalVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
+		}
 	}
+	// } //KS//BD//
+	// else {
+	// 	alphaCellAfterOppositeSide = m_vecPhases[0]->getAlpha();
+	// }
 }
 
 //***********************************************************************

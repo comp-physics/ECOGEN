@@ -95,10 +95,10 @@ void CellO2::copyPhase(const int &phaseNumber, Phase *phase)
 
 //***********************************************************************
 
-void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter, double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface)
+void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef,
+  Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+  double &alphaCellAfterOppositeSide, double &alphaCell, double &alphaCellOtherInterfaceSide, double &epsInterface)
 {
-	//Solution pour multiD cartesian (peut etre une ebauche pour le NS, a voir...)
-
 	//Mise a zero des slopes locales
 	//------------------------------
   double coeff(0.), posCellInterfaceRef(0.);
@@ -219,7 +219,16 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
 		for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] /= sommeCoeff2; }
     alphaCellAfterOppositeSide /= sommeCoeff2;
 	}
-
+// for (int k = 0; k < numberPhases; k++) { //KS//BD//
+//   slopesPhasesLocal1[k]->setToZero();
+//   slopesPhasesLocal2[k]->setToZero();
+// }
+// slopesMixtureLocal1->setToZero();
+// slopesMixtureLocal2->setToZero();
+// for (int k = 0; k < numberTransports; k++) {
+//   slopesTransportLocal1[k] = 0.;
+//   slopesTransportLocal2[k] = 0.;
+// }
 	//Limitations des slopes
 	//----------------------
   //Detection of the interface location
@@ -245,7 +254,9 @@ void CellO2::computeLocalSlopes(const int &numberPhases, const int &numberTransp
 
 //***********************************************************************
 
-void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef, Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter)
+void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &numberTransports, CellInterface &cellInterfaceRef,
+  Limiter &globalLimiter, Limiter &interfaceLimiter, Limiter &globalVolumeFractionLimiter, Limiter &interfaceVolumeFractionLimiter,
+  double &epsInterface)
 {
   //Solution pour multiD cartesian (peut etre une ebauche pour le NS, a voir...)
 
@@ -326,12 +337,20 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
     slopesMixtureLocal2->divide(sommeCoeff2);
     for (int k = 0; k < numberTransports; k++) { slopesTransportLocal2[k] /= sommeCoeff2; }
   }
-
+// for (int k = 0; k < numberPhases; k++) { //KS//BD//
+//   slopesPhasesLocal1[k]->setToZero();
+//   slopesPhasesLocal2[k]->setToZero();
+// }
+// slopesMixtureLocal1->setToZero();
+// slopesMixtureLocal2->setToZero();
+// for (int k = 0; k < numberTransports; k++) {
+//   slopesTransportLocal1[k] = 0.;
+//   slopesTransportLocal2[k] = 0.;
+// }
   //Limitations des slopes
   //----------------------
   //Detection of the interface location
   int phase0(0);
-  double epsInterface(1.e-5);
   if ((m_vecPhases[phase0]->getAlpha() >= epsInterface) && (m_vecPhases[phase0]->getAlpha() <= 1. - epsInterface)) {
     for (int k = 0; k < numberPhases; k++) {
       slopesPhasesLocal1[k]->limitSlopes(*slopesPhasesLocal1[k], *slopesPhasesLocal2[k], interfaceLimiter, interfaceVolumeFractionLimiter);
@@ -351,71 +370,6 @@ void CellO2::computeLocalSlopesLimite(const int &numberPhases, const int &number
     }
   }
 }
-
-//***********************************************************************
-
-//void CellO2::computeMultiSlope(const int &numberPhases, CellInterface *cellInterface, Limiter *globalLimiter)
-//{
-//  //Calcul des slopes (Le Touze et al. 2014)
-//  //slopesPlus correspond aux slopes aval
-//  //slopesMoins correspond aux slopes amont
-//  Phase *slopesPlus; Phase *slopesMoins;
-//  Phase *phaseHM=0, *phaseHP=0;
-//  double distanceP, distanceM;
-//
-//  for (int k = 0; k < numberPhases; k++) {
-//    this->getPhase(k)->initializePhase(&slopesPlus);
-//    this->getPhase(k)->initializePhase(&slopesMoins);
-//    //Si cell de gauche
-//    if (cellInterface->getCellGauche() == this) {
-//      if (cellInterface->getB(BG1M) != 0) {
-//        this->getPhase(k)->initializePhase(&phaseHM);
-//        double beta1 = cellInterface->getBeta(betaG1M);
-//        double beta2 = cellInterface->getBeta(betaG2M);
-//        *phaseHM = beta1 * *(cellInterface->getB(BG1M)->getPhase(k)) + beta2 * *(cellInterface->getB(BG2M)->getPhase(k));
-//        distanceM = cellInterface->getDistanceH(distanceHGM);
-//      }
-//      if (cellInterface->getB(BG1P) != 0) {
-//        this->getPhase(k)->initializePhase(&phaseHP);
-//        double beta1 = cellInterface->getBeta(betaG1P);
-//        double beta2 = cellInterface->getBeta(betaG2P);
-//        *phaseHP = beta1 * *(cellInterface->getB(BG1P)->getPhase(k)) + beta2 * *(cellInterface->getB(BG2P)->getPhase(k));
-//        distanceP = cellInterface->getDistanceH(distanceHGP);
-//      }
-//    }
-//    //Si cell de droite
-//    else {
-//      if (cellInterface->getB(BD1M) != 0) {
-//        this->getPhase(k)->initializePhase(&phaseHM);
-//        double beta1 = cellInterface->getBeta(betaD1M);
-//        double beta2 = cellInterface->getBeta(betaD2M);
-//        *phaseHM = beta1 * *(cellInterface->getB(BD1M)->getPhase(k)) + beta2 * *(cellInterface->getB(BD2M)->getPhase(k));
-//        distanceM = cellInterface->getDistanceH(distanceHDM);
-//      }
-//      if (cellInterface->getB(BD1P) != 0) {
-//        this->getPhase(k)->initializePhase(&phaseHP);
-//        double beta1 = cellInterface->getBeta(betaD1P);
-//        double beta2 = cellInterface->getBeta(betaD2P);
-//        *phaseHP = beta1 * *(cellInterface->getB(BD1P)->getPhase(k)) + beta2 * *(cellInterface->getB(BD2P)->getPhase(k));
-//        distanceP = cellInterface->getDistanceH(distanceHDP);
-//      }
-//    }
-//    if (phaseHP != 0) { slopesPlus->computeSlopes((this->getPhase(k)), phaseHP, distanceP); }
-//    else { slopesPlus->setToZero(); }
-//    if (phaseHM != 0) { slopesMoins->computeSlopes(phaseHM, (this->getPhase(k)), distanceM); }
-//    else { slopesMoins->setToZero(); }
-//
-//    //slopesPlus->setToZero(); //FP//DEV// test a enlever
-//    //slopesMoins->setToZero();
-//
-//    //Une fois les slopes + et - computees, on limite et on stock dans m_vecPhasesSlopes
-//    //m_vecPhasesSlopes[k]->limitSlopes(slopesPlus, slopesMoins, globalLimiter);
-//    delete slopesMoins; delete slopesPlus;
-//    if (phaseHM != 0) delete phaseHM;
-//    if (phaseHP != 0) delete phaseHP;
-//
-//  }
-//}
 
 //***********************************************************************
 
@@ -645,7 +599,7 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, cons
       }
     }
 
-    double epsilon(1.e-15), sommeCoeff(0.), scalarDiff(0.), alphaCellAfterOppositeSide(0.);
+    double epsilon(1.e-08), sommeCoeff(0.), scalarDiff(0.), alphaCellAfterOppositeSide(0.);
     Coord coordBuffer(0.);
     int phase0(0);
     for (unsigned int b2 = 0; b2 < cellInterfacesWithNeighboringGhostCell.size(); b2++) {
@@ -688,23 +642,35 @@ void CellO2::fillBufferSlopes(double *buffer, int &counter, const int &lvl, cons
                   else if (coordBuffer.getY() < -epsilon) slopeIndex=2;
                   else if (coordBuffer.getY() >  epsilon) slopeIndex=3;
                   else if (coordBuffer.getZ() < -epsilon) slopeIndex=4;
-                  else                                    slopeIndex=5;
+                  else if (coordBuffer.getZ() >  epsilon) slopeIndex=5;
                 }
               }
             }
           }
         }
       }
-
+// if ((slopeIndex == -1) && !m_split) { //KS//BD//
+// std::cout<<"cpu "<<rankCpu
+// <<" innerCellCoord "<<m_element->getPosition().getX()<<" "<<m_element->getPosition().getY()
+// <<" slopeIndex "<<slopeIndex
+// <<" cellInterfacesWithNeighboringGhostCell["<<b2<<"]"
+// <<std::endl; //KS//BD//
+// }
   		//Normalization of the slope
   		//--------------------------
-  		if (sommeCoeff > 1.e-5) {
+  		if (sommeCoeff > 1.e-8) {
   			for (int k = 0; k < m_numberPhases; k++) { slopesPhasesLocal1[k]->divide(sommeCoeff); }
   			slopesMixtureLocal1->divide(sommeCoeff);
   			for (int k = 0; k < m_numberTransports; k++) { slopesTransportLocal1[k] /= sommeCoeff; }
         alphaCellAfterOppositeSide /= sommeCoeff;
   		}
-
+// for (int k = 0; k < m_numberPhases; k++) { //KS//BD//
+//   slopesPhasesLocal1[k]->setToZero();
+// }
+// slopesMixtureLocal1->setToZero();
+// for (int k = 0; k < m_numberTransports; k++) {
+//   slopesTransportLocal1[k] = 0.;
+// }
   		//Fill buffer to send
   		//-------------------
   		for (int k = 0; k < m_numberPhases; k++) {

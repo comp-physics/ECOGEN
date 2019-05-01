@@ -224,7 +224,24 @@ void Run::solver()
     dtMax = 1.e10;
     int lvlDep = 0;
     this->integrationProcedure(m_dt, lvlDep, dtMax, m_nbCellsTotalAMR);
-
+// std::ofstream ofs("cells_serial_"+std::to_string(m_iteration+1)+".txt");//KS//BD//
+// std::ofstream ofs("cells_rank_"+std::to_string(rankCpu)+"_"+std::to_string(m_iteration+1)+".txt");//KS//BD//
+// for (unsigned int i = 0; i < m_cellsLvl[0].size(); i++) {//KS//BD//
+// ofs<<m_cellsLvl[0][i]->getElement()->getKey().getIndex()
+// <<" "<<m_cellsLvl[0][i]->getElement()->getPosition().getX()
+// <<" "<<m_cellsLvl[0][i]->getElement()->getPosition().getY()
+// <<" "<<m_cellsLvl[0][i]->getElement()->getPosition().getZ()
+// <<" "<<m_cellsLvl[0][i]->getPhase(0)->getAlpha()
+// <<" "<<m_cellsLvl[0][i]->getPhase(0)->getDensity()
+// <<" "<<m_cellsLvl[0][i]->getPhase(0)->getPressure()
+// <<" "<<m_cellsLvl[0][i]->getPhase(1)->getAlpha()
+// <<" "<<m_cellsLvl[0][i]->getPhase(1)->getDensity()
+// <<" "<<m_cellsLvl[0][i]->getPhase(1)->getPressure()
+// <<" "<<m_cellsLvl[0][i]->getMixture()->getVelocity().getX()
+// <<" "<<m_cellsLvl[0][i]->getMixture()->getVelocity().getY()
+// <<" "<<m_cellsLvl[0][i]->getMixture()->getVelocity().getZ()
+// <<std::endl;
+// }
     //-------------------- CONTROL ITERATIONS/TIME ---------------------
 
     //Still alive...

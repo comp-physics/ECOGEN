@@ -144,12 +144,6 @@ public: //Ctors
 
     int get_rank(const key_type& _key)
     {
-        
-        //for(auto it=key_rank_map_.begin();it!=key_rank_map_.end();++it)
-        //{
-        //    if(_key < it->first) return (--it)->second;
-        //    else if(_key == it->first) return (it)->second;
-        //}
         auto range = key_rank_map_.equal_range(_key);
         if (range.first->first == range.second->first) {
             auto it = range.first;
@@ -196,7 +190,6 @@ public: //Ctors
 
     void recombineStarts()
     {
-return; //KS//BD//
         auto it = key_rank_map_.begin(), itPrev = it++;
         while (it != --(key_rank_map_.end())) {
             if (it->second == itPrev->second) {

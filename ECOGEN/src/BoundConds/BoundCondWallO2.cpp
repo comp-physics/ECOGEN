@@ -134,7 +134,8 @@ void BoundCondWallO2::solveRiemann(const int &numberPhases, const int &numberTra
   if (m_face->getNormal().getX() < 0. || m_face->getNormal().getY() < 0. || m_face->getNormal().getZ() < 0.) { distanceGauche = -distanceGauche; }
 
   //Extrapolation gauche
-  m_cellLeft->computeLocalSlopesLimite(numberPhases, numberTransports, *this, globalLimiter, interfaceLimiter, globalVolumeFractionLimiter, interfaceVolumeFractionLimiter);
+  double epsInterface(1.e-4);
+  m_cellLeft->computeLocalSlopesLimite(numberPhases, numberTransports, *this, globalLimiter, interfaceLimiter, globalVolumeFractionLimiter, interfaceVolumeFractionLimiter, epsInterface);
   for (int k = 0; k < numberPhases; k++) {
     cellLeft->getPhase(k)->extrapolate(*slopesPhasesLocal1[k], distanceGauche);
   }
