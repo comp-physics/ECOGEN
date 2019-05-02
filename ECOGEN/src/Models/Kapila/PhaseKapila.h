@@ -63,7 +63,7 @@ class PhaseKapila : public Phase
 
     //Specific methods for data printing
     //----------------------------------
-    //virtual int getNumberScalars() const { return 4; };
+    //virtual int getNumberScalars() const { return 4; }; //KS//BD//
     virtual int getNumberScalars() const { return 1; };
     virtual int getNumberVectors() const { return 0; };
     virtual double returnScalar(const int &numVar) const;

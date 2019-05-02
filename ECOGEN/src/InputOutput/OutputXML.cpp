@@ -383,7 +383,7 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
 
   //1) Ecriture des variables des phases
   //------------------------------------
-  //for (int phase = 0; phase < m_run->getNumberPhases(); phase++)
+  //for (int phase = 0; phase < m_run->getNumberPhases(); phase++) //KS//BD//
   for (int phase = 0; phase < 1; phase++)
   {
     //Ecriture des variables scalars
@@ -448,7 +448,7 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
 
   // //3) Ecriture des transports et autres...
   // //---------------------------------------
-  // int transport = -2;
+  // int transport = -2; //KS//BD//
   // for (int var = 1; var <= m_run->m_numberTransports; var++)
   // {
   //   fileStream << "        <" << prefix << "DataArray type=\"Float32\" Name=\"T" << var << "\"";
@@ -503,10 +503,10 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
     }
     else { fileStream << "\"/>" << std::endl; }
   }
-
+//BD//
   // //7) CPU rank
   // //-----------
-  // if (mesh->getType() == AMR) {
+  // if (mesh->getType() == AMR) { //KS//BD//
   //   int CPUrank = -5;
   //   fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
   //   if (!parallel) {
