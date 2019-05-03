@@ -2285,8 +2285,8 @@ void Cell::getDataToReceiveAndRefine(std::vector<double> &dataToReceive, std::ve
 void Cell::computeLoad(double &load, int lvl) const
 {
   if (!m_split) {
-    if (m_lvl == lvl) { load += 1.; } //For levelwise balancing
-    //load += 1.; //For global balancing
+    //if (m_lvl == lvl) { load += 1.; } //For levelwise balancing
+    load += 1.; //For global balancing
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {

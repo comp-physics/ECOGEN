@@ -65,5 +65,6 @@
   <!-- <testCase>./libTests/referenceTestCases/multiP/1D/cavitation/</testCase> -->
   
   <!-- 3D atomization test cases -->
-  <testCase>./libTests/3Datomization/Mach1_3/</testCase>
+  <!-- <testCase>./libTests/3Datomization/Mach1_3/</testCase> -->
+  <testCase>./libTests/3Datomization/Mach1_3_V2/</testCase>
 </ecogen>

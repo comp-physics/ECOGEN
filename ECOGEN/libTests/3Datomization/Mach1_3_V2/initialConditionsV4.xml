@@ -1,0 +1,74 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<CI>
+    <!-- LISTE DES DOMAINES GEOMETRIQUES  -->
+    <physicalDomains> 
+        <domain name="base" state="air" type="entireDomain"/>
+        <domain name="shock"  state="shockedState" type="halfSpace">
+            <dataHalfSpace axe="x" origin="2.5e-3" direction="negative"/>
+        </domain>
+        <!-- <domain name="droplet"  state="waterDroplet" type="sphere">
+            <dataSphere radius="0.5605e-3">
+                <center x="3.2e-3" y="0." z="0."/>
+            </dataSphere>
+        </domain> -->
+        <domain name="droplet"  state="waterDroplet" type="ellipsoid">
+            <dataEllipsoid axe1="x" axe2="y" axe3="z" radius1="0.6533e-3" radius2="0.5605e-3" radius3="0.5605e-3">
+                <center x="3.2e-3" y="3.5e-3" z="3.5e-3"/>
+            </dataEllipsoid>
+        </domain>
+    </physicalDomains>
+
+    <!-- LISTE DES CONDITIONS AUX LIMITES -->
+    <boundaryConditions>
+        <boundCond name="CLXm" type="abs" number="1"/>
+        <boundCond name="CLXp" type="abs" number="2"/>
+        <boundCond name="CLYm" type="abs" number="3"/>
+        <boundCond name="CLYp" type="abs" number="4"/>
+        <boundCond name="CLZm" type="abs" number="5"/>
+        <boundCond name="CLZp" type="abs" number="6"/>
+    </boundaryConditions>
+    
+    <!--  LISTE DES ETATS UTILISES  -->
+    <state name="air">
+        <material type="fluide" EOS="IG_air.xml">
+            <dataFluid alpha="1." density="1.20412"/>
+        </material>
+        <material type="fluide" EOS="SG_water_ApplaudMedical.xml">
+            <dataFluid alpha="0." density="1000."/>
+        </material>
+        <mixture>
+            <dataMix pressure = "1.01325e5"/>
+            <velocity x="0." y="0." z="0."/>
+        </mixture>
+        <transport name="color" value="0."/>
+    </state>
+
+    <state name="shockedState">
+        <material type="fluide" EOS="IG_air.xml">
+            <dataFluid alpha="1." density="1.82511283256872"/>
+        </material>
+        <material type="fluide" EOS="SG_water_ApplaudMedical.xml">
+            <dataFluid alpha="0." density="1000."/>
+        </material>
+        <mixture>
+            <dataMix pressure = "1.82896617649681e5"/>
+            <velocity x="151.821433232719" y="0." z="0."/>
+        </mixture>
+        <transport name="color" value="0."/>
+    </state>
+
+    <state name="waterDroplet">
+        <material type="fluide" EOS="IG_air.xml">
+            <dataFluid alpha="0." density="1.20412"/>
+        </material>
+        <material type="fluide" EOS="SG_water_ApplaudMedical.xml">
+            <dataFluid alpha="1." density="1000.0"/>
+        </material>
+        <mixture>
+            <dataMix pressure = "1.01397e5"/>
+            <velocity x="0." y="0." z="0."/>
+        </mixture>
+        <transport name="color" value="1."/>
+    </state>
+
+</CI>

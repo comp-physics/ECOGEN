@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<mesh>
+  <type structure="cartesian"/>
+  <cartesianMesh>
+    <dimensions x="9.5e-3" y="7.e-3" z="7.e-3"/>
+    <numberCells x="10" y ="10" z="10"/>
+    <meshStretching>
+      <XStretching>
+        <stretch startAt="0.e-3" endAt="1.e-3" factor="0.9803921" numberCells="24"/>
+        <stretch startAt="1.e-3" endAt="5.5e-3" factor="1." numberCells="130"/>
+        <stretch startAt="5.5e-3" endAt="9.5e-3" factor="1.02" numberCells="61"/>
+      </XStretching>
+      <YStretching>
+        <stretch startAt="0." endAt="1.25e-3" factor="0.9803921" numberCells="28"/>
+        <stretch startAt="1.25e-3" endAt="5.75e-3" factor="1." numberCells="130"/>
+        <stretch startAt="5.75e-3" endAt="7.e-3" factor="1.02" numberCells="28"/>
+      </YStretching>
+      <ZStretching>
+        <stretch startAt="0." endAt="1.25e-3" factor="0.9803921" numberCells="28"/>
+        <stretch startAt="1.25e-3" endAt="5.75e-3" factor="1." numberCells="130"/>
+        <stretch startAt="5.75e-3" endAt="7.e-3" factor="1.02" numberCells="28"/>
+      </ZStretching>
+    </meshStretching>
+    <AMR lvlMax="2" criteriaVar="0.04" varRho="true" varP="true" varU="true" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>
+  </cartesianMesh>
+</mesh>

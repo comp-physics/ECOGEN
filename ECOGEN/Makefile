@@ -4,7 +4,7 @@
 #Definitions
 EXECUTABLE = ECOGEN
 CXX = mpicxx
-CXXFLAGS = -O3 -std=c++14
+CXXFLAGS = -O3 -std=c++11
 #CXXFLAGS = -g -std=c++11
 # LDFLAGS =
 
