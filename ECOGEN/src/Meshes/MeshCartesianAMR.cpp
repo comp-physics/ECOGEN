@@ -792,6 +792,7 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
           else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); } //BD//
+          else if (phase == -6) { jeuDonnees.push_back(static_cast<double>(cellsLvl[lvl][i]->getElement()->getKey().getIndex())); } //BD//
           else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles
@@ -897,12 +898,12 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
     std::vector<typename decomposition::Key<3>::value_type> indicesSendEndGlobal;
     std::vector<typename decomposition::Key<3>::value_type> indicesReceiveStartGlobal;
     std::vector<typename decomposition::Key<3>::value_type> indicesReceiveEndGlobal;
-    for (int lvl = 0; lvl <= m_lvlMax; ++lvl) { //For levelwise balancing
-    //int lvl(0); //For global balancing
+    //for (int lvl = 0; lvl <= m_lvlMax; ++lvl) { //For levelwise balancing
+    int lvl(0); //For global balancing
       this->computePotentialBalancing(cellsLvl, init, lvl, balance, ordreCalcul,
         indicesSendStartGlobal, indicesSendEndGlobal, 
         indicesReceiveStartGlobal, indicesReceiveEndGlobal);
-    } //For levelwise balancing
+    //} //For levelwise balancing
 
     if (balance) {
       this->balance(cellsLvl, cellsLvlGhost, cellInterfacesLvl, ordreCalcul, numberPhases, numberTransports, addPhys, model, eos,
@@ -1010,10 +1011,10 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
       for (unsigned int i = 0; i < cellsLvl[0].size() - 1; i++) {
         lvlMax = 0;
         cellsLvl[0][i]->computeLvlMax(lvlMax);
-        if (lvlMax == lvl) { //For levelwise balancing
+        //if (lvlMax == lvl) { //For levelwise balancing
           cellsLvl[0][i]->computeLoad(possibleLoadShiftStart, lvl);
           ++numberOfCellsToSendStart;
-        } //For levelwise balancing
+        //} //For levelwise balancing
         if (static_cast<int>(std::round(possibleLoadShiftStart)) >= static_cast<int>(std::round(idealLoadShiftStart))) break;
       }
       if (numberOfCellsToSendStart != 0) --numberOfCellsToSendStart;
@@ -1034,10 +1035,10 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
       for (int i = cellsLvl[0].size() - 1; i >= 0; --i) {
         lvlMax = 0;
         cellsLvl[0][i]->computeLvlMax(lvlMax);
-         if (lvlMax == lvl) { //For levelwise balancing
+         //if (lvlMax == lvl) { //For levelwise balancing
           cellsLvl[0][i]->computeLoad(possibleLoadShiftEnd, lvl);
           ++numberOfCellsToSendEnd;
-         } //For levelwise balancing
+         //} //For levelwise balancing
         if (static_cast<int>(std::round(-possibleLoadShiftEnd)) <= static_cast<int>(std::round(idealLoadShiftEnd)) ||
             (numberOfCellsToSendEnd + numberOfCellsToSendStart + 1) == cellsLvl[0].size()
             ) break;
@@ -1096,10 +1097,10 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
     for (unsigned int i = 0; i < cellsLvl[0].size(); ++i) {
       lvlMax = 0;
       cellsLvl[0][i]->computeLvlMax(lvlMax);
-      if (lvlMax == lvl) { //For levelwise balancing
+      //if (lvlMax == lvl) { //For levelwise balancing
         indicesSendStart.push_back(cellsLvl[0][i]->getElement()->getKey().getIndex());
         if (indicesSendStart.size() == numberOfCellsToSendStart) { break; }
-      } //For levelwise balancing
+      //} //For levelwise balancing
     }
     MPI_Isend(&indicesSendStart[0], numberOfCellsToSendStart, MPI_UNSIGNED_LONG_LONG, rankCpu-1, rankCpu, MPI_COMM_WORLD, &req_neighborM1);
     MPI_Wait(&req_neighborM1, &status);
@@ -1116,10 +1117,10 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
     for (int i = cellsLvl[0].size() - 1; i >= 0 ; --i) {
       lvlMax = 0;
       cellsLvl[0][i]->computeLvlMax(lvlMax);
-      if (lvlMax == lvl) { //For levelwise balancing
+      //if (lvlMax == lvl) { //For levelwise balancing
         indicesSendEnd.push_back(cellsLvl[0][i]->getElement()->getKey().getIndex());
         if (indicesSendEnd.size() == numberOfCellsToSendEnd) { break; }
-      } //For levelwise balancing
+      //} //For levelwise balancing
     }
     MPI_Isend(&indicesSendEnd[0], numberOfCellsToSendEnd, MPI_UNSIGNED_LONG_LONG, rankCpu+1, rankCpu+1, MPI_COMM_WORLD, &req_neighborP1);
     MPI_Wait(&req_neighborP1, &status);

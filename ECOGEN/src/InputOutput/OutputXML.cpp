@@ -506,18 +506,32 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
 //BD//
   // //7) CPU rank
   // //-----------
-  // if (mesh->getType() == AMR) { //KS//BD//
-  //   int CPUrank = -5;
-  //   fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
-  //   if (!parallel) {
-  //     fileStream << " format=\"" << format << "\">" << std::endl;
-  //     mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
-  //     this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
-  //     fileStream << std::endl;
-  //     fileStream << "        </" << prefix << "DataArray>" << std::endl;
-  //   }
-  //   else { fileStream << "\"/>" << std::endl; }
-  // }
+   if (mesh->getType() == AMR) { //KS//BD//
+     int CPUrank = -5;
+     fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
+     if (!parallel) {
+       fileStream << " format=\"" << format << "\">" << std::endl;
+       mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
+       this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
+       fileStream << std::endl;
+       fileStream << "        </" << prefix << "DataArray>" << std::endl;
+     }
+     else { fileStream << "\"/>" << std::endl; }
+   }
+  // //8) Morton index
+  // //-----------
+   if (mesh->getType() == AMR) { //KS//BD//
+     int MortonIndex = -6;
+     fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"MortonIndex\"";
+     if (!parallel) {
+       fileStream << " format=\"" << format << "\">" << std::endl;
+       mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, MortonIndex);
+       this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
+       fileStream << std::endl;
+       fileStream << "        </" << prefix << "DataArray>" << std::endl;
+     }
+     else { fileStream << "\"/>" << std::endl; }
+   }
 
   //Fin
   fileStream << "      </" << prefix << "CellData>" << std::endl;

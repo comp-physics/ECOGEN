@@ -306,24 +306,5 @@ typename std::enable_if<N==2,typename std::common_type<U,V>::type>::type cross(c
 
 } // namespace math
 
-namespace std {
-	
-// template<typename U, std::size_t N>
-// math::vector<U,N> max(const math::vector<U,N>& lhs, const math::vector<U,N>& rhs)
-// {
-// 	math::vector<U,N> res;
-// 	for (std::size_t n=0; n<N; ++n) res[n] = std::max(lhs[n],rhs[n]);
-// 	return std::move(res);
-// }
-
-// template<typename U, std::size_t N>
-// math::vector<U,N> min(const math::vector<U,N>& lhs, const math::vector<U,N>& rhs)
-// {
-// 	math::vector<U,N> res;
-// 	for (std::size_t n=0; n<N; ++n) res[n] = std::min(lhs[n],rhs[n]);
-// 	return std::move(res);
-// }
-
-} // namespace std
 
 #endif // INCLUDED_SIMPLE_VECTOR_HPP

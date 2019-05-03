@@ -74,14 +74,9 @@ public: //Ctors
         auto nCells_t=std::accumulate(nCells_global_.begin(),nCells_global_.end(),1,
                 std::multiplies<int>());
 
-        for(std::size_t d=0;d<Dim;++d)
-        {
-            const int level= static_cast<int >(std::log2(nCells_global_[d]))+1;
-            if(level>base_level_) base_level_=level;
-        }
         
         float chunks = static_cast<float>(nCells_t+0.5)/nProcs;
-        key_type key(0,0,0,base_level_);
+        key_type key(0,0,0);
         for ( int i=0; i<nProcs;++i )
         {
             size_t start= (i*chunks);
@@ -162,14 +157,7 @@ public: //Ctors
     }
 
 
-    int get_load(const key_type& _k) const noexcept
-    {
-        return 1<< (_k.level()-base_level_);
-    }
-
     
-    int& base_level()noexcept{return base_level_;}
-    const int& base_level()const noexcept{return base_level_;}
 
     template<class Coord>
     bool is_inside(const Coord& _coord)

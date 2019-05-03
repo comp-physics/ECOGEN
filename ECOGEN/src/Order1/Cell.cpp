@@ -1144,7 +1144,7 @@ void Cell::refineCellAndCellInterfaces(const int &nbCellsY, const int &nbCellsZ,
     coord_i.x()+=(i % 2);
     coord_i.y()+=((i / 2) % 2);
     coord_i.z()+=((i / 4) % 2);
-    const decomposition::Key<3> child_key( coord_i,child_key_0.level());
+    const decomposition::Key<3> child_key( coord_i);
     m_childrenCells[i]->getElement()->setKey(child_key);
 
 
@@ -1976,7 +1976,7 @@ void Cell::refineCellAndCellInterfacesGhost(const int &nbCellsY, const int &nbCe
           }
           coordChild[(idx+1)%dim] += i;
           coordChild[(idx+2)%dim] += j;
-          decomposition::Key<3> keyChild(coordChild,key.level()+1);
+          decomposition::Key<3> keyChild(coordChild);
 
           //Try to find the child ghost cell into the already created ghost cells (inside parent ghost cell)
           Cell* childCellGhost;
@@ -2285,8 +2285,8 @@ void Cell::getDataToReceiveAndRefine(std::vector<double> &dataToReceive, std::ve
 void Cell::computeLoad(double &load, int lvl) const
 {
   if (!m_split) {
-    if (m_lvl == lvl) { load += 1.; } //For levelwise balancing
-    //load += 1.; //For global balancing
+    //if (m_lvl == lvl) { load += 1.; } //For levelwise balancing
+    load += 1.; //For global balancing
   }
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
