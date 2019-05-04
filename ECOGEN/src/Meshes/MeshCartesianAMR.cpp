@@ -514,11 +514,11 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
 
 void MeshCartesianAMR::procedureRaffinementInitialization(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
   const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains,
-  Eos **eos, const int &resumeSimulation, std::string ordreCalcul, const int &numberPhases, const int &numberTransports)
+  Eos **eos, const int &restartSimulation, std::string ordreCalcul, const int &numberPhases, const int &numberTransports)
 {
   nbCellsTotalAMR = m_numberCellsCalcul;
 
-  if (resumeSimulation == 0) { //Only for simulation from input files
+  if (restartSimulation == 0) { //Only for simulation from input files
     for (int iterInit = 0; iterInit < 2; iterInit++) {
       for (int lvl = 0; lvl < m_lvlMax; lvl++) {
         if (Ncpu > 1) { parallel.communicationsPrimitives(eos, lvl); }
@@ -791,7 +791,7 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
           else if (phase == -2) { jeuDonnees.push_back(cellsLvl[lvl][i]->getTransport(var - 1).getValue()); }
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
-          else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); } //BD//
+          else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); }
           else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles

@@ -95,11 +95,24 @@ void timeStats::endCommunicationTime()
 
 //***********************************************************************
 
-void timeStats::setCompTime(const clock_t &time) { m_computationTime = time; }
+void timeStats::setCompTime(const clock_t &compTime, const clock_t &AMRTime, const clock_t &comTime)
+{
+  m_computationTime = compTime;
+  m_AMRTime = AMRTime;
+  m_communicationTime = comTime;
+}
 
 //***********************************************************************
 
 clock_t timeStats::getComputationTime() const { return m_computationTime; }
+
+//***********************************************************************
+
+clock_t timeStats::getAMRTime() const { return m_AMRTime; }
+
+//***********************************************************************
+
+clock_t timeStats::getCommunicationTime() const { return m_communicationTime; }
 
 //***********************************************************************
 
@@ -111,7 +124,7 @@ void timeStats::printScreenStats(const int &numTest) const
 
   //Estimation temps restant
   //A faire...
-  std::cout << "T" << numTest << " | ------------------------------------------" << std::endl;
+  std::cout << "T" << numTest << " | -------------------------------------------" << std::endl;
 }
 
 //***********************************************************************

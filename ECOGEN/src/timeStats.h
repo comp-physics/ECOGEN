@@ -54,8 +54,10 @@ class timeStats
     void startCommunicationTime();
     void endCommunicationTime();
 
-    void setCompTime(const clock_t &time);
+    void setCompTime(const clock_t &compTime, const clock_t &AMRTime, const clock_t &comTime);
     clock_t getComputationTime() const;
+    clock_t getAMRTime() const;
+    clock_t getCommunicationTime() const;
     void printScreenStats(const int &numTest) const;
     void printScreenTime(const clock_t &time, std::string chaine, const int &numTest) const;
 

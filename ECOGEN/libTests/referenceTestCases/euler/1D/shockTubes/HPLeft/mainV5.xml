@@ -10,7 +10,7 @@
 	<secondOrder>
 		<globalLimiter>vanleer</globalLimiter>
 	</secondOrder>
-	<resumeSimulation fileNumber="0"/>
+	<restartSimulation fileNumber="0"/>
 
 	<probe name="capteur1">
 		<vertex x="0.3" y="0.05" z="0.05"/>

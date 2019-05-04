@@ -249,9 +249,9 @@ void Input::entreeMain(std::string casTest)
     }
 
     //Reprise de Calcul depuis file resultat
-    element = computationParam->FirstChildElement("resumeSimulation");
+    element = computationParam->FirstChildElement("restartSimulation");
     if (element != NULL) { 
-      error = element->QueryIntAttribute("fileNumber", &m_run->m_resumeSimulation);
+      error = element->QueryIntAttribute("fileNumber", &m_run->m_restartSimulation);
       if (error != XML_NO_ERROR) throw ErrorXMLAttribut("number", fileName.str(), __FILE__, __LINE__);
     }
 

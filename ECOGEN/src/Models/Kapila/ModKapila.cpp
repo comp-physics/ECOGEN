@@ -83,8 +83,8 @@ void ModKapila::allocateMixture(Mixture **mixture)
 
 void ModKapila::fulfillState(Phase **phases, Mixture *mixture, const int &numberPhases, Prim type)
 {
-  //Specific to resume simulation
-  if (type == resume) {
+  //Specific to restart simulation
+  if (type == restart) {
     for (int k = 0; k < numberPhases; k++) { phases[k]->setPressure(mixture->getPressure()); }
   }
   //Complete phases state

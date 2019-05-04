@@ -42,7 +42,7 @@
 #include "../libTierces/tinyxml2.h"
 #include "../Order2/HeaderLimiter.h"
 
-enum Prim { vecPhases, vecPhasesO2, vecSlopes, resume };
+enum Prim { vecPhases, vecPhasesO2, vecSlopes, restart };
 
 //! \class     Phase
 //! \brief     Abstract class for a phase

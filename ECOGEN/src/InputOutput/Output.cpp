@@ -214,7 +214,7 @@ void Output::ecritInfos()
   }
   saveInfos();
   saveInfosMailles();
-  std::cout << "T" << m_run->m_numTest << " | printing file number : " << m_numFichier << "... ";
+  std::cout << "T" << m_run->m_numTest << " | Printing file number: " << m_numFichier << "... ";
 }
 
 //***********************************************************************
@@ -329,8 +329,8 @@ void Output::getJeuDonnees(std::istringstream &data, std::vector<double> &jeuDon
 
 void Output::afficheInfoEcriture() const
 {
-  std::cout << "T" << m_run->m_numTest << " | ------------------------------------------" << std::endl;
-  std::cout << "T" << m_run->m_numTest << " | RESULTS FILE NUMBER : " << m_numFichier << ",  ITERATION " << m_run->m_iteration << std::endl;
+  std::cout << "T" << m_run->m_numTest << " | -------------------------------------------" << std::endl;
+  std::cout << "T" << m_run->m_numTest << " | RESULTS FILE NUMBER: " << m_numFichier << ", ITERATION " << m_run->m_iteration << std::endl;
   std::cout << "T" << m_run->m_numTest << " |     Physical time       = " << m_run->m_physicalTime << " s " << std::endl;
   std::cout << "T" << m_run->m_numTest << " |     Last time step      = " << m_run->m_dt << " s " << std::endl;
   m_run->m_stat.printScreenStats(m_run->m_numTest);
@@ -341,11 +341,12 @@ void Output::afficheInfoEcriture() const
 void Output::saveInfos() const
 {
   std::ofstream fileStream;
-  if (m_precision!=0) fileStream.precision(m_precision);
+  if (m_precision != 0) fileStream.precision(m_precision);
   if (rankCpu == 0) {
     fileStream.open((m_folderOutput + m_infoCalcul).c_str(), std::ios::app);
-    if(m_numFichier==0) fileStream << Ncpu << std::endl;
-    fileStream << m_numFichier << " " << m_run->m_iteration << " " << m_run->m_physicalTime << " " << m_run->m_stat.getComputationTime() << " " << m_run->m_dt;
+    if(m_numFichier == 0) fileStream << Ncpu << std::endl;
+    fileStream << m_numFichier << " " << m_run->m_iteration << " " << m_run->m_physicalTime << " " << m_run->m_dtNext
+       << " " << m_run->m_stat.getComputationTime() << " " << m_run->m_stat.getAMRTime() << " " << m_run->m_stat.getCommunicationTime();
 
     //Additional output with purpose to track the radius of a bubble over time and the maximum pressures.
     //To comment if not needed. Be carefull when using it, integration for bubble radius and maximum pressure at the wall are not generalized.
@@ -373,10 +374,12 @@ void Output::saveInfos() const
 void Output::readInfos()
 {
   std::fstream fileStream;
-  std::vector<std::stringstream*> chaine(m_run->m_resumeSimulation + 2); //1 for CPU number, and 1 for initial conditions
+  std::vector<std::stringstream*> chaine(m_run->m_restartSimulation + 2); //1 for CPU number, and 1 for initial conditions
   for (unsigned int i = 0; i < chaine.size(); i++) { chaine[i] = new std::stringstream; }
   std::string chaineTemp;
   clock_t compTime;
+  clock_t AMRTime;
+  clock_t comTime;
   int numberCPURead;
   int iter(0);
   try {
@@ -385,16 +388,16 @@ void Output::readInfos()
     std::getline(fileStream, chaineTemp);
     *(chaine[iter]) << chaineTemp;
     *(chaine[iter]) >> numberCPURead;
-    if (numberCPURead != Ncpu) { throw ErrorECOGEN("resume simulation not possible - number of CPU differs from read files"); }
+    if (numberCPURead != Ncpu) { throw ErrorECOGEN("restart simulation not possible - number of CPU differs from read files"); }
     iter++;
     //Finding corresponding results files
     do {
       std::getline(fileStream, chaineTemp);
       *(chaine[iter]) << chaineTemp;
-      *(chaine[iter]) >> m_numFichier >> m_run->m_iteration >> m_run->m_physicalTime >> compTime >> m_run->m_dt;
+      *(chaine[iter]) >> m_numFichier >> m_run->m_iteration >> m_run->m_physicalTime >> m_run->m_dt >> compTime >> AMRTime >> comTime;
       iter++;
-    } while (m_numFichier != m_run->m_resumeSimulation && !fileStream.eof());
-    if (fileStream.eof()) { throw ErrorECOGEN("resume simulation not possible - check file 'infosCalcul.out'"); }
+    } while (m_numFichier != m_run->m_restartSimulation && !fileStream.eof());
+    if (fileStream.eof()) { throw ErrorECOGEN("restart simulation not possible - check file 'infosCalcul.out'"); }
   }
   catch (ErrorECOGEN &) { fileStream.close(); throw; }
 
@@ -408,7 +411,7 @@ void Output::readInfos()
     }
     fileStream.close();
   }
-  m_run->m_stat.setCompTime(compTime);
+  m_run->m_stat.setCompTime(compTime, AMRTime, comTime);
 }
 
 //***********************************************************************

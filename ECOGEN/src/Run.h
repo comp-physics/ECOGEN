@@ -82,7 +82,7 @@ class Run
     //! \details  Memory desallocations
     void finalize();
     
-    void resumeSimulation();
+    void restartSimulation();
 
     //Accessors
     int getNumberPhases() const;
@@ -142,9 +142,10 @@ class Run
     std::vector<std::string> m_nameQPA;        //!<Vector of names of the quantities of additional physics
     std::vector<std::string> m_nameGPH;        //!<Vector of phasic variables name
     double m_dt;                               //!<Explicit time step
+    double m_dtNext;                           //!<Next time step
     double m_physicalTime;                     //!<Physical time
     int m_iteration;                           //!<time iteration number
-    int m_resumeSimulation;                    //!<File number for restarting a simulation
+    int m_restartSimulation;                    //!<File number for restarting a simulation
 
     //Input/Output attributes
 	Input* m_input;						       //!<Input object

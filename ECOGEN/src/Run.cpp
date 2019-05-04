@@ -38,7 +38,7 @@ using namespace tinyxml2;
 
 //***********************************************************************
 
-Run::Run(std::string nameCasTest, const int &number) : m_numberTransports(0), m_resumeSimulation(0), m_dt(1.e-15), m_physicalTime(0.), m_iteration(0),
+Run::Run(std::string nameCasTest, const int &number) : m_numberTransports(0), m_restartSimulation(0), m_dt(1.e-15), m_physicalTime(0.), m_iteration(0),
   m_simulationName(nameCasTest), m_numTest(number), m_MRF(-1)
 {
   m_stat.initialize();
@@ -69,7 +69,7 @@ void Run::initialize(int argc, char* argv[])
   parallel.initialization(argc, argv);
   if (Ncpu > 1){
     MPI_Barrier(MPI_COMM_WORLD);
-    if (rankCpu == 0) std::cout << "T" << m_numTest << " | Number of CPU : " << Ncpu << std::endl;
+    if (rankCpu == 0) std::cout << "T" << m_numTest << " | Number of CPU: " << Ncpu << std::endl;
   }
 
   //3) Mesh data initialization
@@ -117,7 +117,7 @@ void Run::initialize(int argc, char* argv[])
 	//8) AMR initialization
 	//---------------------
   m_mesh->procedureRaffinementInitialization(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model,
-    m_nbCellsTotalAMR, domains, m_eos, m_resumeSimulation, m_order, m_numberPhases, m_numberTransports);
+    m_nbCellsTotalAMR, domains, m_eos, m_restartSimulation, m_order, m_numberPhases, m_numberTransports);
 
   for (unsigned int d = 0; d < domains.size(); d++) { delete domains[d]; }
 
@@ -127,16 +127,16 @@ void Run::initialize(int argc, char* argv[])
   for (unsigned int c = 0; c < m_cuts.size(); c++) m_cuts[c]->prepareOutput(*cellLeft);
   for (unsigned int p = 0; p < m_probes.size(); p++) m_probes[p]->prepareOutput(*cellLeft);
 
-  //10) Resume simulation
+  //10) restart simulation
   //---------------------
-  if (m_resumeSimulation > 0) {
-    try { this->resumeSimulation(); }
+  if (m_restartSimulation > 0) {
+    try { this->restartSimulation(); }
     catch (ErrorECOGEN &) { throw; }
   }
   
   //11) Printing t0 solution
   //------------------------
-  if (m_resumeSimulation == 0) {
+  if (m_restartSimulation == 0) {
     try {
       //Only for few test cases
       //-----
@@ -155,17 +155,17 @@ void Run::initialize(int argc, char* argv[])
       m_outPut->ecritSolution(m_mesh, m_cellsLvl);
     }
     catch (ErrorXML &) { throw; }
-    if (rankCpu == 0) std::cout << " ...OK" << std::endl;
+    if (rankCpu == 0) std::cout << " OK" << std::endl;
   }
 }
 
 //***********************************************************************
 
-void Run::resumeSimulation()
+void Run::restartSimulation()
 {
   std::ifstream fileStream;
 
-  std::cout << "Resuming simulation from result files number: " << m_resumeSimulation << " ...";
+  if (rankCpu == 0) std::cout << "Restarting simulation from result file number: " << m_restartSimulation << "...";
   try {
     m_outPut->readInfos();
     if (m_mesh->getType() == AMR) m_outPut->readTree(m_mesh, m_cellsLvl, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR);
@@ -176,15 +176,15 @@ void Run::resumeSimulation()
 
   //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
   for (int i = 0; i < m_cellsLvl[0].size(); i++) {
-    m_cellsLvl[0][i]->completeFulfillState(resume); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
-    //KS//FP// apparemment fulfillState avec Prim::resume n'est pas a jour dans tous les modeles (seulement pour Kapila)
+    m_cellsLvl[0][i]->completeFulfillState(restart); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
+    //KS//FP// apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
   }
 
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
       //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(m_eos, lvl); }
       for (unsigned int i = 0; i < m_cellsLvl[lvl + 1].size(); i++) {
-        m_cellsLvl[lvl + 1][i]->completeFulfillState(resume);
+        m_cellsLvl[lvl + 1][i]->completeFulfillState(restart);
       }
       for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
         m_cellsLvl[lvl][i]->averageChildrenInParent();
@@ -195,7 +195,7 @@ void Run::resumeSimulation()
   //Initial communications
   if (Ncpu > 1) { parallel.communicationsPrimitives(m_eos, 0); }
 
-  std::cout << " ...OK" << std::endl;
+  if (rankCpu == 0) std::cout << " OK" << std::endl;
 }
 
 //***********************************************************************
@@ -246,6 +246,8 @@ void Run::solver()
 
     //------------------------ OUTPUT FILES PRINTING -------------------------
     nbCellsTotalAMRMax = std::max(nbCellsTotalAMRMax, m_nbCellsTotalAMR);
+    m_dtNext = m_cfl * dtMax;
+    if (Ncpu > 1) { parallel.computeDt(m_dtNext); }
     if (print) {
       m_stat.updateComputationTime();
       //General printings
@@ -259,7 +261,7 @@ void Run::solver()
       if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);
       for (unsigned int c = 0; c < m_cuts.size(); c++) { m_cuts[c]->ecritSolution(m_mesh, m_cellsLvl); }
       m_outPut->ecritSolution(m_mesh, m_cellsLvl);
-      if (rankCpu == 0) std::cout << " ...OK" << std::endl;
+      if (rankCpu == 0) std::cout << "OK" << std::endl;
       print = false;
     }
     //Printing probes data
@@ -269,11 +271,10 @@ void Run::solver()
 
     //-------------------------- TIME STEP UPDATING --------------------------
 
-    m_dt = m_cfl * dtMax;
-    if (Ncpu > 1) { parallel.computeDt(m_dt); }
+    m_dt = m_dtNext;
 
   } //time iterative loop end
-  if (rankCpu == 0) std::cout << "T" << m_numTest << " | ------------------------------------------" << std::endl;
+  if (rankCpu == 0) std::cout << "T" << m_numTest << " | -------------------------------------------" << std::endl;
   MPI_Barrier(MPI_COMM_WORLD);
   if (m_mesh->getType() == AMR) {
     double localLoad(0.);
@@ -293,7 +294,7 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   //1) AMR Level time step determination
   double dtLvl = dt * std::pow(2., -(double)lvl);
   
-  //2) (Un)Reffinement procedure
+  //2) Refinement procedure
   if (m_lvlMax > 0) { 
     m_stat.startAMRTime();
     m_mesh->procedureRaffinement(m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, lvl, m_addPhys, m_model, nbCellsTotalAMR, m_eos);

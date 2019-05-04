@@ -80,10 +80,9 @@ int main(int argc, char* argv[])
       run = new Run(xmlText->Value(), numTestCase);
       MPI_Barrier(MPI_COMM_WORLD);
       if (rankCpu == 0) {
+        std::cout << "           EXECUTION OF THE TEST CASE NUMBER: " << numTestCase << std::endl;
         std::cout << "************************************************************" << std::endl;
-        std::cout << "          EXECUTION OF THE TEST CASE NUMBER : " << numTestCase << std::endl;
-        std::cout << "************************************************************" << std::endl;
-        std::cout << "T" << numTestCase << " | Test case : " << xmlText->Value() << std::endl;
+        std::cout << "T" << numTestCase << " | Test case: " << xmlText->Value() << std::endl;
       }
       MPI_Barrier(MPI_COMM_WORLD);
       //2) Execution of the test case
@@ -127,6 +126,7 @@ int main(int argc, char* argv[])
 void displayHeader()
 {
   std::cout << "************************************************************" << std::endl;
+  std::cout << std::endl;
   std::cout << "    ,---.     ,--,    .---.     ,--,    ,---.    .-. .-. " << std::endl;
   std::cout << "    | .-'   .' .')   / .-. )  .' .'     | .-'    |  \\| | " << std::endl;
   std::cout << "    | `-.   |  |(_)  | | |(_) |  |  __  | `-.    |   | | " << std::endl;
@@ -134,6 +134,7 @@ void displayHeader()
   std::cout << "    |  `--.  \\  `-.  \\ `-' /   \\  `-) ) |  `--.  | | |)| " << std::endl;
   std::cout << "    /( __.'   \\____\\  )---'    )\\____/  /( __.'  /(  (_) " << std::endl;
   std::cout << "   (__)              (_)      (__)     (__)     (__)     " << std::endl;
+  std::cout << std::endl;
   std::cout << "************************************************************" << std::endl;
 }
 

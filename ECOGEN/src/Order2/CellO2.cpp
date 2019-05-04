@@ -409,14 +409,14 @@ void CellO2::completeFulfillState(Prim type)
 {
   //Complete thermodynamical variables
   switch (type) {
-  case vecPhases: case resume: //Idem cell ordre 1
+  case vecPhases: case restart: //Idem cell ordre 1
     m_model->fulfillState(m_vecPhases, m_mixture, m_numberPhases, type);
     //Extended energies depending on additional physics
     this->prepareAddPhys();
     m_mixture->internalEnergyToTotalEnergy(m_vecQuantitiesAddPhys);
     break;
   case vecPhasesO2: //Utile seulement pour le parallele ordre 2
-    std::cout << "test: are we passing through here sometime?" << std::endl; //KS// don't delete before having test the resume option
+    std::cout << "test: are we passing through here sometime?" << std::endl; //KS// don't delete before having test the restart option
     m_model->fulfillState(m_vecPhasesO2, m_mixtureO2, m_numberPhases);
     //Extended energies depending on additional physics
     this->prepareAddPhys();
@@ -432,7 +432,7 @@ void CellO2::fulfillState(Prim type)
 {
   //Complete thermodynamical variables
   switch (type) {
-  case vecPhases: case resume: //Identical to cell first order
+  case vecPhases: case restart: //Identical to cell first order
     m_model->fulfillState(m_vecPhases, m_mixture, m_numberPhases);
     //This routine is used in different configurations and a short note correspond to each one:
     //- Riemann solver: No need to reconstruct the total energy there because it isn't grabbed during the Riemann problem. The total energy is directly reconstruct there.

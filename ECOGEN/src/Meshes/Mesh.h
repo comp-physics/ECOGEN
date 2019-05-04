@@ -112,7 +112,7 @@ public:
   //Specific to AMR method
   //----------------------
   virtual void procedureRaffinementInitialization(std::vector<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, std::vector<CellInterface *> *cellInterfacesLvl,
-    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains, Eos **eos, const int &resumeSimulation, std::string ordreCalcul,
+    const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, std::vector<GeometricalDomain*> &domains, Eos **eos, const int &restartSimulation, std::string ordreCalcul,
     const int &numberPhases, const int &numberTransports) { nbCellsTotalAMR = m_numberCellsCalcul; };
   virtual void procedureRaffinement(std::vector<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, std::vector<CellInterface *> *cellInterfacesLvl, const int &lvl,
     const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR, Eos **eos) {};

@@ -75,11 +75,11 @@ The choice of the limiters is divided into four parts:
 </secondOrder>
 %%%%%%%%%%%%%%%%%% << copy between these lines
 
-*) Resume a simulation
+*) Restart a simulation
 **********************
-resume a finished computation from the result file number
+restart a finished computation from the result file number
 %%%%%%%%%%%%%%%%%% << copy between these lines
-<resumeSimulation fileNumber="15"/>
+<restartSimulation fileNumber="15"/>
 %%%%%%%%%%%%%%%%%% << copy between these lines
 
 *) 1D output Cut

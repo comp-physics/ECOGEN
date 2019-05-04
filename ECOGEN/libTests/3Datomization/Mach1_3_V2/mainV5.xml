@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
 <computationParam>
   <run>3Datomization_Mach1_3_V2</run>
-  <outputMode format="XML" binary="true"/>
+  <outputMode format="XML" binary="false" precision="16"/>
   <timeControlMode iterations="false">
     <iterations number="16" iterFreq="8"/>
     <physicalTime totalTime="500.e-6" timeFreq="0.5e-6"/>
