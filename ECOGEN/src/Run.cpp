@@ -38,8 +38,8 @@ using namespace tinyxml2;
 
 //***********************************************************************
 
-Run::Run(std::string nameCasTest, const int &number) : m_numberTransports(0), m_restartSimulation(0), m_dt(1.e-15), m_physicalTime(0.), m_iteration(0),
-  m_simulationName(nameCasTest), m_numTest(number), m_MRF(-1)
+Run::Run(std::string nameCasTest, const int &number) : m_numberTransports(0), m_restartSimulation(0), m_restartAMRsaveFreq(0),
+  m_dt(1.e-15), m_physicalTime(0.), m_iteration(0), m_simulationName(nameCasTest), m_numTest(number), m_MRF(-1)
 {
   m_stat.initialize();
 }
@@ -53,7 +53,7 @@ Run::~Run(){}
 void Run::initialize(int argc, char* argv[])
 {
 
-  //2) Reading input file (XML format)
+  //1) Reading input file (XML format)
   //----------------------------------
   std::vector<GeometricalDomain*> domains;
   std::vector<BoundCond*> boundCond;
@@ -64,8 +64,8 @@ void Run::initialize(int argc, char* argv[])
   catch (ErrorXML &) { throw; }
   TB = new Tools(m_numberPhases);
 
-  //1) Initialization of parallel computing (also needed for 1 CPU!)
-  //----------------------------------------------------------------
+  //2) Initialization of parallel computing (also needed for 1 CPU)
+  //---------------------------------------------------------------
   parallel.initialization(argc, argv);
   if (Ncpu > 1){
     MPI_Barrier(MPI_COMM_WORLD);
@@ -122,13 +122,13 @@ void Run::initialize(int argc, char* argv[])
   for (unsigned int d = 0; d < domains.size(); d++) { delete domains[d]; }
 
   //9) Output file preparation
-  //---------------------------
+  //--------------------------
   m_outPut->prepareOutput(*cellLeft);
   for (unsigned int c = 0; c < m_cuts.size(); c++) m_cuts[c]->prepareOutput(*cellLeft);
   for (unsigned int p = 0; p < m_probes.size(); p++) m_probes[p]->prepareOutput(*cellLeft);
 
-  //10) restart simulation
-  //---------------------
+  //10) Restart simulation
+  //----------------------
   if (m_restartSimulation > 0) {
     try { this->restartSimulation(); }
     catch (ErrorECOGEN &) { throw; }
@@ -149,7 +149,8 @@ void Run::initialize(int argc, char* argv[])
       //-----
       m_outPut->prepareOutputInfos();
       if (rankCpu == 0) m_outPut->ecritInfos();
-      if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);
+      m_outPut->saveInfosMailles();
+      if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl, m_restartAMRsaveFreq);
       for (unsigned int c = 0; c < m_cuts.size(); c++) m_cuts[c]->ecritSolution(m_mesh, m_cellsLvl);
       for (unsigned int p = 0; p < m_probes.size(); p++) { if (m_probes[p]->possesses()) m_probes[p]->ecritSolution(m_mesh, m_cellsLvl); }
       m_outPut->ecritSolution(m_mesh, m_cellsLvl);
@@ -166,34 +167,50 @@ void Run::restartSimulation()
   std::ifstream fileStream;
 
   if (rankCpu == 0) std::cout << "Restarting simulation from result file number: " << m_restartSimulation << "...";
+
+  //Reconstruct the mesh and get physical data from restart point
   try {
     m_outPut->readInfos();
-    if (m_mesh->getType() == AMR) m_outPut->readTree(m_mesh, m_cellsLvl, m_cellInterfacesLvl, m_addPhys, m_model, m_nbCellsTotalAMR);
+    if (m_mesh->getType() == AMR) {
+      if (m_restartSimulation % m_restartAMRsaveFreq == 0) {
+        m_outPut->readTree(m_mesh, m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_eos, m_nbCellsTotalAMR);
+      }
+      else {
+        Errors::errorMessage("Run::restartSimulation: Restart files not available");
+      }
+    }
     m_outPut->readResults(m_mesh, m_cellsLvl);
   }
   catch (ErrorECOGEN &) { fileStream.close(); throw; }
   fileStream.close();
 
-  //Complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
-  for (int i = 0; i < m_cellsLvl[0].size(); i++) {
-    m_cellsLvl[0][i]->completeFulfillState(restart); //FP//ERR//ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
-    //KS//FP// apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
+  //Communicate physical data between processors and complete fluid state with additional calculations (sound speed, energies, mixture variables, etc.)
+  if (Ncpu > 1) {
+    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+      parallel.communicationsPrimitives(m_eos, lvl);
+      parallel.communicationsTransports(lvl);
+    }
   }
-
+  for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+    for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
+      m_cellsLvl[lvl][i]->completeFulfillState(restart);
+    }
+  }
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-      //if (Ncpu > 1) { parallel.communicationsPrimitivesAMR(m_eos, lvl); }
-      for (unsigned int i = 0; i < m_cellsLvl[lvl + 1].size(); i++) {
-        m_cellsLvl[lvl + 1][i]->completeFulfillState(restart);
-      }
       for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
         m_cellsLvl[lvl][i]->averageChildrenInParent();
       }
     }
   }
+  if (Ncpu > 1) {
+    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+      parallel.communicationsPrimitives(m_eos, lvl);
+    }
+  }
 
-  //Initial communications
-  if (Ncpu > 1) { parallel.communicationsPrimitives(m_eos, 0); }
+  //FP//ERR//Devrait etre corriger, a verifier : ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
+  //KS//FP// apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
 
   if (rankCpu == 0) std::cout << " OK" << std::endl;
 }
@@ -258,7 +275,8 @@ void Run::solver()
       //m_pMaxWall[0] = 0.;
       //-----
       if (rankCpu == 0) m_outPut->ecritInfos();
-      if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl);
+      m_outPut->saveInfosMailles();
+      if (m_mesh->getType() == AMR) m_outPut->printTree(m_mesh, m_cellsLvl, m_restartAMRsaveFreq);
       for (unsigned int c = 0; c < m_cuts.size(); c++) { m_cuts[c]->ecritSolution(m_mesh, m_cellsLvl); }
       m_outPut->ecritSolution(m_mesh, m_cellsLvl);
       if (rankCpu == 0) std::cout << "OK" << std::endl;

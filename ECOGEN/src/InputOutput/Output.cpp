@@ -156,25 +156,30 @@ void Output::prepareOutputInfos()
 
 //***********************************************************************
 
-void Output::printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl)
+void Output::printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl, int m_restartAMRsaveFreq)
 {
-  try {
-    std::ofstream fileStream;
-    std::string file = m_folderInfoMesh + creationNameFichier(m_treeStructure.c_str(), -1, rankCpu, m_numFichier);
-    fileStream.open(file.c_str());
-    for (int lvl = 0; lvl <= mesh->getLvlMax(); lvl++) {
-      for (unsigned int c = 0; c < cellsLvl[lvl].size(); c++) {
-        fileStream << cellsLvl[lvl][c]->getSplit() << " ";
+  if (m_restartAMRsaveFreq != 0) {
+    if ((m_numFichier % m_restartAMRsaveFreq) == 0) {
+      try {
+        std::ofstream fileStream;
+        std::string file = m_folderInfoMesh + creationNameFichier(m_treeStructure.c_str(), -1, rankCpu, m_numFichier);
+        fileStream.open(file.c_str());
+        for (int lvl = 0; lvl <= mesh->getLvlMax(); lvl++) {
+          for (unsigned int c = 0; c < cellsLvl[lvl].size(); c++) {
+            fileStream << cellsLvl[lvl][c]->getSplit() << " ";
+          }
+        }
+        fileStream.close();
       }
+      catch (ErrorECOGEN &) { throw; }
     }
-    fileStream.close();
   }
-  catch (ErrorECOGEN &) { throw; }
 }
 
 //***********************************************************************
 
-void Output::readTree(Mesh *mesh, std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR)
+void Output::readTree(Mesh *mesh, TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
+  const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR)
 {
   try {
     std::ifstream fileStream;
@@ -182,24 +187,35 @@ void Output::readTree(Mesh *mesh, std::vector<Cell *> *cellsLvl, std::vector<Cel
     std::string chaine;
     std::string file = m_folderInfoMesh + creationNameFichier(m_treeStructure.c_str(), -1, rankCpu, m_numFichier);
     fileStream.open(file.c_str());
+
     for (int lvl = 0; lvl <= mesh->getLvlMax(); lvl++) {
+      //Refine cells and cell interfaces
       for (unsigned int c = 0; c < cellsLvl[lvl].size(); c++) {
         fileStream >> splitCell;
-        //Raffinement de la cellule
         if (splitCell) mesh->refineCellAndCellInterfaces(cellsLvl[lvl][c], addPhys, model, nbCellsTotalAMR);
       }
 
-      if (Ncpu > 1) Errors::errorMessage("Output::readTree: Resuming with AMR not available");
-
-      //Building cells and interface cells vectors
-      //------------------------------------------
       if (lvl < mesh->getLvlMax()) {
-        cellsLvl[lvl+1].clear();
+        if (Ncpu > 1) {
+          //Refine ghost cells
+          parallel.communicationsSplit(lvl);
+          cellsLvlGhost[lvl + 1].clear();
+          for (unsigned int i = 0; i < cellsLvlGhost[lvl].size(); i++) { cellsLvlGhost[lvl][i]->chooseRefineDeraffineGhost(mesh->getNumberCellsY(), mesh->getNumberCellsZ(), addPhys, model, cellsLvlGhost); }
+
+          //Update of persistent communications of cells lvl + 1
+          parallel.communicationsNumberGhostCells(lvl + 1);
+          parallel.updatePersistentCommunicationsLvlAMR(lvl + 1, mesh->getGeometrie());
+        }
+
+        //Reconstruction of the arrays of cells and cell interfaces of lvl + 1
+        cellsLvl[lvl + 1].clear();
         cellInterfacesLvl[lvl + 1].clear();
         for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->buildLvlCellsAndLvlInternalCellInterfacesArrays(cellsLvl, cellInterfacesLvl); }
         for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->constructionTableauCellInterfacesExternesLvl(cellInterfacesLvl); }
       }
     }
+    nbCellsTotalAMR = 0;
+    for (int i = 0; i < cellsLvl[0].size(); i++) { cellsLvl[0][i]->updateNbCellsTotalAMR(nbCellsTotalAMR); }
     fileStream.close();
   }
   catch (ErrorECOGEN &) { throw; }
@@ -213,8 +229,21 @@ void Output::ecritInfos()
     afficheInfoEcriture();
   }
   saveInfos();
-  saveInfosMailles();
   std::cout << "T" << m_run->m_numTest << " | Printing file number: " << m_numFichier << "... ";
+}
+
+//***********************************************************************
+
+void Output::saveInfosMailles() const
+{
+  try {
+    std::ofstream fileStream;
+    std::string file = m_folderInfoMesh + creationNameFichier(m_infoMesh.c_str(), -1, rankCpu);
+    fileStream.open(file.c_str(), std::ios::app);
+    fileStream << m_run->m_nbCellsTotalAMR << std::endl;
+    fileStream.close();
+  }
+  catch (ErrorECOGEN &) { throw; }
 }
 
 //***********************************************************************
@@ -402,6 +431,7 @@ void Output::readInfos()
   catch (ErrorECOGEN &) { fileStream.close(); throw; }
 
   //Erasing end of file
+  MPI_Barrier(MPI_COMM_WORLD);
   if (rankCpu == 0) {
     fileStream.close();
     fileStream.open((m_folderOutput + m_infoCalcul).c_str(), std::ios::out | std::ios::trunc); //Opening in printing mode with erasing
@@ -412,20 +442,6 @@ void Output::readInfos()
     fileStream.close();
   }
   m_run->m_stat.setCompTime(compTime, AMRTime, comTime);
-}
-
-//***********************************************************************
-
-void Output::saveInfosMailles() const
-{
-  try {
-    std::ofstream fileStream;
-    std::string file = m_folderInfoMesh + creationNameFichier(m_infoMesh.c_str(), -1, rankCpu);
-    fileStream.open(file.c_str(), std::ios::app);
-    fileStream << m_run->m_nbCellsTotalAMR << std::endl;
-    fileStream.close();
-  }
-  catch (ErrorECOGEN &) { throw; }
 }
 
 //***********************************************************************

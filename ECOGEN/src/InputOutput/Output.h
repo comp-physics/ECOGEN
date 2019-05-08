@@ -70,14 +70,16 @@ class Output
     void prepareOutput(const Cell &cell);
     virtual void prepareOutputInfos();
     virtual void ecritSolution(Mesh *mesh, std::vector<Cell *> *cellsLvl) { try { throw ErrorECOGEN("ecritSolution not available for requested output format"); } catch (ErrorECOGEN &) { throw; }};
-    void printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl);
+    void printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl, int m_restartAMRsaveFreq);
     virtual void ecritInfos();
+    void saveInfosMailles() const;
 
     virtual void prepareSortieSpecifique() { try { throw ErrorECOGEN("prepareSortieSpecifique not available for requested output format"); } catch (ErrorECOGEN &) { throw; } };
 
     void readInfos();
     virtual void readResults(Mesh *mesh, std::vector<Cell *> *cellsLvl) { try { throw ErrorECOGEN("readResutls not available for requested output format"); } catch (ErrorECOGEN &) { throw; } };
-    void readTree(Mesh *mesh, std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl, const std::vector<AddPhys*> &addPhys, Model *model, int &nbCellsTotalAMR);
+    void readTree(Mesh *mesh, TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
+        const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR);
 
     //Accesseur
     int getNumSortie() const { return m_numFichier; };
@@ -89,31 +91,30 @@ class Output
     //Donnees generales
     void afficheInfoEcriture() const;
     void saveInfos() const;
-    void saveInfosMailles() const;
     std::string creationNameFichier(const char* name, int lvl = -1, int proc = -1, int numFichier = -1) const;
 
     void ecritJeuDonnees(std::vector<double> jeuDonnees, std::ofstream &fileStream, TypeData typeData);
     void getJeuDonnees(std::istringstream &data, std::vector<double> &jeuDonnees, TypeData typeData);
 
-	  Input *m_input;												   //!<Pointeur vers entree
-    Run *m_run;                                  //!<pointeur vers run
+    Input *m_input;                                     //!<Pointeur vers entree
+    Run *m_run;                                         //!<pointeur vers run
 
     //attribut name fichiers/dossiers
-    std::string m_simulationName;                                             //!<Name du cas test (defini dans "main.xml")
-    std::string m_infoCalcul;                                         //!<Name file pour saver les infos utiles du compute
-    std::string m_infoMesh;                                         //!<Name fichiers pour stocker les infos de mesh
-    std::string m_treeStructure;                                       //!<File name for tree structure backup
-    std::string m_fileNameResults;                                 //!<Name du file de sortie resultat
-    std::string m_fileNameCollectionParaview;                                //!<Name de la collection regroupant les fichiers resultats (for Paraview)
-    std::string m_fileNameCollectionVisIt;                                //!<Name de la collection regroupant les fichiers resultats (for VisIt)
-    std::string m_folderOutput;                                       //!<Dossier pour enregistrement des resultats
-    std::string m_folderSavesInput;                           //!<Dossier pour copier les fichiers entrees
-    std::string m_folderDatasets;                             //!<Folder to save the datasets
-    std::string m_folderInfoMesh;                      //!<Dossier pour stocker les infos de mesh
-    std::string m_folderCuts;                                       //!<cuts results folder location
-    std::string m_folderProbes;                                        //!<probes results folder location
-    std::string m_fichierCollectionParaview;                                   //!<Chemin du file collection regroupant les fichiers resultats (for Paraview)
-    std::string m_fichierCollectionVisIt;                                   //!<Chemin du file collection regroupant les fichiers resultats (for VisIt)
+    std::string m_simulationName;                       //!<Name du cas test (defini dans "main.xml")
+    std::string m_infoCalcul;                           //!<Name file pour saver les infos utiles du compute
+    std::string m_infoMesh;                             //!<Name fichiers pour stocker les infos de mesh
+    std::string m_treeStructure;                        //!<File name for tree structure backup
+    std::string m_fileNameResults;                      //!<Name du file de sortie resultat
+    std::string m_fileNameCollectionParaview;           //!<Name de la collection regroupant les fichiers resultats (for Paraview)
+    std::string m_fileNameCollectionVisIt;              //!<Name de la collection regroupant les fichiers resultats (for VisIt)
+    std::string m_folderOutput;                         //!<Dossier pour enregistrement des resultats
+    std::string m_folderSavesInput;                     //!<Dossier pour copier les fichiers entrees
+    std::string m_folderDatasets;                       //!<Folder to save the datasets
+    std::string m_folderInfoMesh;                       //!<Dossier pour stocker les infos de mesh
+    std::string m_folderCuts;                           //!<cuts results folder location
+    std::string m_folderProbes;                         //!<probes results folder location
+    std::string m_fichierCollectionParaview;            //!<Chemin du file collection regroupant les fichiers resultats (for Paraview)
+    std::string m_fichierCollectionVisIt;               //!<Chemin du file collection regroupant les fichiers resultats (for VisIt)
      
     //attribut parametres d print
     bool m_ecritBinaire;                                //!<Choix print binary/ASCII
@@ -124,7 +125,7 @@ class Output
     std::string m_endianMode;
     
     //Utile pour print des donnees de cells
-    Cell m_cellRef;                                              //!<cell de reference pour recupérer les names des variables
+    Cell m_cellRef;                                     //!<cell de reference pour recupérer les names des variables
 };
 
 #endif //OUTPUT_H

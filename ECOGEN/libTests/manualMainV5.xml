@@ -76,10 +76,10 @@ The choice of the limiters is divided into four parts:
 %%%%%%%%%%%%%%%%%% << copy between these lines
 
 *) Restart a simulation
-**********************
-restart a finished computation from the result file number
+***********************
+Restart a finished computation from the result file number. For AMR simulations, one also needs to specify the frequency at which restarts are saved (default is 0).
 %%%%%%%%%%%%%%%%%% << copy between these lines
-<restartSimulation fileNumber="15"/>
+<restartSimulation restartFileNumber="15" AMRsaveFreq="5"/>                <!-- optionnal node -->
 %%%%%%%%%%%%%%%%%% << copy between these lines
 
 *) 1D output Cut

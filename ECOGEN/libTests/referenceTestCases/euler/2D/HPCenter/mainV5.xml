@@ -14,5 +14,5 @@
 	<secondOrder>
 		<globalLimiter>vanleer</globalLimiter>
 	</secondOrder>
-	<restartSimulation fileNumber="0"/>
+	<restartSimulation restartFileNumber="0" AMRsaveFreq="0"/>
 </computationParam>

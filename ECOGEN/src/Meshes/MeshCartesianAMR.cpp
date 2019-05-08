@@ -889,7 +889,7 @@ void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
   const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init)
 {
-//return; //KS//BD//
+return; //KS//BD//
   bool balance(false);
   do {
     balance = false;

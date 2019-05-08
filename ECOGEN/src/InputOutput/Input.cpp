@@ -248,11 +248,13 @@ void Input::entreeMain(std::string casTest)
 
     }
 
-    //Reprise de Calcul depuis file resultat
+    //Reprise de calcul depuis file resultat
     element = computationParam->FirstChildElement("restartSimulation");
     if (element != NULL) { 
-      error = element->QueryIntAttribute("fileNumber", &m_run->m_restartSimulation);
-      if (error != XML_NO_ERROR) throw ErrorXMLAttribut("number", fileName.str(), __FILE__, __LINE__);
+      error = element->QueryIntAttribute("restartFileNumber", &m_run->m_restartSimulation);
+      if (error != XML_NO_ERROR) throw ErrorXMLAttribut("restartFileNumber", fileName.str(), __FILE__, __LINE__);
+      error = element->QueryIntAttribute("AMRsaveFreq", &m_run->m_restartAMRsaveFreq);
+      if (error != XML_NO_ERROR) throw ErrorXMLAttribut("AMRsaveFreq", fileName.str(), __FILE__, __LINE__);
     }
 
   }

@@ -58,7 +58,13 @@ public:
   void decoupageParallele(std::string ordreCalcul, TypeMeshContainer<Cell *> &cells);
   virtual std::string whoAmI() const;
 
+  //Accessors
+  //---------
+  virtual int getNumberCellsY() { return m_numberCellsY; };
+  virtual int getNumberCellsZ() { return m_numberCellsZ; };
+
   //Printing / Reading
+  //------------------
   virtual std::string recupereChaineExtent(int localRank, bool global = false) const;
   virtual void recupereCoord(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Axe axe) const;
   virtual void recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const;

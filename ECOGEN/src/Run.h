@@ -145,7 +145,8 @@ class Run
     double m_dtNext;                           //!<Next time step
     double m_physicalTime;                     //!<Physical time
     int m_iteration;                           //!<time iteration number
-    int m_restartSimulation;                    //!<File number for restarting a simulation
+    int m_restartSimulation;                   //!<File number for restarting a simulation
+    int m_restartAMRsaveFreq;                  //!<Frequency at which a save to restart a simulation is done (usefull only for AMR)
 
     //Input/Output attributes
 	Input* m_input;						       //!<Input object

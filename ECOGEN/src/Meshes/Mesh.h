@@ -76,6 +76,8 @@ public:
   virtual double getdY() const { return 0; };
   virtual double getdZ() const { return 0; };
   TypeM getType() const { return m_type; };
+  virtual int getNumberCellsY() { return 0; };
+  virtual int getNumberCellsZ() { return 0; };
   virtual int getLvlMax() const { return 0; };
 
   //Printing
