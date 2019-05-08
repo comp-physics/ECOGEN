@@ -56,6 +56,7 @@ Output::Output(std::string casTest, std::string nameRun, XMLElement *element, st
   m_infoCalcul = "infoCalcul.out";
   m_infoMesh = "infoMesh";
   m_treeStructure = "treeStructure";
+  m_domainDecomposition = "domainDecomposition";
   m_fileNameResults = "result";
   m_fileNameCollectionParaview = "collectionParaview";
   m_fileNameCollectionVisIt = "collectionVisIt";
@@ -156,13 +157,22 @@ void Output::prepareOutputInfos()
 
 //***********************************************************************
 
-void Output::printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl, int m_restartAMRsaveFreq)
+void Output::printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl, int restartAMRsaveFreq)
 {
-  if (m_restartAMRsaveFreq != 0) {
-    if ((m_numFichier % m_restartAMRsaveFreq) == 0) {
+  if (restartAMRsaveFreq != 0) {
+    if ((m_numFichier % restartAMRsaveFreq) == 0) {
       try {
         std::ofstream fileStream;
-        std::string file = m_folderInfoMesh + creationNameFichier(m_treeStructure.c_str(), -1, rankCpu, m_numFichier);
+        std::string file;
+        //Print domain decomposition
+        if (rankCpu == 0) {
+          file = m_folderInfoMesh + creationNameFichier(m_domainDecomposition.c_str(), -1, -1, m_numFichier);
+          fileStream.open(file.c_str());
+          mesh->printDomainDecomposition(fileStream);
+          fileStream.close();
+        }
+        //Print cell tree
+        file = m_folderInfoMesh + creationNameFichier(m_treeStructure.c_str(), -1, rankCpu, m_numFichier);
         fileStream.open(file.c_str());
         for (int lvl = 0; lvl <= mesh->getLvlMax(); lvl++) {
           for (unsigned int c = 0; c < cellsLvl[lvl].size(); c++) {
@@ -174,6 +184,21 @@ void Output::printTree(Mesh* mesh, std::vector<Cell *> *cellsLvl, int m_restartA
       catch (ErrorECOGEN &) { throw; }
     }
   }
+}
+
+//***********************************************************************
+
+void Output::readDomainDecompostion(Mesh* mesh, int restartSimulation)
+{
+  try {
+    std::ifstream fileStream;
+    std::string file;
+    file = m_folderInfoMesh + creationNameFichier(m_domainDecomposition.c_str(), -1, -1, m_numFichier);
+    fileStream.open(file.c_str());
+    mesh->readDomainDecomposition(fileStream);
+    fileStream.close();
+  }
+  catch (ErrorECOGEN &) { throw; }
 }
 
 //***********************************************************************

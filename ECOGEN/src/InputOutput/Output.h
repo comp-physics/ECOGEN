@@ -78,6 +78,7 @@ class Output
 
     void readInfos();
     virtual void readResults(Mesh *mesh, std::vector<Cell *> *cellsLvl) { try { throw ErrorECOGEN("readResutls not available for requested output format"); } catch (ErrorECOGEN &) { throw; } };
+    void readDomainDecompostion(Mesh* mesh, int restartSimulation);
     void readTree(Mesh *mesh, TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl,
         const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR);
 
@@ -104,6 +105,7 @@ class Output
     std::string m_infoCalcul;                           //!<Name file pour saver les infos utiles du compute
     std::string m_infoMesh;                             //!<Name fichiers pour stocker les infos de mesh
     std::string m_treeStructure;                        //!<File name for tree structure backup
+    std::string m_domainDecomposition;                  //!<File name for domain decomposition backup
     std::string m_fileNameResults;                      //!<Name du file de sortie resultat
     std::string m_fileNameCollectionParaview;           //!<Name de la collection regroupant les fichiers resultats (for Paraview)
     std::string m_fileNameCollectionVisIt;              //!<Name de la collection regroupant les fichiers resultats (for VisIt)

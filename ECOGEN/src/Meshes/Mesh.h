@@ -62,7 +62,8 @@ public:
   virtual ~Mesh();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond) = 0;
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+    const int &restartSimulation, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER") = 0; //!< renvoi le number de dimensions (1,2 ou 3)
   virtual std::string whoAmI() const { Errors::errorMessage("whoAmI pas prevu pour le mesh demande"); return 0; };
 
   //Accessors
@@ -110,6 +111,8 @@ public:
   //! \param     sourceMRF        pointer to the corresponding MRF source
   //! \param     jeuDonnees       double vector containing the extracted data
   virtual void extractAbsVeloxityMRF(std::vector<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, Source *sourceMRF) const { Errors::errorMessage("extractAbsVeloxityMRF non prevu pour mesh considere"); };
+  virtual void printDomainDecomposition(std::ofstream &fileStream) {};
+  virtual void readDomainDecomposition(std::ifstream &fileStream) {};
   
   //Specific to AMR method
   //----------------------

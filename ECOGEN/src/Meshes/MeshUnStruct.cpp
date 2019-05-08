@@ -106,7 +106,8 @@ void MeshUnStruct::attributLimites(std::vector<BoundCond*> &boundCond)
 
 //***********************************************************************
 
-int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshUnStruct::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+  const int &restartSimulation, bool pretraitementParallele, std::string ordreCalcul)
 {
   try {
     if (Ncpu == 1) { this->initializeGeometrieMonoCPU(cells, cellInterfaces, ordreCalcul); }

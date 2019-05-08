@@ -62,43 +62,43 @@ public: //Ctors
 
 
 
-    Decomposition(std::array<int,Dim> _nCells, int nProcs)
+    Decomposition(std::array<int,Dim> _nCells, int nProcs, int restartSimulation)
     :nCells_global_(_nCells)
     {
-        init( nProcs );
+        init(nProcs, restartSimulation);
     }
 
-    void init(int nProcs) noexcept
+    void init(int nProcs, int restartSimulation) noexcept
     {
-
-        auto nCells_t=std::accumulate(nCells_global_.begin(),nCells_global_.end(),1,
+key_rank_map_.clear(); //KS//BD//
+        auto nCells_t = std::accumulate(nCells_global_.begin(),nCells_global_.end(),1,
                 std::multiplies<int>());
 
-        for(std::size_t d=0;d<Dim;++d)
+        for (std::size_t d = 0; d < Dim; ++d)
         {
-            const int level= static_cast<int >(std::log2(nCells_global_[d]))+1;
-            if(level>base_level_) base_level_=level;
+            const int level = static_cast<int >(std::log2(nCells_global_[d]))+1;
+            if (level > base_level_) base_level_ = level;
         }
         
         float chunks = static_cast<float>(nCells_t+0.5)/nProcs;
-        key_type key(0,0,0,base_level_);
-        for ( int i=0; i<nProcs;++i )
+        key_type key(0, 0, 0, base_level_);
+        for (int i = 0; i < nProcs; ++i)
         {
-            size_t start= (i*chunks);
-            size_t end= ((i+1)*chunks);
-            const int nlocal=end-start;
-            int count=0;
+            size_t start = (i*chunks);
+            size_t end = ((i+1)*chunks);
+            const int nlocal = end-start;
+            int count = 0;
             key_rank_map_.emplace(key, i);
             nCells_per_rank_.emplace_back(nlocal);
 
-            while(count < nlocal)
+            while (count < nlocal)
             {
-                if(is_valid(key)) ++count;
+                if (is_valid(key)) ++count;
                 ++key;
             }
 
             //Store also end, to check validity:
-            if(i==nProcs-1)
+            if (i == nProcs-1)
             {
                 nCells_per_rank_.emplace_back(0);
                 key_rank_map_.emplace(--key, i);
@@ -106,23 +106,46 @@ public: //Ctors
         }
     }
 
-    std::vector<key_type> get_keys( int _rank ) const noexcept
+    void printDomainDecomposition(std::ofstream &fileStream) const noexcept
     {
-        auto key_it=key_rank_map_.begin();
+        fileStream << key_rank_map_.size() << " ";
+        auto it = key_rank_map_.begin();
+        while (it != key_rank_map_.end()) {
+            fileStream << it->first.getIndex() << " " << it->second << " ";
+            ++it;
+        }
+    }
+
+    void readDomainDecomposition(std::ifstream &fileStream) noexcept
+    {
+        int sizeKeyRankMap(0), rank(0);
+        fileStream >> sizeKeyRankMap;
+        typename key_type::value_type key(0);
+        for (int i = 0; i < sizeKeyRankMap; ++i)
+        {
+            fileStream >> key;
+            fileStream >> rank;
+            key_rank_map_.emplace(key, rank);
+        }
+    }
+
+    std::vector<key_type> get_keys(int _rank) const noexcept
+    {
+        auto key_it = key_rank_map_.begin();
         std::advance(key_it, _rank);
-        auto key=key_it->first;
-        auto nCells=nCells_per_rank_[_rank];
+        auto key = key_it->first;
+        auto nCells = nCells_per_rank_[_rank];
         std::vector<key_type> keys(nCells);
 
-        for(int i =0; i<nCells;++i)
+        for (int i = 0; i < nCells; ++i)
         {
-            bool valid=false;
-            while(!valid)
+            bool valid = false;
+            while (!valid)
             {
-                if(is_valid(key))  
+                if (is_valid(key))  
                 {
-                    valid=true;
-                    keys[i]=key;
+                    valid = true;
+                    keys[i] = key;
                 }
                 ++key;
             }
@@ -132,12 +155,12 @@ public: //Ctors
 
     bool areConsecutive(key_type _key0,key_type _key1)
     {
-        while(true)
+        while (true)
         {
             ++_key0;
-            if(is_valid(_key0) )  
+            if (is_valid(_key0))  
             {
-                return  _key0==_key1;
+                return _key0 == _key1;
             }
         }
     }
@@ -154,7 +177,7 @@ public: //Ctors
         }
     }
 
-    bool is_valid( const key_type& _key ) const noexcept
+    bool is_valid(const key_type& _key) const noexcept
     {
         return (_key.coordinate()[0] < nCells_global_[0] &&
                 _key.coordinate()[1] < nCells_global_[1] &&
@@ -164,19 +187,19 @@ public: //Ctors
 
     int get_load(const key_type& _k) const noexcept
     {
-        return 1<< (_k.level()-base_level_);
+        return 1 << (_k.level()-base_level_);
     }
 
     
-    int& base_level()noexcept{return base_level_;}
-    const int& base_level()const noexcept{return base_level_;}
+    int& base_level() noexcept{ return base_level_; }
+    const int& base_level() const noexcept{ return base_level_; }
 
     template<class Coord>
     bool is_inside(const Coord& _coord)
     {
-       for(int d=0;d<Dim;++d)
+       for (int d = 0; d < Dim; ++d)
        {
-           if( _coord[d]<0 || _coord[d]>= nCells_global_[d])
+           if (_coord[d]<0 || _coord[d] >= nCells_global_[d])
                return false;
        }
        return true;
@@ -185,7 +208,7 @@ public: //Ctors
 
     void recombineStarts()
     {
-        return; //KS//BD//;
+        //return; //KS//BD//;
         auto it = key_rank_map_.begin(), itPrev = it++;
         while (it != --(key_rank_map_.end())) {
             if (it->second == itPrev->second) {
@@ -232,7 +255,7 @@ public: //Ctors
 
 
 private:
-    int base_level_=-1;
+    int base_level_ = -1;
     std::array<int,Dim> nCells_global_;
     std::map<key_type, int> key_rank_map_;
     std::vector<int> nCells_per_rank_; //Not updated once the starts are changed

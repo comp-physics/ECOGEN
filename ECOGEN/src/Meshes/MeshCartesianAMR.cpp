@@ -55,17 +55,18 @@ MeshCartesianAMR::~MeshCartesianAMR(){}
 
 //***********************************************************************
 
-int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshCartesianAMR::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+  const int &restartSimulation, bool pretraitementParallele, std::string ordreCalcul)
 {
   this->meshStretching();
-  this->initializeGeometrieAMR(cells, cellsGhost, cellInterfaces, ordreCalcul);
+  this->initializeGeometrieAMR(cells, cellsGhost, cellInterfaces, restartSimulation, ordreCalcul);
   return m_geometrie;
 }
 
 
 //***********************************************************************
 
-void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
+void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, const int &restartSimulation, std::string ordreCalcul)
 {
   int ix, iy, iz;
 
@@ -75,7 +76,7 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
   
   //Domain decomposition
   //--------------------
-  m_decomp = decomposition::Decomposition({{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}}, Ncpu);
+  m_decomp = decomposition::Decomposition({{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}}, Ncpu, restartSimulation);
   auto keys = m_decomp.get_keys(rankCpu);
 
   for(unsigned int i = 0; i < keys.size(); ++i)
@@ -853,6 +854,20 @@ void MeshCartesianAMR::refineCellAndCellInterfaces(Cell *cell, const std::vector
   bool refineExternalCellInterfaces(true);
   cell->refineCellAndCellInterfaces(m_numberCellsY, m_numberCellsZ, addPhys, model, refineExternalCellInterfaces);
   nbCellsTotalAMR += cell->getNumberCellsChildren() - 1;
+}
+
+//***********************************************************************
+
+void MeshCartesianAMR::printDomainDecomposition(std::ofstream &fileStream)
+{
+  m_decomp.printDomainDecomposition(fileStream);
+}
+
+//***********************************************************************
+
+void MeshCartesianAMR::readDomainDecomposition(std::ifstream &fileStream)
+{
+  m_decomp.readDomainDecomposition(fileStream);
 }
 
 //****************************************************************************

@@ -155,7 +155,8 @@ void MeshCartesian::construitIGlobal(const int &i, const int &j, const int &k, i
 
 //***********************************************************************
 
-int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul)
+int MeshCartesian::initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+  const int &restartSimulation, bool pretraitementParallele, std::string ordreCalcul)
 {
   this->meshStretching();
   if (Ncpu == 1)

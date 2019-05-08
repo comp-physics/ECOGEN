@@ -79,7 +79,19 @@ void Run::initialize(int argc, char* argv[])
   m_cellsLvlGhost = new TypeMeshContainer<Cell *>[m_lvlMax + 1];
   m_cellInterfacesLvl = new TypeMeshContainer<CellInterface *>[m_lvlMax + 1];
   try {
-    m_dimension = m_mesh->initializeGeometrie(m_cellsLvl[0], m_cellsLvlGhost[0], m_cellInterfacesLvl[0], m_parallelPreTreatment, m_order);
+    if (m_restartSimulation > 0) {
+      if (rankCpu == 0) std::cout << "Restarting simulation from result file number: " << m_restartSimulation << "...";
+      m_outPut->readInfos();
+      if (m_mesh->getType() == AMR) {
+        if (m_restartSimulation % m_restartAMRsaveFreq == 0) {
+          m_outPut->readDomainDecompostion(m_mesh, m_restartSimulation);
+        }
+        else {
+          Errors::errorMessage("Run::restartSimulation: Restart files not available");
+        }
+      }
+    }
+    m_dimension = m_mesh->initializeGeometrie(m_cellsLvl[0], m_cellsLvlGhost[0], m_cellInterfacesLvl[0], m_restartSimulation, m_parallelPreTreatment, m_order);
   }
   catch (ErrorECOGEN &) { throw; }
 
@@ -166,17 +178,11 @@ void Run::restartSimulation()
 {
   std::ifstream fileStream;
 
-  if (rankCpu == 0) std::cout << "Restarting simulation from result file number: " << m_restartSimulation << "...";
-
   //Reconstruct the mesh and get physical data from restart point
   try {
-    m_outPut->readInfos();
     if (m_mesh->getType() == AMR) {
       if (m_restartSimulation % m_restartAMRsaveFreq == 0) {
         m_outPut->readTree(m_mesh, m_cellsLvl, m_cellsLvlGhost, m_cellInterfacesLvl, m_addPhys, m_model, m_eos, m_nbCellsTotalAMR);
-      }
-      else {
-        Errors::errorMessage("Run::restartSimulation: Restart files not available");
       }
     }
     m_outPut->readResults(m_mesh, m_cellsLvl);
@@ -192,23 +198,16 @@ void Run::restartSimulation()
     }
   }
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-    for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
-      m_cellsLvl[lvl][i]->completeFulfillState(restart);
-    }
+    for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->completeFulfillState(restart); }
   }
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
-      for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
-        m_cellsLvl[lvl][i]->averageChildrenInParent();
-      }
+      for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->averageChildrenInParent(); }
     }
   }
   if (Ncpu > 1) {
-    for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
-      parallel.communicationsPrimitives(m_eos, lvl);
-    }
+    for (int lvl = 0; lvl <= m_lvlMax; lvl++) { parallel.communicationsPrimitives(m_eos, lvl); }
   }
-
   //FP//ERR//Devrait etre corriger, a verifier : ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
   //KS//FP// apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
 

@@ -48,7 +48,8 @@ public:
   ~MeshUnStruct();
 
   virtual void attributLimites(std::vector<BoundCond*> &boundCond);
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+    const int &restartSimulation, bool pretraitementParallele = true, std::string ordreCalcul = "FIRSTORDER");
   virtual std::string whoAmI() const { return 0; };
 
   //Printing / Reading

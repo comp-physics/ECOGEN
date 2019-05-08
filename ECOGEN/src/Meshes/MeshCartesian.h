@@ -51,7 +51,8 @@ public:
   virtual void attributLimites(std::vector<BoundCond*> &boundCond);
   void recupereIJK(const int &index, int &i, int &j, int &k) const;
   void construitIGlobal(const int &i, const int &j, const int &k, int &index) const;
-  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, bool pretraitementParallele, std::string ordreCalcul);
+  virtual int initializeGeometrie(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces,
+    const int &restartSimulation, bool pretraitementParallele, std::string ordreCalcul);
   void meshStretching();
   void initializeGeometrieMonoCpu(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
   void initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul);
