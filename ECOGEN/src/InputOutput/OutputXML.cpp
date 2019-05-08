@@ -92,7 +92,6 @@ void OutputXML::ecritSolution(Mesh* mesh, std::vector<Cell *> *cellsLvl)
   }
   catch (ErrorECOGEN &) { throw; } // Renvoi au niveau suivant
   m_numFichier++;
-  MPI_Barrier(MPI_COMM_WORLD);
 }
 
 //***********************************************************************
@@ -524,14 +523,29 @@ void OutputXML::ecritDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsL
     else { fileStream << "\"/>" << std::endl; }
   }
 
-  // //7) CPU rank
-  // //-----------
+  //7) CPU rank
+  //-----------
   // if (mesh->getType() == AMR) { //For complete output
   //   int CPUrank = -5;
   //   fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"CPUrank\"";
   //   if (!parallel) {
   //     fileStream << " format=\"" << format << "\">" << std::endl;
   //     mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, CPUrank);
+  //     this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
+  //     fileStream << std::endl;
+  //     fileStream << "        </" << prefix << "DataArray>" << std::endl;
+  //   }
+  //   else { fileStream << "\"/>" << std::endl; }
+  // }
+
+  //8) Morton index
+  //---------------
+  // if (mesh->getType() == AMR) { //For complete output
+  //   int MortonIndex = -6;
+  //   fileStream << "        <" << prefix << "DataArray type=\"Int32\" Name=\"MortonIndex\"";
+  //   if (!parallel) {
+  //     fileStream << " format=\"" << format << "\">" << std::endl;
+  //     mesh->recupereDonnees(cellsLvl, jeuDonnees, 1, MortonIndex);
   //     this->ecritJeuDonnees(jeuDonnees, fileStream, INT);
   //     fileStream << std::endl;
   //     fileStream << "        </" << prefix << "DataArray>" << std::endl;

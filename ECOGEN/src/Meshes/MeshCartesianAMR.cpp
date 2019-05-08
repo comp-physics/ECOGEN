@@ -73,11 +73,14 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
   m_numberCellsX = m_numberCellsXGlobal;
   m_numberCellsY = m_numberCellsYGlobal;
   m_numberCellsZ = m_numberCellsZGlobal;
-  
+
   //Domain decomposition
   //--------------------
-  m_decomp = decomposition::Decomposition({{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}}, Ncpu, restartSimulation);
-  auto keys = m_decomp.get_keys(rankCpu);
+  if (restartSimulation == 0) {
+    std::array<int,3> temp={{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}};
+    m_decomp = decomposition::Decomposition(temp);
+  }
+  auto keys = m_decomp.initialize(Ncpu, rankCpu, restartSimulation);
 
   for(unsigned int i = 0; i < keys.size(); ++i)
   {
@@ -793,6 +796,7 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
           else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); }
+          else if (phase == -6) { jeuDonnees.push_back(static_cast<double>(cellsLvl[lvl][i]->getElement()->getKey().getIndex())); }
           else { Errors::errorMessage("MeshCartesianAMR::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles
@@ -867,6 +871,8 @@ void MeshCartesianAMR::printDomainDecomposition(std::ofstream &fileStream)
 
 void MeshCartesianAMR::readDomainDecomposition(std::ifstream &fileStream)
 {
+  std::array<int,3> temp={{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}};
+  m_decomp = decomposition::Decomposition(temp);
   m_decomp.readDomainDecomposition(fileStream);
 }
 
@@ -904,7 +910,7 @@ void MeshCartesianAMR::finalizeParallele(const int &lvlMax)
 void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshContainer<Cell *> *cellsLvlGhost, TypeMeshContainer<CellInterface *> *cellInterfacesLvl, std::string ordreCalcul,
   const int &numberPhases, const int &numberTransports, const std::vector<AddPhys*> &addPhys, Model *model, Eos **eos, int &nbCellsTotalAMR, bool init)
 {
-return; //KS//BD//
+//return; //KS//BD//
   bool balance(false);
   do {
     balance = false;
