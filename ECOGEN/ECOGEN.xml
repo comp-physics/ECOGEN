@@ -28,7 +28,7 @@
   <!-- <testCase>./libTests/referenceTestCases/kapila/1D/cavitation/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/2D/transportWaterSquareInAir/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/2D/squareWaterExplosion/</testCase> -->
-  <testCase>./libTests/referenceTestCases/kapila/2D/shockBubble/heliumAir/</testCase>
+  <!-- <testCase>./libTests/referenceTestCases/kapila/2D/shockBubble/heliumAir/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/2D/richtmyerMeshkov/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/2D/testUnstructured/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/Kapila/AddPhysicalEffects/evap/evapShockTube/</testCase> -->
@@ -66,5 +66,5 @@
   
   <!-- 3D atomization test cases -->
   <!-- <testCase>./libTests/3Datomization/Mach1_3/</testCase> -->
-  <!-- <testCase>./libTests/3Datomization/Mach1_3_V2/</testCase> -->
+  <testCase>./libTests/3Datomization/Mach1_3_V2/</testCase>
 </ecogen>

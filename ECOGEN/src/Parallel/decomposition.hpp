@@ -96,14 +96,14 @@ public: //Ctors
         if (restartSimulation == 0) {
             auto nCells_t = std::accumulate(nCells_global_.begin(),nCells_global_.end(),1,
                     std::multiplies<int>());
-            
+
             float chunks = static_cast<float>(nCells_t+0.5)/nProcs;
             key_type key(0,0,0);
             std::vector<int> nCells_per_rank;
             for (int i = 0; i < nProcs; ++i)
             {
                 size_t start = (i*chunks);
-                size_t end = ((i+1)*chunks);
+                size_t end = std::min(static_cast<int>((i+1)*chunks), nCells_t);
                 const int nlocal = end-start;
                 int count = 0;
                 key_rank_map_.emplace(key, i);

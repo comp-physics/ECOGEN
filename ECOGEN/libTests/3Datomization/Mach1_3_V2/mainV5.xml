@@ -13,4 +13,5 @@
     <globalVolumeFractionLimiter>minmod</globalVolumeFractionLimiter>
     <interfaceVolumeFractionLimiter>thinc</interfaceVolumeFractionLimiter>
   </secondOrder>
+  <restartSimulation restartFileNumber="0" AMRsaveFreq="5"/>
 </computationParam>
