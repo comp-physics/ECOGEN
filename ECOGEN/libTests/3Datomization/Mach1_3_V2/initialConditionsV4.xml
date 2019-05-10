@@ -65,7 +65,7 @@
             <dataFluid alpha="1." density="1000.0"/>
         </material>
         <mixture>
-            <dataMix pressure = "1.01397e5"/>
+            <dataMix pressure = "1.01453e5"/>
             <velocity x="0." y="0." z="0."/>
         </mixture>
         <transport name="color" value="1."/>

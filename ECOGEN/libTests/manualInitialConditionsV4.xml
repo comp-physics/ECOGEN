@@ -76,6 +76,10 @@ Available geometrical domains are: entireDomain, halfSpace, disc, rectangle, pav
 <dataEllipsoid axe1="x" axe2="y" axe3="z" radius1="1." radius2="1.5" radius3="1.5">
   <center x="0." y="0." z="0."/>
 </dataEllipsoid>
+<!-- type=cylinder -->
+<dataCylinder axe1="x" axe2="y" radius="0.5" length="1.">
+  <center x="0." y="0." z="0."/>
+</dataCylinder>
 ******************
 Additional feature for geometrical domain: It is possible to use physicalIdentity number coming from mesh software to initialize a geometrical domain.
 Example:

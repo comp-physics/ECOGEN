@@ -45,5 +45,6 @@
 #include "GDEllipsoid.h"
 #include "GDRectangle.h"
 #include "GDPavement.h"
+#include "GDCylinder.h"
 
 #endif // HEADERGEOMETRICALDOMAIN_H
