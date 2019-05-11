@@ -1811,6 +1811,7 @@ void MeshUnStruct::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vec
 {
   jeuDonnees.clear();
   int numCell;
+  double transport(0.);
   for (int i = m_numberFacesLimites; i < m_numberElementsInternes; i++)
   {
     if (!m_elements[i]->isFantome())
@@ -1819,7 +1820,11 @@ void MeshUnStruct::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vec
       if (var > 0) { //On veut recuperer les donnees scalars
         if (phase >= 0) { jeuDonnees.push_back(cellsLvl[0][numCell]->getPhase(phase)->returnScalar(var)); }      //Donnees de phases
         else if (phase == -1) { jeuDonnees.push_back(cellsLvl[0][numCell]->getMixture()->returnScalar(var)); }   //Donnees de mixture
-        else if (phase == -2) { jeuDonnees.push_back(cellsLvl[0][numCell]->getTransport(var-1).getValue()); }
+        else if (phase == -2) {
+          transport = cellsLvl[0][numCell]->getTransport(var-1).getValue();
+          if (transport < 1.e-20) { transport = 0.; }
+          jeuDonnees.push_back(transport);
+        }
         else if (phase == -3) { jeuDonnees.push_back(cellsLvl[0][numCell]->getXi()); }
         else if (phase == -4) { jeuDonnees.push_back(cellsLvl[0][numCell]->getGradient()); }
         else { Errors::errorMessage("MeshUnStruct::recupereDonnees: unknown number of phase: ", phase); }

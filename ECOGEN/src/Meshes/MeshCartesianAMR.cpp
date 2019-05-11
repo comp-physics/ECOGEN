@@ -557,10 +557,13 @@ void MeshCartesianAMR::procedureRaffinement(TypeMeshContainer<Cell *> *cellsLvl,
   //-------------------------------------------------
   for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) { cellsLvl[lvl][i]->setToZeroXi(); }
   for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->computeXi(m_criteriaVar, m_varRho, m_varP, m_varU, m_varAlpha); }
-  //bool varP2(true);
-  //if (lvl >= 5) { varP2 = false; }
-  //for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->computeXi(m_criteriaVar, m_varRho, varP2, m_varU, m_varAlpha); }
-  //for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
+  // bool varP2 = m_varP;
+  // if (lvl >= 5) { varP2 = false; }
+  // for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->computeXi(m_criteriaVar, m_varRho, varP2, m_varU, m_varAlpha); }
+  // bool varU2 = m_varU;
+  // if (lvl >= 2) { varU2 = false; }
+  // for (unsigned int i = 0; i < cellInterfacesLvl[lvl].size(); i++) { cellInterfacesLvl[lvl][i]->computeXi(m_criteriaVar, m_varRho, m_varP, varU2, m_varAlpha); }
+  // for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
   //  double x(0.), y(0.), z(0.);
   //  x = cellsLvl[lvl][i]->getPosition().getX();
   //  y = cellsLvl[lvl][i]->getPosition().getY();
@@ -572,7 +575,7 @@ void MeshCartesianAMR::procedureRaffinement(TypeMeshContainer<Cell *> *cellsLvl,
   //  if (std::pow((x*x + y * y), 0.5) > 5.) {
   //      cellsLvl[lvl][i]->setToZeroXi();
   //  }
-  //}
+  // }
   if (Ncpu > 1) { parallel.communicationsXi( lvl); }
   
   //2) Smoothing de Xi
@@ -786,13 +789,18 @@ void MeshCartesianAMR::recupereTypeCell(std::vector<double> &jeuDonnees, std::ve
 void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::vector<double> &jeuDonnees, const int var, int phase) const
 {
   jeuDonnees.clear();
+  double transport(0.);
   for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
     for (unsigned int i = 0; i < cellsLvl[lvl].size(); i++) {
       if (!cellsLvl[lvl][i]->getSplit()) {
         if (var > 0) { //On veut recuperer les donnees scalars
           if (phase >= 0) { jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnScalar(var)); }      //Donnees de phases
           else if (phase == -1) { jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnScalar(var)); }   //Donnees de mixture
-          else if (phase == -2) { jeuDonnees.push_back(cellsLvl[lvl][i]->getTransport(var - 1).getValue()); }
+          else if (phase == -2) {
+            transport = cellsLvl[lvl][i]->getTransport(var - 1).getValue();
+            if (transport < 1.e-20) { transport = 0.; }
+            jeuDonnees.push_back(transport);
+          }
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[lvl][i]->getXi()); }
           else if (phase == -4) { jeuDonnees.push_back(cellsLvl[lvl][i]->getGradient()); }
           else if (phase == -5) { jeuDonnees.push_back(static_cast<double>(rankCpu)); }
