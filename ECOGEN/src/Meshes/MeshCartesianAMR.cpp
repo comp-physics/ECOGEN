@@ -76,12 +76,11 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
 
   //Domain decomposition
   //--------------------
-  if (restartSimulation == 0) {
-    std::array<int,3> temp={{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}};
-    m_decomp = decomposition::Decomposition(temp);
-  }
+  std::array<int,3> physicalDomainSizes={{m_numberCellsXGlobal,m_numberCellsYGlobal,m_numberCellsZGlobal}};
+  if (restartSimulation == 0) { m_decomp = decomposition::Decomposition(physicalDomainSizes); }
+  else { m_decomp.updatePhysicalDomainSizes(physicalDomainSizes); }
   auto keys = m_decomp.initialize(Ncpu, rankCpu, restartSimulation);
-
+  
   for(unsigned int i = 0; i < keys.size(); ++i)
   {
     if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }

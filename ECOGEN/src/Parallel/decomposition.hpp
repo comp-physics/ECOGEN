@@ -89,6 +89,11 @@ public: //Ctors
         }
     }
 
+    void updatePhysicalDomainSizes(std::array<int,Dim> _nCells) noexcept
+    {
+        nCells_global_ = _nCells;
+    }
+
     std::vector<key_type> initialize(int nProcs, int _rank, int restartSimulation) noexcept
     {
         std::vector<key_type> keys;
