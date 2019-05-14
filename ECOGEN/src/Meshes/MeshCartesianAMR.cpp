@@ -813,7 +813,7 @@ void MeshCartesianAMR::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std:
             jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getY());
             jeuDonnees.push_back(cellsLvl[lvl][i]->getPhase(phase)->returnVector(-var).getZ());
           }
-          else if(phase == -1){  //Donnees de mixture
+          else if (phase == -1){  //Donnees de mixture
             jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getX());
             jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getY());
             jeuDonnees.push_back(cellsLvl[lvl][i]->getMixture()->returnVector(-var).getZ());
@@ -938,6 +938,10 @@ void MeshCartesianAMR::parallelLoadBalancingAMR(TypeMeshContainer<Cell *> *cells
         nbCellsTotalAMR, indicesSendStartGlobal, indicesSendEndGlobal, indicesReceiveStartGlobal, indicesReceiveEndGlobal);
     }
   } while (balance);
+
+  //Update gradients for level max only (others are updated within the recursive time-stepping loop)
+  for (unsigned int i = 0; i < cellsLvl[m_lvlMax].size(); i++) { if (!cellsLvl[m_lvlMax][i]->getSplit()) { cellsLvl[m_lvlMax][i]->prepareAddPhys(); } }
+  for (unsigned int pa = 0; pa < addPhys.size(); pa++) { addPhys[pa]->communicationsAddPhys(m_numberPhases, m_geometrie, m_lvlMax); }
 }
 
 //***********************************************************************

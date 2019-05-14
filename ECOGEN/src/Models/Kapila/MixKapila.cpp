@@ -216,6 +216,8 @@ double MixKapila::returnScalar(const int &numVar) const
     return m_density; break;
   case 2:
     return m_pressure; break;
+  case 3:
+    return m_totalEnergy; break;
   default:
     return 0.; break;
   }
@@ -244,6 +246,8 @@ std::string MixKapila::returnNameScalar(const int &numVar) const
     return "Density_Mixture"; break;
   case 2:
     return "Pressure_Mixture"; break;
+  case 3:
+    return "Total_energy_Mixture"; break;
   default:
     return "NoName"; break;
   }
@@ -274,6 +278,8 @@ void MixKapila::setScalar(const int &numVar, const double &value)
     m_density = value; break;
   case 2:
     m_pressure = value; break;
+  case 3:
+    m_totalEnergy = value; break;
   default:
     Errors::errorMessage("numVar not found in MixKapila::setScalar"); break;
   }

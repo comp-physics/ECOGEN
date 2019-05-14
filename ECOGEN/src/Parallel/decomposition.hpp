@@ -208,7 +208,6 @@ public: //Ctors
 
     void recombineStarts()
     {
-        //return; //KS//BD//
         auto it = key_rank_map_.begin(), itPrev = it++;
         while (it != --(key_rank_map_.end())) {
             if (it->second == itPrev->second) {

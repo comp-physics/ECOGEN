@@ -69,7 +69,8 @@ class MixKapila : public Mixture
       virtual void reverseProjection(const Coord &normal, const Coord &tangent, const Coord &binormal);
 
       //Data printing
-      virtual int getNumberScalars() const { return 2; };
+      virtual int getNumberScalars() const { return 2; }; //For reduced output
+      //virtual int getNumberScalars() const { return 3; }; //For complete output
       virtual int getNumberVectors() const { return 1; };
       virtual double returnScalar(const int &numVar) const;
       virtual Coord returnVector(const int &numVar) const;

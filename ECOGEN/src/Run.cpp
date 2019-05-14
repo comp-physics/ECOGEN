@@ -197,9 +197,20 @@ void Run::restartSimulation()
       parallel.communicationsTransports(lvl);
     }
   }
-  for (int lvl = 0; lvl <= m_lvlMax; lvl++) {
+  for (int lvl = 0; lvl <= m_lvlMax; lvl++) { //With reduced output
     for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->completeFulfillState(restart); }
   }
+  // for (int lvl = 0; lvl <= m_lvlMax; lvl++) { //With complete output
+  //   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->fulfillState(restart); }
+  //   if (m_numberAddPhys) {
+  //       for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
+  //       if (Ncpu > 1) {
+  //         m_stat.startCommunicationTime();
+  //         for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { m_addPhys[pa]->communicationsAddPhys(m_numberPhases, m_dimension, lvl); }
+  //         m_stat.endCommunicationTime();
+  //       }
+  //   }
+  // }
   if (m_mesh->getType() == AMR) {
     for (int lvl = 0; lvl < m_lvlMax; lvl++) {
       for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { m_cellsLvl[lvl][i]->averageChildrenInParent(); }
@@ -208,8 +219,7 @@ void Run::restartSimulation()
   if (Ncpu > 1) {
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) { parallel.communicationsPrimitives(m_eos, lvl); }
   }
-  //FP//ERR//Devrait etre corriger, a verifier : ici pour la tension de surface en // pb car les gradient ne sont pas bien calcules car pas de comm preliminaire.
-  //KS//FP// apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
+  //KS//FP// Apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
 
   if (rankCpu == 0) std::cout << " OK" << std::endl;
 }
@@ -335,7 +345,12 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
   }
   if (lvl < m_lvlMax) {
     if (m_numberAddPhys) {
-			for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
+      for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
+      if (Ncpu > 1) {
+        m_stat.startCommunicationTime();
+        for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { m_addPhys[pa]->communicationsAddPhys(m_numberPhases, m_dimension, lvl); }
+        m_stat.endCommunicationTime();
+      }
     }
     //4) Recursive call for level up integration procedure
     this->integrationProcedure(dt, lvl + 1, dtMax, nbCellsTotalAMR);
@@ -535,6 +550,11 @@ void Run::solveRelaxations(int &lvl)
     }
   }
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) { if (!m_cellsLvl[lvl][i]->getSplit()) { m_cellsLvl[lvl][i]->prepareAddPhys(); } }
+  if (Ncpu > 1) {
+    m_stat.startCommunicationTime();
+    for (unsigned int pa = 0; pa < m_addPhys.size(); pa++) { m_addPhys[pa]->communicationsAddPhys(m_numberPhases, m_dimension, lvl); }
+    m_stat.endCommunicationTime();
+  }
   //Optional energy corrections and other relaxations
   for (unsigned int i = 0; i < m_cellsLvl[lvl].size(); i++) {
     if (!m_cellsLvl[lvl][i]->getSplit()) {

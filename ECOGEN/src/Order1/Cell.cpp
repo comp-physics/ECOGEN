@@ -272,7 +272,7 @@ void Cell::buildCons(const int &numberPhases)
 
 void Cell::correctionEnergy(const int &numberPhases)
 {
-  m_mixture->totalEnergyToInternalEnergy(m_vecQuantitiesAddPhys);    //Building specific internal energy form totale one
+  m_mixture->totalEnergyToInternalEnergy(m_vecQuantitiesAddPhys);    //Building specific internal energy from totale one
   m_cons->correctionEnergy(this, numberPhases);                      //Pressure correction
 }
 
@@ -561,7 +561,7 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
   double sommeDistanceZ = 0.;
   Coord grad(0.);               /*!< gradient vector for needed variable on the cell*/
   Coord gradProjectedFace(0.);  /*!< gradient vector for the needed variable on a cell interface in the absolute system of coordinate*/             
-  double gradCellInterface(0.);          /*!< gradient for needed variable on the cell interface in the face direction*/
+  double gradCellInterface(0.); /*!< gradient for needed variable on the cell interface in the face direction*/
  
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
     if (!m_cellInterfaces[b]->getSplit()) {
