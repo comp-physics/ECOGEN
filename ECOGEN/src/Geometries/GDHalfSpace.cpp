@@ -95,3 +95,34 @@ bool GDHalfSpace::belong(Coord &posElement, const int &lvl) const
 }
 
 //***************************************************************
+
+void GDHalfSpace::fillIn(Cell *cell, const int &numberPhases, const int &numberTransports) const
+{
+  //As basic fillIn: Test if the cell belongs to the geometrical domain
+  bool belongs(true);
+  if (cell->getElement() != 0) {
+    Coord coord(cell->getPosition());
+    if (!this->belong(coord, cell->getLvl())) { belongs = false; }
+    //Test if the cell belongs to physical mesh entity (for unstructured meshes)
+    if (cell->getElement()->getAppartenancePhysique() > 0 && m_physicalEntity > 0) {
+      if(cell->getElement()->getAppartenancePhysique() != m_physicalEntity) { belongs = false; }
+    }
+  }
+
+  if (belongs) {
+    for (int k = 0; k < numberPhases; k++) { cell->copyPhase(k, m_vecPhases[k]); }
+    cell->copyMixture(m_mixture);
+    for (int k = 0; k < numberTransports; k++) { cell->setTransport(m_vecTransports[k].getValue(), k); }
+
+    //To uncomment only for special test cases
+    //4. Random velocity perturbations: O(1e−4 u_s)
+    //---------------------------------------------
+    // Coord perturbedVelocity(cell->getMixture()->getVelocity());
+    // perturbedVelocity.setX(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getX());
+    // perturbedVelocity.setY(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getY());
+    // perturbedVelocity.setZ(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getZ());
+    // cell->getMixture()->setVelocity(perturbedVelocity);
+  }
+}
+
+//***************************************************************

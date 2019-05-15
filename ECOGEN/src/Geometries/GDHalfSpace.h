@@ -55,6 +55,7 @@ class GDHalfSpace : public GeometricalDomain
     virtual ~GDHalfSpace();
 
     virtual bool belong(Coord &posElement, const int &lvl) const;
+    virtual void fillIn(Cell *cell, const int &numberPhases, const int &numberTransports) const;
 
   private:
     double m_position;  //!< Origin of the half space along axe

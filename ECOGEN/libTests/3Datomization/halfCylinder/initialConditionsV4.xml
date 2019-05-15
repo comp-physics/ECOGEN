@@ -2,7 +2,7 @@
 <CI>
     <!-- LISTE DES DOMAINES GEOMETRIQUES  -->
     <physicalDomains> 
-        <domain name="base" state="air" type="entireDomain"/>
+        <domain name="base" state="air" type="entireDomainWithParticularities"/>
         <domain name="shock"  state="shockedState" type="halfSpace">
             <dataHalfSpace axe="x" origin="2.5e-4" direction="negative"/>
         </domain>
