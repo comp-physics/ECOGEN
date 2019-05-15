@@ -2,20 +2,20 @@
 <mesh>
   <type structure="cartesian"/>
   <cartesianMesh>
-    <dimensions x="8.5e-4" y="3.e-4" z="2.7e-4"/>
+    <dimensions x="12.4e-4" y="5.e-4" z="2.25e-4"/>
     <numberCells x="10" y ="10" z="10"/>
     <meshStretching>
       <XStretching>
-        <stretch startAt="0.e-4" endAt="1.e-4" factor="0.9803921" numberCells="24"/>
-        <stretch startAt="1.e-4" endAt="5.5e-4" factor="1." numberCells="130"/>
-        <stretch startAt="5.5e-4" endAt="8.5e-4" factor="1.02" numberCells="51"/>
+        <stretch startAt="0.e-4" endAt="2.e-4" factor="0.9803921" numberCells="39"/>
+        <stretch startAt="2.e-4" endAt="7.4e-4" factor="1." numberCells="156"/>
+        <stretch startAt="7.4e-4" endAt="12.4e-4" factor="1.02" numberCells="69"/>
       </XStretching>
       <YStretching>
-        <stretch startAt="0.e-4" endAt="0.9e-4" factor="1." numberCells="26"/>
-        <stretch startAt="0.9e-4" endAt="3.e-4" factor="1.02" numberCells="41"/>
+        <stretch startAt="0.e-4" endAt="1.8e-4" factor="1." numberCells="52"/>
+        <stretch startAt="1.8e-4" endAt="5.e-4" factor="1.02" numberCells="53"/>
       </YStretching>
       <ZStretching>
-        <stretch startAt="0.e-4" endAt="2.7e-4" factor="1." numberCells="78"/>
+        <stretch startAt="0.e-4" endAt="2.25e-4" factor="1." numberCells="65"/>
       </ZStretching>
     </meshStretching>
     <AMR lvlMax="1" criteriaVar="0.04" varRho="false" varP="false" varU="false" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>

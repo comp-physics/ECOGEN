@@ -4,11 +4,11 @@
     <physicalDomains> 
         <domain name="base" state="air" type="entireDomainWithParticularities"/>
         <domain name="shock"  state="shockedState" type="halfSpace">
-            <dataHalfSpace axe="x" origin="2.5e-4" direction="negative"/>
+            <dataHalfSpace axe="x" origin="3.5e-4" direction="negative"/>
         </domain>
         <domain name="droplet"  state="waterCylinder" type="cylinder">
             <dataCylinder axe1="x" axe2="y" radius="0.5605e-4" length="1.">
-                <center x="3.2e-4" y="0." z="0."/>
+                <center x="4.2e-4" y="0." z="0."/>
             </dataCylinder>
         </domain>
     </physicalDomains>

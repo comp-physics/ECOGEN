@@ -133,9 +133,9 @@ void GDEntireDomainWithParticularities::fillIn(Cell *cell, const int &numberPhas
     //4. Random velocity perturbations: O(1e−4 u_s)
     //---------------------------------------------
     Coord perturbedVelocity(cell->getMixture()->getVelocity());
-    perturbedVelocity.setX(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getX());
-    perturbedVelocity.setY(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getY());
-    perturbedVelocity.setZ(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-4*151.821433232719 + perturbedVelocity.getZ());
+    perturbedVelocity.setX(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getX());
+    perturbedVelocity.setY(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getY());
+    perturbedVelocity.setZ(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getZ());
     cell->getMixture()->setVelocity(perturbedVelocity);
     
   }
