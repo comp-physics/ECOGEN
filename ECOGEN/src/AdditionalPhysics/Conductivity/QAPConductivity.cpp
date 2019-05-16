@@ -35,31 +35,36 @@
 #include "QAPConductivity.h"
 #include <iostream>
 
+std::vector<std::string> m_variableNames;
+std::vector<int> m_numPhases;
+
 //***********************************************************************
 
 QAPConductivity::QAPConductivity(){}
 
 //***********************************************************************
 
-QAPConductivity::QAPConductivity(AddPhys* addPhys, const int &numberPhases) : QuantitiesAddPhys(addPhys)
+QAPConductivity::QAPConductivity(AddPhys* addPhys, const int &numberPhases) : QuantitiesAddPhys(addPhys),
+	m_gradTk(numberPhases)
 {
-  m_gradTk = new Coord[numberPhases];
-  for (int k = 0; k < numberPhases; k++) {
+  m_variableNames.resize(numberPhases);
+  m_numPhases.resize(numberPhases);
+  for (int k = 0; k < numberPhases; ++k) {
     m_gradTk[k] = 0.;
+    m_variableNames[k] = "T";
+    m_numPhases[k] = k;
   }
 }
 
 //***********************************************************************
 
-QAPConductivity::~QAPConductivity(){  delete[] m_gradTk; }
+QAPConductivity::~QAPConductivity(){}
 
 //***********************************************************************
 
 void QAPConductivity::computeQuantities(Cell* cell)
 {
-  for (int k = 0; k < cell->getNumberPhases(); k++) {
-    m_gradTk[k] = cell->computeGradient("T", k);
-  }
+  cell->computeGradient(m_gradTk, m_variableNames, m_numPhases);
 }
 
 //***********************************************************************

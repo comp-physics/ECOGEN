@@ -341,7 +341,7 @@ void Parallel::finalizePersistentCommunicationsPrimitives(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsPrimitives(Eos **eos, const int &lvl, Prim type)
+void Parallel::communicationsPrimitives(Eos **eos, int lvl, Prim type)
 {
   int count(0);
   MPI_Status status;
@@ -428,11 +428,11 @@ void Parallel::finalizePersistentCommunicationsSlopes(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSlopes(const int &lvl)
+void Parallel::communicationsSlopes(int lvl)
 {
   int count(0);
   MPI_Status status;
-
+  
   for (int neighbour = 0; neighbour < Ncpu; neighbour++) {
     if (m_isNeighbour[neighbour]) {
       //Prepation of sendings
@@ -569,7 +569,7 @@ void Parallel::finalizePersistentCommunicationsVector(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num, int index)
+void Parallel::communicationsVector(std::string nameVector, const int &dim, int lvl, int num, int index)
 {
   int count(0);
   MPI_Status status;
@@ -658,7 +658,7 @@ void Parallel::finalizePersistentCommunicationsTransports(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsTransports(const int &lvl)
+void Parallel::communicationsTransports(int lvl)
 {
   int count(0);
   MPI_Status status;
@@ -1128,7 +1128,7 @@ void Parallel::finalizePersistentCommunicationsXi(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsXi(const int &lvl)
+void Parallel::communicationsXi(int lvl)
 {
   int count(0);
   MPI_Status status;
@@ -1217,7 +1217,7 @@ void Parallel::finalizePersistentCommunicationsSplit(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsSplit(const int &lvl)
+void Parallel::communicationsSplit(int lvl)
 {
   int count(0);
   MPI_Status status;
@@ -1312,7 +1312,7 @@ void Parallel::finalizePersistentCommunicationsNumberGhostCells()
 
 //***********************************************************************
 
-void Parallel::communicationsNumberGhostCells(const int &lvl)
+void Parallel::communicationsNumberGhostCells(int lvl)
 {
   MPI_Status status;
 

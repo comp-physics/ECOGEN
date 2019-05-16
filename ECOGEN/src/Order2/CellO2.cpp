@@ -415,8 +415,7 @@ void CellO2::completeFulfillState(Prim type)
     this->prepareAddPhys();
     m_mixture->internalEnergyToTotalEnergy(m_vecQuantitiesAddPhys);
     break;
-  case vecPhasesO2: //Utile seulement pour le parallele ordre 2
-    std::cout << "test: are we passing through here sometime?" << std::endl; //KS// don't delete before having test the restart option
+  case vecPhasesO2: //Not used for now
     m_model->fulfillState(m_vecPhasesO2, m_mixtureO2, m_numberPhases);
     //Extended energies depending on additional physics
     this->prepareAddPhys();

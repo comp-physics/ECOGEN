@@ -80,7 +80,7 @@ void MeshCartesianAMR::initializeGeometrieAMR(TypeMeshContainer<Cell *> &cells, 
   if (restartSimulation == 0) { m_decomp = decomposition::Decomposition(physicalDomainSizes); }
   else { m_decomp.updatePhysicalDomainSizes(physicalDomainSizes); }
   auto keys = m_decomp.initialize(Ncpu, rankCpu, restartSimulation);
-  
+
   for(unsigned int i = 0; i < keys.size(); ++i)
   {
     if (ordreCalcul == "FIRSTORDER") { cells.push_back(new Cell); }
@@ -298,7 +298,7 @@ TypeMeshContainer<CellInterface*> &cellInterfaces, std::string ordreCalcul)
           else //Neighbor cell is a ghost cell
           {
             //Try to find the neighbor cell into the already created ghost cells
-            auto it2 = std::find_if(cellsGhost.begin(), cellsGhost.end(), //KS//BD// To improve, use hash
+            auto it2 = std::find_if(cellsGhost.begin(), cellsGhost.end(),
                     [&nKey](Cell* _k0){ 
                     return _k0->getElement()->getKey() == nKey;
                     });
@@ -1084,12 +1084,6 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
       MPI_Wait(&req_neighborP1, &status);
     }
   }
-// if (rankCpu == 2) { //KS//BD//
-//   std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl
-//   <<" idealLoadShiftStart "<<idealLoadShiftStart<<" idealLoadShiftEnd "<<idealLoadShiftEnd
-//   <<" possibleLoadShiftStart "<<possibleLoadShiftStart<<" possibleLoadShiftEnd "<<possibleLoadShiftEnd
-//   <<std::endl;
-// }
   // double localLoadStartPosition = localLoadEndPosition - localLoad;
   // localLoadStartPosition += possibleLoadShiftStart;
   // localLoadEndPosition += possibleLoadShiftEnd;
@@ -1097,12 +1091,7 @@ void MeshCartesianAMR::computePotentialBalancing(TypeMeshContainer<Cell *> *cell
   // std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl<<" localLoadStartPosition "<<localLoadStartPosition<<" localLoadEndPosition "<<localLoadEndPosition
   // <<" initialLocalLoad "<<localLoad
   // <<" finalLocalLoad "<<finalLocalLoad<<std::endl;
-// if (rankCpu == 2) { //KS//BD//
-//   std::cout<<"cpu "<<rankCpu<<" lvl "<<lvl
-//   <<" numberOfCellsToSendStart "<<numberOfCellsToSendStart<<" numberOfCellsToSendEnd "<<numberOfCellsToSendEnd
-//   <<" numberOfCellsToReceiveStart "<<numberOfCellsToReceiveStart<<" numberOfCellsToReceiveEnd "<<numberOfCellsToReceiveEnd
-//   <<std::endl;
-// }
+
   //4) Update criterion to balance
   //------------------------------
   double relativePossibleLoadShiftMax(0.), relativePossibleLoadShiftLocal(0.);
@@ -1282,7 +1271,7 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
   std::vector<int> localRanks;
   localKeys.push_back(cellsLvl[0][0]->getElement()->getKey().getIndex());
   localRanks.push_back(rankCpu);
-  for (unsigned int i = 1; i < cellsLvl[0].size(); i++) 
+  for (unsigned int i = 1; i < cellsLvl[0].size(); i++)
   {
       if (!m_decomp.areConsecutive(cellsLvl[0][i-1]->getElement()->getKey().getIndex(), 
                   cellsLvl[0][i]->getElement()->getKey().getIndex())
@@ -1296,14 +1285,7 @@ void MeshCartesianAMR::balance(TypeMeshContainer<Cell *> *cellsLvl, TypeMeshCont
 
   //Recombine starts of all CPU
   m_decomp.recombineStarts();
-// if (rankCpu == 2) {
-// std::cout<<"cpu "<<rankCpu
-// <<" numberOfCellsToSendStartGlobal "<<numberOfCellsToSendStartGlobal
-// <<" numberOfCellsToSendEndGlobal "<<numberOfCellsToSendEndGlobal
-// <<" numberOfCellsToReceiveStartGlobal "<<numberOfCellsToReceiveStartGlobal
-// <<" numberOfCellsToReceiveEndGlobal "<<numberOfCellsToReceiveEndGlobal
-// <<std::endl;
-// } //KS//BD//
+
   //4) Create cell interfaces, faces and ghost cells of level 0
   //-----------------------------------------------------------
   for (int b = 0; b < cellInterfacesLvl[0].size(); b++) { delete cellInterfacesLvl[0][b]; }

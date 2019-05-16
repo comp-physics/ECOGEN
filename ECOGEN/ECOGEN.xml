@@ -38,6 +38,7 @@
   <!-- <testCase>./libTests/referenceTestCases/kapila/AddPhysicalEffects/surfaceTension/waterDropletInAir/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/AddPhysicalEffects/surfaceTension/dropletImpact/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/AddPhysicalEffects/gravity/</testCase> -->
+  <!-- <testCase>./libTests/referenceTestCases/kapila/AddPhysicalEffects/heatConduction/simple/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/3D/unstructured/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/kapila/3D/shockBubble/heliumAir/</testCase> -->
   <!-- Issues to solve -->
@@ -64,8 +65,9 @@
   <!-- <testCase>./libTests/referenceTestCases/multiP/1D/shockTubes/epoxySpinel/</testCase> -->
   <!-- <testCase>./libTests/referenceTestCases/multiP/1D/cavitation/</testCase> -->
   
-  <!-- 3D atomization test cases -->
-  <!-- <testCase>./libTests/3Datomization/Mach1_3/</testCase> -->
-  <!-- <testCase>./libTests/3Datomization/Mach1_3_V2/</testCase> -->
-  <testCase>./libTests/3Datomization/halfCylinder/</testCase>
+  <!-- Tests Kevin -->
+  <!-- <testCase>./libTests/testsKevin/3Datomization/Mach1_3/</testCase> -->
+  <!-- <testCase>./libTests/testsKevin/3Datomization/Mach1_3_V2/</testCase> -->
+  <!-- <testCase>./libTests/testsKevin/3Datomization/halfCylinder/</testCase> -->
+  <testCase>./libTests/testsKevin/viscosity/Blasius/</testCase>
 </ecogen>

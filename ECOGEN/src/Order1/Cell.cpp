@@ -258,7 +258,7 @@ void Cell::timeEvolutionAddPhys(const double &dt, const int &numberPhases, const
 
 void Cell::buildPrim(const int &numberPhases)
 {
-  m_cons->buildPrim(m_vecPhases, m_mixture, numberPhases); 
+  m_cons->buildPrim(m_vecPhases, m_mixture, numberPhases);
 }
 
 //***********************************************************************
@@ -556,162 +556,171 @@ void Cell::setVector(std::string nameVector, const Coord &value, int num, int su
 Coord Cell::computeGradient(std::string nameVariable, int numPhase)
 {
   int typeCellInterface(0);
-  double sommeDistanceX = 0.;
-  double sommeDistanceY = 0.;
-  double sommeDistanceZ = 0.;
-  Coord grad(0.);               /*!< gradient vector for needed variable on the cell*/
-  Coord gradProjectedFace(0.);  /*!< gradient vector for the needed variable on a cell interface in the absolute system of coordinate*/             
-  double gradCellInterface(0.); /*!< gradient for needed variable on the cell interface in the face direction*/
- 
+  double cg(0.), cd(0.), gradCellInterface(0.);
+  double distance(0.), distanceX(0.), distanceY(0.), distanceZ(0.);
+  double sumDistanceX(0.), sumDistanceY(0.), sumDistanceZ(0.);
+  Coord grad(0.);
+
   for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
     if (!m_cellInterfaces[b]->getSplit()) {
       typeCellInterface = m_cellInterfaces[b]->whoAmI();
       if (typeCellInterface == 0) //Cell interface type CellInterface/O2
       {
+        // Sum for each cell interface with ponderation using distance in each direction
+        // then the cell gradient is normalized by sum of distances.
+        distanceX = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceX(m_cellInterfaces[b]->getCellDroite()));
+        distanceY = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceY(m_cellInterfaces[b]->getCellDroite()));
+        distanceZ = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceZ(m_cellInterfaces[b]->getCellDroite()));
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        distance = m_cellInterfaces[b]->getCellGauche()->distance(m_cellInterfaces[b]->getCellDroite());
+
         // Extracting left and right variables values for each cell interface
         // and calculus of the gradient normal to the face
-        double cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariable, numPhase);
-        double cd = m_cellInterfaces[b]->getCellDroite()->selectScalar(nameVariable, numPhase);
-
-        double distance(m_cellInterfaces[b]->getCellGauche()->distance(m_cellInterfaces[b]->getCellDroite()));
+        cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariable, numPhase);
+        cd = m_cellInterfaces[b]->getCellDroite()->selectScalar(nameVariable, numPhase);
         gradCellInterface = (cd - cg) / distance;
 
         // Projection in the absolute system of coordinate
-        gradProjectedFace.setX(m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface);
-        gradProjectedFace.setY(m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface);
-        gradProjectedFace.setZ(m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface);
-
-        // Summ for each cell interface with ponderation using distance in each direction
-        // then the cell gradient is normalized by summ of distances.
-        double distanceX(m_cellInterfaces[b]->getCellGauche()->distanceX(m_cellInterfaces[b]->getCellDroite()));
-        double distanceY(m_cellInterfaces[b]->getCellGauche()->distanceY(m_cellInterfaces[b]->getCellDroite()));
-        double distanceZ(m_cellInterfaces[b]->getCellGauche()->distanceZ(m_cellInterfaces[b]->getCellDroite()));
-        distanceX = std::fabs(distanceX);
-        distanceY = std::fabs(distanceY);
-        distanceZ = std::fabs(distanceZ);
-
-        gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
-
-        sommeDistanceX += distanceX;
-        sommeDistanceY += distanceY;
-        sommeDistanceZ += distanceZ;
-
-        grad += gradProjectedFace;
+        grad.setXYZ(grad.getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                    grad.getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                    grad.getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
       }
-      else if (typeCellInterface == 1) { //Cell interface of type Abs
-        double distanceX(this->distanceX(m_cellInterfaces[b]));
-        double distanceY(this->distanceY(m_cellInterfaces[b]));
-        double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-        distanceX = std::fabs(distanceX)*2.;
-        distanceY = std::fabs(distanceY)*2.;
-        distanceZ = std::fabs(distanceZ)*2.;
-        sommeDistanceX += distanceX;
-        sommeDistanceY += distanceY;
-        sommeDistanceZ += distanceZ;
-      }
-      else if (typeCellInterface == 6) { //Cell Interface of type Symetrie
+      else {
+        distanceX = std::fabs(this->distanceX(m_cellInterfaces[b])) * 2.;
+        distanceY = std::fabs(this->distanceY(m_cellInterfaces[b])) * 2.;
+        distanceZ = std::fabs(this->distanceZ(m_cellInterfaces[b])) * 2.;
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        
         if (nameVariable == "u" || nameVariable == "v" || nameVariable == "w") {
           // Extracting left variables values
           // and calculus of the gradient normal to the face
-          double cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariable, numPhase);
-
-          double distance(this->distance(m_cellInterfaces[b]));
+          distance = this->distance(m_cellInterfaces[b]);
+          cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariable, numPhase);
           gradCellInterface = cg / distance;
 
-          // Multiplication of the gradient by the normal direction to guarantee symmetry
-          if (nameVariable == "u") { gradCellInterface = gradCellInterface* m_cellInterfaces[b]->getFace()->getNormal().getX(); }
-          if (nameVariable == "v") { gradCellInterface = gradCellInterface* m_cellInterfaces[b]->getFace()->getNormal().getY(); }
-          if (nameVariable == "w") { gradCellInterface = gradCellInterface* m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
+          if (typeCellInterface == 6) { //Cell Interface of type Symmetry
+            // Multiplication of the gradient by the normal direction to guarantee symmetry
+            if (nameVariable == "u") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
+            if (nameVariable == "v") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
+            if (nameVariable == "w") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
 
-          // Projection in the absolute system of coordinate
-          gradProjectedFace.setX(m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface);
-          gradProjectedFace.setY(m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface);
-          gradProjectedFace.setZ(m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface);
-
-          // Summ for each cell interface with ponderation using distance in each direction
-          // then the cell gradient is normalized by summ of distances.
-          double distanceX(this->distanceX(m_cellInterfaces[b]));
-          double distanceY(this->distanceY(m_cellInterfaces[b]));
-          double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = std::fabs(distanceX)*2.;
-          distanceY = std::fabs(distanceY)*2.;
-          distanceZ = std::fabs(distanceZ)*2.;
-
-          gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
-
-          sommeDistanceX += distanceX;
-          sommeDistanceY += distanceY;
-          sommeDistanceZ += distanceZ;
-
-          grad += gradProjectedFace;
-        }
-        else {
-          double distanceX(this->distanceX(m_cellInterfaces[b]));
-          double distanceY(this->distanceY(m_cellInterfaces[b]));
-          double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = std::fabs(distanceX)*2.;
-          distanceY = std::fabs(distanceY)*2.;
-          distanceZ = std::fabs(distanceZ)*2.;
-          sommeDistanceX += distanceX;
-          sommeDistanceY += distanceY;
-          sommeDistanceZ += distanceZ;
-        }
-      }
-      else if (typeCellInterface == 2) { //Cell interface of type Wall
-        if (nameVariable == "u" || nameVariable == "v" || nameVariable == "w") {
-          // Extracting left variables values
-          // and calculus of the gradient normal to the face
-          double cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariable, numPhase);
-
-          double distance(this->distance(m_cellInterfaces[b]));
-          gradCellInterface = cg / distance;
-
-          // Projection in the absolute system of coordinate
-          gradProjectedFace.setX(m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface);
-          gradProjectedFace.setY(m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface);
-          gradProjectedFace.setZ(m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface);
-
-          // Summ for each cell interface with ponderation using distance in each direction
-          // then the cell gradient is normalized by summ of distances.
-          double distanceX(this->distanceX(m_cellInterfaces[b]));
-          double distanceY(this->distanceY(m_cellInterfaces[b]));
-          double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = std::fabs(distanceX)*2.;
-          distanceY = std::fabs(distanceY)*2.;
-          distanceZ = std::fabs(distanceZ)*2.;
-
-          gradProjectedFace.setXYZ(gradProjectedFace.getX()*distanceX, gradProjectedFace.getY()*distanceY, gradProjectedFace.getZ()*distanceZ);
-
-          sommeDistanceX += distanceX;
-          sommeDistanceY += distanceY;
-          sommeDistanceZ += distanceZ;
-
-          grad += gradProjectedFace;
-        }
-        else {
-          double distanceX(this->distanceX(m_cellInterfaces[b]));
-          double distanceY(this->distanceY(m_cellInterfaces[b]));
-          double distanceZ(this->distanceZ(m_cellInterfaces[b]));
-          distanceX = std::fabs(distanceX)*2.;
-          distanceY = std::fabs(distanceY)*2.;
-          distanceZ = std::fabs(distanceZ)*2.;
-          sommeDistanceX += distanceX;
-          sommeDistanceY += distanceY;
-          sommeDistanceZ += distanceZ;
+            // Projection in the absolute system of coordinate +
+            grad.setXYZ(grad.getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                        grad.getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                        grad.getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+          }
+          else if (typeCellInterface == 2) { //Cell interface of type Wall
+            // Projection in the absolute system of coordinate
+            grad.setXYZ(grad.getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                        grad.getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                        grad.getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+          }
         }
       }
     }
   }
 
   // Verifications in multiD
-  if (sommeDistanceX <= 1.e-12) { sommeDistanceX = 1.; }
-  if (sommeDistanceY <= 1.e-12) { sommeDistanceY = 1.; }
-  if (sommeDistanceZ <= 1.e-12) { sommeDistanceZ = 1.; }
+  if (sumDistanceX <= 1.e-12) { sumDistanceX = 1.; }
+  if (sumDistanceY <= 1.e-12) { sumDistanceY = 1.; }
+  if (sumDistanceZ <= 1.e-12) { sumDistanceZ = 1.; }
 
   // Final normalized gradient on the cell
-  grad.setXYZ(grad.getX() / sommeDistanceX, grad.getY() / sommeDistanceY, grad.getZ() / sommeDistanceZ);
+  grad.setXYZ(grad.getX() / sumDistanceX, grad.getY() / sumDistanceY, grad.getZ() / sumDistanceZ);
 
   return grad;
+}
+
+//***********************************************************************
+
+void Cell::computeGradient(std::vector<Coord> &grads, std::vector<std::string> &nameVariables, std::vector<int> &numPhases)
+{
+  int typeCellInterface(0);
+  double cg(0.), cd(0.), gradCellInterface(0.);
+  double distance(0.), distanceX(0.), distanceY(0.), distanceZ(0.);
+  double sumDistanceX(0.), sumDistanceY(0.), sumDistanceZ(0.);
+  for (unsigned int g = 0; g < grads.size(); g++) { grads[g] = 0.; }
+
+  for (unsigned int b = 0; b < m_cellInterfaces.size(); b++) {
+    if (!m_cellInterfaces[b]->getSplit()) {
+      typeCellInterface = m_cellInterfaces[b]->whoAmI();
+      if (typeCellInterface == 0) //Cell interface type CellInterface/O2
+      {
+        // Sum for each cell interface with ponderation using distance in each direction
+        // then the cell gradient is normalized by sum of distances.
+        distanceX = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceX(m_cellInterfaces[b]->getCellDroite()));
+        distanceY = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceY(m_cellInterfaces[b]->getCellDroite()));
+        distanceZ = std::fabs(m_cellInterfaces[b]->getCellGauche()->distanceZ(m_cellInterfaces[b]->getCellDroite()));
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        distance = m_cellInterfaces[b]->getCellGauche()->distance(m_cellInterfaces[b]->getCellDroite());
+
+        // Extracting left and right variables values for each cell interface
+        // and calculus of the gradients normal to the face
+        for (unsigned int g = 0; g < grads.size(); g++) {
+          cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariables[g], numPhases[g]);
+          cd = m_cellInterfaces[b]->getCellDroite()->selectScalar(nameVariables[g], numPhases[g]);
+          gradCellInterface = (cd - cg) / distance;
+
+          // Projection in the absolute system of coordinate
+          grads[g].setXYZ(grads[g].getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                          grads[g].getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                          grads[g].getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+        }
+      }
+      else {
+        distanceX = std::fabs(this->distanceX(m_cellInterfaces[b])) * 2.;
+        distanceY = std::fabs(this->distanceY(m_cellInterfaces[b])) * 2.;
+        distanceZ = std::fabs(this->distanceZ(m_cellInterfaces[b])) * 2.;
+        sumDistanceX += distanceX;
+        sumDistanceY += distanceY;
+        sumDistanceZ += distanceZ;
+        distance = this->distance(m_cellInterfaces[b]);
+          
+        for (unsigned int g = 0; g < grads.size(); g++) {
+          if (nameVariables[g] == "u" || nameVariables[g] == "v" || nameVariables[g] == "w") {
+            // Extracting left variables values
+            // and calculus of the gradient normal to the face
+            cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariables[g], numPhases[g]);
+            gradCellInterface = cg / distance;
+
+            if (typeCellInterface == 6) { //Cell Interface of type Symmetry
+              // Multiplication of the gradient by the normal direction to guarantee symmetry
+              if (nameVariables[g] == "u") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
+              if (nameVariables[g] == "v") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
+              if (nameVariables[g] == "w") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
+
+              // Projection in the absolute system of coordinate +
+              grads[g].setXYZ(grads[g].getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                              grads[g].getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                              grads[g].getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+            }
+            else if (typeCellInterface == 2) { //Cell interface of type Wall
+              // Projection in the absolute system of coordinate
+              grads[g].setXYZ(grads[g].getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
+                              grads[g].getY() + m_cellInterfaces[b]->getFace()->getNormal().getY()*gradCellInterface*distanceY,
+                              grads[g].getZ() + m_cellInterfaces[b]->getFace()->getNormal().getZ()*gradCellInterface*distanceZ);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Verifications in multiD
+  if (sumDistanceX <= 1.e-12) { sumDistanceX = 1.; }
+  if (sumDistanceY <= 1.e-12) { sumDistanceY = 1.; }
+  if (sumDistanceZ <= 1.e-12) { sumDistanceZ = 1.; }
+
+  // Final normalized gradient on the cell
+  for (unsigned int g = 0; g < grads.size(); g++) {
+    grads[g].setXYZ(grads[g].getX() / sumDistanceX, grads[g].getY() / sumDistanceY, grads[g].getZ() / sumDistanceZ);
+  }
 }
 
 //***********************************************************************

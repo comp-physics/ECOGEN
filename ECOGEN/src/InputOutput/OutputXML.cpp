@@ -217,24 +217,6 @@ void OutputXML::ReadDonneesPhysiquesXML(Mesh *mesh, std::vector<Cell *> *cellsLv
       mesh->setDataSet(scalarDataSet, cellsLvl, 1, xi);
       nodeData = nodeData->NextSiblingElement("DataArray");
     }
-// if (rankCpu == 3) { //KS//BD//
-// std::ofstream ofs("test.txt");
-// ofs.precision(16);
-// for (int i = 0; i < cellsLvl[0].size(); ++i)
-// {
-// ofs
-// <<cellsLvl[0][i]->getPhase(0)->getAlpha()<<" "
-// <<cellsLvl[0][i]->getPhase(0)->getDensity()<<" "
-// <<cellsLvl[0][i]->getPhase(1)->getAlpha()<<" "
-// <<cellsLvl[0][i]->getPhase(1)->getDensity()<<" "
-// <<cellsLvl[0][i]->getMixture()->getDensity()<<" "
-// <<cellsLvl[0][i]->getMixture()->getPressure()<<" "
-// <<cellsLvl[0][i]->getMixture()->getVelocity().getX()<<" "
-// <<cellsLvl[0][i]->getMixture()->getVelocity().getY()<<" "
-// <<cellsLvl[0][i]->getMixture()->getVelocity().getZ()
-// <<std::endl;
-// }
-// }
   } //Fin try
   catch (ErrorECOGEN &) { throw; }
 }

@@ -95,7 +95,7 @@ void RelaxationP::stiffRelaxation(Cell *cell, const int &numberPhases, Prim type
     } while (std::fabs(f)>1e-10 && iteration < 100);
     //} while (std::fabs(f) > 1e-10);
 
-    //KS//FP//Apply the relaxation procedure only if it has converged to a solution.
+    //Apply the relaxation procedure only if it has converged to a solution.
     if (iteration < 100) {
       //Cell update
       for (int k = 0; k < numberPhases; k++) {

@@ -144,7 +144,7 @@ void APKSurfaceTension::solveFluxAddPhys(CellInterface *cellInterface, const int
 
 void APKSurfaceTension::solveFluxAddPhysBoundary(CellInterface *cellInterface, const int &numberPhases)
 {
-  //KS//DEV//CAP On ne fait rien aux limites avec la surface tension pour le moment, a gerer un jour
+  //KS//DEV// Nothing special is done at the boundaries with surface tension right now (considered as symmetry)
 
   m_normal = cellInterface->getFace()->getNormal();
   m_tangent = cellInterface->getFace()->getTangent();
@@ -162,11 +162,11 @@ void APKSurfaceTension::solveFluxAddPhysBoundary(CellInterface *cellInterface, c
   fluxBufferKapila->setToZero(numberPhases);
 
   int typeCellInterface = cellInterface->whoAmI();
-  if (typeCellInterface == 1) { this->solveFluxSurfaceTensionAbs(m_velocityLeft, m_gradCLeft); }
-  else if (typeCellInterface == 2 || typeCellInterface == 6) { this->solveFluxSurfaceTensionWall(m_gradCLeft); }
-  else if (typeCellInterface == 3) { this->solveFluxSurfaceTensionOutflow(m_velocityLeft, m_gradCLeft); }
-  else if (typeCellInterface == 4) { this->solveFluxSurfaceTensionInflow(m_velocityLeft, m_gradCLeft); }
-  else { this->solveFluxSurfaceTensionOther(m_velocityLeft, m_gradCLeft); }
+  if (typeCellInterface == 1) { this->solveFluxSurfaceTensionAbs(m_velocityLeft, m_gradCLeft); } //Absorption
+  else if (typeCellInterface == 2 || typeCellInterface == 6) { this->solveFluxSurfaceTensionWall(m_gradCLeft); } //Wall or Symmetry
+  else if (typeCellInterface == 3) { this->solveFluxSurfaceTensionOutflow(m_velocityLeft, m_gradCLeft); } //Outflow
+  else if (typeCellInterface == 4) { this->solveFluxSurfaceTensionInflow(m_velocityLeft, m_gradCLeft); } //Injection
+  else { this->solveFluxSurfaceTensionOther(m_velocityLeft, m_gradCLeft); } //Tank or else
   // etc... Boundaries not taken into account yet for surface tension, pay attention
 
   // Flux projection on the absolute orientation axes

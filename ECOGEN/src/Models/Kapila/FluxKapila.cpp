@@ -252,8 +252,7 @@ void FluxKapila::correctionEnergy(Cell *cell, const int &numberPhases, Prim type
     denom += TB->ak[k] * unSurGamMoinsUn;
   }
   p /= denom;
-
-  //KS//FP//
+  
   //Puisqu'on permet au code d'avoir maintenant des pressions negatives dans le liquide, cette procedure n'est plus utile et on garantie ainsi la conservation de l'enegie.
   //En revanche, pour eviter tout probleme durant la simulation, on modifie tout de meme la pression du gas pour etre non-negative si jamais cela est le cas (depend de l'EOS).
   //Cette configuration ne devrait se produire que dans les localisations ou la fraction volumique du gas est tres faible ou nulle.

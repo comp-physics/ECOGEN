@@ -19,7 +19,7 @@
         <material type="fluide" EOS="IG_air.xml">
             <dataFluid alpha="0.5" density="2.0"/>
         </material>
-        <material type="fluide" EOS="IG_air2.xml">
+        <material type="fluide" EOS="IG_air.xml">
             <dataFluid alpha="0.5" density="2.0"/>
         </material>
         <mixture>
@@ -32,7 +32,7 @@
         <material type="fluide" EOS="IG_air.xml">
             <dataFluid alpha="0.5" density="1.0"/>
         </material>
-        <material type="fluide" EOS="IG_air2.xml">
+        <material type="fluide" EOS="IG_air.xml">
             <dataFluid alpha="0.5" density="1.0"/>
         </material>
         <mixture>

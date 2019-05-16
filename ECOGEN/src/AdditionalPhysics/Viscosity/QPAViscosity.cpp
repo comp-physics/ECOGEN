@@ -35,14 +35,27 @@
 #include "QAPViscosity.h"
 #include <iostream>
 
+std::vector<std::string> m_variableNames;
+std::vector<int> m_numPhases;
+
 //***********************************************************************
 
 QAPViscosity::QAPViscosity(){}
 
 //***********************************************************************
 
-QAPViscosity::QAPViscosity(AddPhys* addPhys) : QuantitiesAddPhys(addPhys), m_gradU(0.), m_gradV(0.), m_gradW(0.)
-{}
+QAPViscosity::QAPViscosity(AddPhys* addPhys) : QuantitiesAddPhys(addPhys), m_grads(3)
+{
+  m_variableNames.resize(3);
+  m_numPhases.resize(3);
+  for (int i = 0; i < 3; ++i) {
+    m_grads[i] = 0.;
+    m_numPhases[i] = -1;
+  }
+  m_variableNames[0] = "u";
+  m_variableNames[1] = "v";
+  m_variableNames[2] = "w";
+}
 
 //***********************************************************************
 
@@ -52,34 +65,21 @@ QAPViscosity::~QAPViscosity(){}
 
 void QAPViscosity::computeQuantities(Cell* cell)
 {
-  m_gradU = cell->computeGradient("u");
-  m_gradV = cell->computeGradient("v");
-  m_gradW = cell->computeGradient("w");
+  cell->computeGradient(m_grads, m_variableNames, m_numPhases);
 }
 
 //***********************************************************************
 
 void QAPViscosity::setGrad(const Coord &grad, int num)
 {
-  switch (num) {
-  case 1: m_gradU = grad; break;
-  case 2: m_gradV = grad; break;
-  case 3: m_gradW = grad; break;
-  default: Errors::errorMessage("Error in QAPViscosity::setGrad value of num non defined"); break;
-  }
+  m_grads[num-1] = grad;
 }
 
 //***********************************************************************
 
 Coord QAPViscosity::getGrad(int num) const
 {
-  switch (num) {
-  case 1: return m_gradU; break;
-  case 2: return m_gradV; break;
-  case 3: return m_gradW; break;
-  default: Errors::errorMessage("Error in QAPViscosity::getGrad value of num non defined"); break;
-  }
-  return 0;
+  return m_grads[num-1];
 }
 
 //***********************************************************************

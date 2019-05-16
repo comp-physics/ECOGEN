@@ -102,7 +102,7 @@ void APKConductivity::solveFluxAddPhys(CellInterface *cellInterface, const int &
 
 void APKConductivity::solveFluxAddPhysBoundary(CellInterface *cellInterface, const int &numberPhases)
 {
-  //KS//DEV//COND On ne fait rien aux limites avec la conductivite pour le moment, a gerer un jour
+  //KS//DEV// On ne fait rien aux limites avec la conductivite pour le moment, a gerer un jour
 
   m_normal = cellInterface->getFace()->getNormal();
   m_tangent = cellInterface->getFace()->getTangent();
@@ -148,8 +148,8 @@ void APKConductivity::solveFluxConductivityInner(Coord &gradTkLeft, Coord &gradT
   alphak = (alphakL + alphakR) / 2.;
 
   //Writing of conductive terms on each equation of fluxTempXXX
-  fluxBufferKapila->m_energ[numPhase] += -alphak*m_lambdak[numPhase]* dTkdx;
-  fluxBufferKapila->m_energMixture += -alphak*m_lambdak[numPhase] * dTkdx;
+  fluxBufferKapila->m_energ[numPhase] = -alphak*m_lambdak[numPhase] * dTkdx;
+  fluxBufferKapila->m_energMixture   += -alphak*m_lambdak[numPhase] * dTkdx;
 }
 
 //***********************************************************************
@@ -164,7 +164,7 @@ void APKConductivity::solveFluxConductivityAbs(Coord &gradTkLeft, double &alphak
 void APKConductivity::solveFluxConductivityWall(Coord &gradTkLeft, double &alphakL, int &numPhase) const
 {
   //Not manage at the moment, just an example
-  //KS//DEV//COND// A faire pour couche limite thermique !!! ...
+  //KS//DEV// A faire pour couche limite thermique !!! ...
 
   // To avoid bug when not manage
   fluxBufferKapila->m_qdm.setX(fluxBufferKapila->m_qdm.getX() + 0.);

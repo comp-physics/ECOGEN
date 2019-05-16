@@ -196,7 +196,7 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 	if (m_indexCellInterface[s] != -1) { //Slope stores in ghost cell is from a cell interface of type cellInterfaceO2 or BoundCondWallO2
 		alphaCellAfterOppositeSide = m_alphaCellAfterOppositeSide[s]; //Detection of the interface and THINC method are simplified in parallel
 	}
-	else { //KS//BD//
+	else {
 		alphaCellAfterOppositeSide = m_vecPhases[0]->getAlpha();
 	}
 	if ((alphaCell >= epsInterface) && (alphaCell <= 1. - epsInterface) &&
@@ -218,10 +218,6 @@ void CellO2Ghost::computeLocalSlopes(const int &numberPhases, const int &numberT
 			slopesTransportLocal1[k] = globalVolumeFractionLimiter.limiteSlope(slopesTransportLocal1[k], m_vecTransportsSlopesGhost[s][k]);
 		}
 	}
-	// } //KS//BD//
-	// else {
-	// 	alphaCellAfterOppositeSide = m_vecPhases[0]->getAlpha();
-	// }
 }
 
 //***********************************************************************

@@ -49,16 +49,16 @@ void AddPhys::computeFluxAddPhys(CellInterface *cellInterface, const int &number
   this->solveFluxAddPhys(cellInterface, numberPhases);
 
   if (cellInterface->getCellGauche()->getLvl() == cellInterface->getCellDroite()->getLvl()) {     //CoefAMR = 1 for the two
-    this->addFluxAddPhys(cellInterface, numberPhases, 1.);                                    //Add flux on the right cell
-    this->subtractFluxAddPhys(cellInterface, numberPhases, 1.);                               //Subtract flux on the left cell
+    this->addFluxAddPhys(cellInterface, numberPhases, 1.);                                        //Add flux on the right cell
+    this->subtractFluxAddPhys(cellInterface, numberPhases, 1.);                                   //Subtract flux on the left cell
   }
   else if (cellInterface->getCellGauche()->getLvl() > cellInterface->getCellDroite()->getLvl()) { //CoefAMR = 1 for the left and 0.5 for the right
-    this->addFluxAddPhys(cellInterface, numberPhases, 0.5);                                   //Add flux on the right cell
-    this->subtractFluxAddPhys(cellInterface, numberPhases, 1.);                               //Subtract flux on the left cell
+    this->addFluxAddPhys(cellInterface, numberPhases, 0.5);                                       //Add flux on the right cell
+    this->subtractFluxAddPhys(cellInterface, numberPhases, 1.);                                   //Subtract flux on the left cell
   }
-  else {                                                                                  //CoefAMR = 0.5 for the left and 1 for the right
-    this->addFluxAddPhys(cellInterface, numberPhases, 1.);                                    //Add flux on the right cell
-    this->subtractFluxAddPhys(cellInterface, numberPhases, 0.5);                              //Subtract flux on the left cell
+  else {                                                                                          //CoefAMR = 0.5 for the left and 1 for the right
+    this->addFluxAddPhys(cellInterface, numberPhases, 1.);                                        //Add flux on the right cell
+    this->subtractFluxAddPhys(cellInterface, numberPhases, 0.5);                                  //Subtract flux on the left cell
   }
 }
 

@@ -1,0 +1,16 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<mesh>
+  <type structure="cartesian"/>
+  <cartesianMesh>
+    <dimensions x="2.5e-3" y="1.5e-3" z="1."/>
+    <numberCells x="10" y ="10" z="10"/>
+    <meshStretching>
+      <XStretching>
+        <stretch startAt="0." endAt="2.5e-3" factor="1." numberCells="70"/>
+      </XStretching>
+      <YStretching>
+        <stretch startAt="0." endAt="1.5e-3" factor="1.02" numberCells="70"/>
+      </YStretching>
+    </meshStretching>
+  </cartesianMesh>
+</mesh>

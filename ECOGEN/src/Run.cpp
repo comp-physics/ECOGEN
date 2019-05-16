@@ -219,7 +219,7 @@ void Run::restartSimulation()
   if (Ncpu > 1) {
     for (int lvl = 0; lvl <= m_lvlMax; lvl++) { parallel.communicationsPrimitives(m_eos, lvl); }
   }
-  //KS//FP// Apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
+  //KS//FP//DEV// Apparemment fulfillState avec Prim::restart n'est pas a jour dans tous les modeles (seulement pour Kapila)
 
   if (rankCpu == 0) std::cout << " OK" << std::endl;
 }
@@ -338,8 +338,7 @@ void Run::integrationProcedure(double &dt, int lvl, double &dtMax, int &nbCellsT
     if (Ncpu > 1) {
       m_stat.startCommunicationTime();
       parallel.communicationsSlopes(lvl);
-      if (lvl > 0) { parallel.communicationsSlopes(lvl - 1); } //Comble un defaut d'un cas particulier non communique a temps (fantome niveau quelconque, cell lvl l, cell lvl l+1)
-      //KS//FP// A reflechir si mieux a faire (a appliquer sur les 3 communications des slopes)
+      if (lvl > 0) { parallel.communicationsSlopes(lvl - 1); }
       m_stat.endCommunicationTime();
     }
   }

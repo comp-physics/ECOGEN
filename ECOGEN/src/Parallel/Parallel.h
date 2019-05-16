@@ -66,12 +66,12 @@ public:
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsPrimitives();
   void finalizePersistentCommunicationsPrimitives(const int &lvlMax);
-  void communicationsPrimitives(Eos **eos, const int &lvl, Prim type = vecPhases);
+  void communicationsPrimitives(Eos **eos, int lvl, Prim type = vecPhases);
 
   //Methodes pour toutes les slopes
   void initializePersistentCommunicationsSlopes();
   void finalizePersistentCommunicationsSlopes(const int &lvlMax);
-  void communicationsSlopes(const int &lvl);
+  void communicationsSlopes(int lvl);
 
   //Methodes pour une variable scalar
   void initializePersistentCommunicationsScalar();
@@ -80,12 +80,12 @@ public:
   //Methodes pour une variable vectorielle
   void initializePersistentCommunicationsVector(const int &dim);
   void finalizePersistentCommunicationsVector(const int &lvlMax);
-  void communicationsVector(std::string nameVector, const int &dim, const int &lvl, int num=0, int index=-1);
+  void communicationsVector(std::string nameVector, const int &dim, int lvl, int num=0, int index=-1);
 
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsTransports();
   void finalizePersistentCommunicationsTransports(const int &lvlMax);
-  void communicationsTransports(const int &lvl);
+  void communicationsTransports(int lvl);
 
   //Methodes pour les variables AMR
   void initializePersistentCommunicationsAMR(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim, const int &lvlMax);
@@ -97,15 +97,15 @@ public:
 
   void initializePersistentCommunicationsXi();
   void finalizePersistentCommunicationsXi(const int &lvlMax);
-  void communicationsXi(const int &lvl);
+  void communicationsXi(int lvl);
 
   void initializePersistentCommunicationsSplit();
   void finalizePersistentCommunicationsSplit(const int &lvlMax);
-  void communicationsSplit(const int &lvl);
+  void communicationsSplit(int lvl);
 
   void initializePersistentCommunicationsNumberGhostCells();
   void finalizePersistentCommunicationsNumberGhostCells();
-  void communicationsNumberGhostCells( const int &lvl);
+  void communicationsNumberGhostCells(int lvl);
 
 private:
     

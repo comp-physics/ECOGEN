@@ -677,7 +677,7 @@ void MeshUnStruct::initializeGeometrieMonoCPU(TypeMeshContainer<Cell *> &cells, 
 
 void MeshUnStruct::initializeGeometrieParallele(TypeMeshContainer<Cell *> &cells, TypeMeshContainer<Cell *> &cellsGhost, TypeMeshContainer<CellInterface *> &cellInterfaces, std::string ordreCalcul)
 {
-//KS//FP// Distinction between cells and cellsGhost not done here. To do in the future.
+//KS//FP//DEV// Distinction between cells and cellsGhost not done here. To do in the future.
   clock_t totalTime(clock());
 
   //1) Lecture noeuds et elements

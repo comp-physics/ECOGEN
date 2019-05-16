@@ -106,12 +106,13 @@ class Cell
         //For additional physics
         //----------------------
         void prepareAddPhys();
-        double selectScalar(std::string nameVariable, int num=0) const;
+        double selectScalar(std::string nameVariable, int num = 0) const;
         void setScalar(std::string nameVariable, const double &value, int num = 0, int subscript = -1);
-        Coord selectVector(std::string nameVector, int num=0, int subscript =-1) const;
-        void setVector(std::string nameVector, const Coord &value, int num=0, int subscript =-1);
+        Coord selectVector(std::string nameVector, int num = 0, int subscript = -1) const;
+        void setVector(std::string nameVector, const Coord &value, int num = 0, int subscript = -1);
         
-        Coord computeGradient(std::string nameVariable, int num=-1);
+        Coord computeGradient(std::string nameVariable, int num = -1);
+        void computeGradient(std::vector<Coord> &grads, std::vector<std::string> &nameVariables, std::vector<int> &numPhases);
        
         QuantitiesAddPhys* getQPA(int &numQPA) const; //!< Allow to recover an additional physical quantity
 
