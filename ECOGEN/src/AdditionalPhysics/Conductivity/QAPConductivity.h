@@ -58,7 +58,4 @@ class QAPConductivity : public QuantitiesAddPhys
     private:
 };
 
-extern std::vector<std::string> m_variableNames;  //!< Variable names of the corresponding gradients
-extern std::vector<int> m_numPhases;              //!< Number of the phase
-
 #endif // QAPCONDUCTIVITY_H

@@ -58,7 +58,4 @@ class QAPViscosity : public QuantitiesAddPhys
     private:
 };
 
-extern std::vector<std::string> m_variableNames;  //!< Variable names of the corresponding gradients
-extern std::vector<int> m_numPhases;              //!< Number of the phase (-1 for viscosity: works on mixture)
-
 #endif // QAPVISCOSITY_H
