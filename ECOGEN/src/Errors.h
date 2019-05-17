@@ -82,6 +82,9 @@ public:
   //Accesseur
   int getEtat();
 
+  static constexpr int defaultInt = 0;
+  static constexpr double defaultDouble = 0.;
+
 private:
   std::string m_message;
   int m_state;

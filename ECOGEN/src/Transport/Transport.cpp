@@ -56,13 +56,6 @@ void Transport::setValue(double value)
 
 //***********************************************************************
 
-double Transport::getValue() const
-{
-  return m_value;
-}
-
-//***********************************************************************
-
 void Transport::solveRiemann(double transportLeft, double transportRight, double sM)
 {
 	if (sM > 0.) { m_value = transportLeft*sM; }

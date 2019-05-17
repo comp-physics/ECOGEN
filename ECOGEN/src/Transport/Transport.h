@@ -51,7 +51,7 @@ class Transport
     //! \param     value                  value of the transport variable
     void setValue(double value);
     //! \brief     Return the value of the corresponding transport variable
-    double getValue() const;
+    const double& getValue() const { return m_value; };
 
     //! \brief     Cell to cell Riemann solver for the corresponding transport equation
     //! \param     transportLeft          left value of transport variable

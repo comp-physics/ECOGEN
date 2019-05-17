@@ -57,11 +57,11 @@ public:
   virtual ~Element();
 
   //Accesseurs
-  void setCellAssociee(const int &numCell);
-  Coord getPosition() const;
-  double getLCFL() const;
-  double getVolume() const;
-  int getNumCellAssociee() const;
+  void setCellAssociee(const int &numCell){ m_numCellAssociee = numCell; };
+  const Coord& getPosition() const { return m_position; };
+  const double& getLCFL() const { return m_lCFL; };
+  const double& getVolume() const { return m_volume; };
+  const int& getNumCellAssociee() const { return m_numCellAssociee; };
 
   virtual int getIndex() const { Errors::errorMessage("getIndex not available for requested element"); return 0; };
   virtual int getAppartenancePhysique() const { return 0; }; //!< default

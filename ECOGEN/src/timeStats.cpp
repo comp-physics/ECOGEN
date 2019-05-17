@@ -104,18 +104,6 @@ void timeStats::setCompTime(const clock_t &compTime, const clock_t &AMRTime, con
 
 //***********************************************************************
 
-clock_t timeStats::getComputationTime() const { return m_computationTime; }
-
-//***********************************************************************
-
-clock_t timeStats::getAMRTime() const { return m_AMRTime; }
-
-//***********************************************************************
-
-clock_t timeStats::getCommunicationTime() const { return m_communicationTime; }
-
-//***********************************************************************
-
 void timeStats::printScreenStats(const int &numTest) const
 {
   printScreenTime(m_computationTime, "Elapsed time", numTest);

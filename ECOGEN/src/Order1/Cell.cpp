@@ -729,13 +729,6 @@ void Cell::computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nam
 
 //***********************************************************************
 
-QuantitiesAddPhys* Cell::getQPA(int &numGPA) const
-{
-  return m_vecQuantitiesAddPhys[numGPA];
-}
-
-//***********************************************************************
-
 Coord Cell::getGradTk(int &numPhase, int &numAddPhys) const
 {
   return m_vecQuantitiesAddPhys[numAddPhys]->getGradTk(numPhase);
@@ -745,7 +738,6 @@ Coord Cell::getGradTk(int &numPhase, int &numAddPhys) const
 
 void Cell::setGradTk(int &numPhase, int &numAddPhys, double *buffer, int &counter)
 {
-
   Coord grad(0.);
   grad.setX(buffer[++counter]);
   grad.setY(buffer[++counter]);
@@ -817,14 +809,6 @@ Flux* Cell::getCons() const
 void Cell::setCons(Flux *cons)
 {
   m_cons->setCons(cons, m_numberPhases);
-}
-
-//***********************************************************************
-
-Coord Cell::getPosition() const
-{
-  if (m_element != 0) { return m_element->getPosition(); }
-  return 0.;
 }
 
 //***********************************************************************
@@ -903,20 +887,6 @@ Transport* Cell::getConsTransport(const int &numTransport) const
 void Cell::setConsTransport(double value, const int &numTransport)
 {
   m_consTransports[numTransport].setValue(value);
-}
-
-//***********************************************************************
-
-int Cell::getNumberPhases() const
-{
-  return m_numberPhases;
-}
-
-//***********************************************************************
-
-int Cell::getNumberTransports() const
-{
-  return m_numberTransports;
 }
 
 //***********************************************************************
@@ -1647,27 +1617,6 @@ void Cell::lookForPmax(double *pMax, double*pMaxWall)
       m_childrenCells[i]->lookForPmax(pMax, pMaxWall);
     }
   }
-}
-
-//***********************************************************************
-
-int Cell::getLvl()
-{
-  return m_lvl;
-}
-
-//***********************************************************************
-
-bool Cell::getSplit()
-{
-	return m_split;
-}
-
-//***********************************************************************
-
-double Cell::getXi()
-{
-  return m_xi;
 }
 
 //***********************************************************************

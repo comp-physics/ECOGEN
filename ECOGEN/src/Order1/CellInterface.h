@@ -101,19 +101,19 @@ class CellInterface
     //Pour methode AMR
     virtual void computeXi(const double &criteriaVar, const bool &varRho, const bool &varP, const bool &varU, const bool &varAlpha);  /*!< Calcul de la variable Xi pour criteria de (de)raffinement a priori */
     void computeCritereAMR(const double &criteriaVar, Variable nameVariable, int num = 0);                                          /*!< Calcul de xi via le criteria de variation */
-    virtual void computeFluxXi();                                 /*!< Calcul des flux de Xi (diffusion) pour smoothing */
+    virtual void computeFluxXi();                                      /*!< Calcul des flux de Xi (diffusion) pour smoothing */
     virtual void creerCellInterfaceChild();                                                                        /*!< Creer un child cell interface (non initialize) */
     virtual void creerCellInterfaceChildInterne(const int &lvl, std::vector<CellInterface*> *childrenInternalCellInterfaces); /*!< Creer un intern child cell interface (non initialize) */
-    void creerFaceChild(CellInterface *cellInterfaceParent);             /*!< Creer une face enfant (non initialize) */
+    void creerFaceChild(CellInterface *cellInterfaceParent);           /*!< Creer une face enfant (non initialize) */
     virtual void raffineCellInterfaceExterne(const int &nbCellsY, const int &nbCellsZ, const double &dXParent, const double &dYParent, const double &dZParent, Cell *cellRef, const int &dim);      /*!< Raffinement du extern cell interface en creant si besoin des children cell interfaces + liaisons cells/cell interfaces */
-    virtual void deraffineCellInterfaceExterne(Cell *cellRef);        /*!< Deraffinement du extern cell interface en supprimant si besoin ses children cell interfaces + liaisons cells/cell interfaces */
-    void deraffineCellInterfacesChildren();                               /*!< Supprime les children cell interfaces */
+    virtual void deraffineCellInterfaceExterne(Cell *cellRef);         /*!< Deraffinement du extern cell interface en supprimant si besoin ses children cell interfaces + liaisons cells/cell interfaces */
+    void deraffineCellInterfacesChildren();                            /*!< Supprime les children cell interfaces */
     void constructionTableauCellInterfacesExternesLvl(std::vector<CellInterface *> *cellInterfacesLvl); /*!< Construction du nouveau tableau de cell interfaces du niveau (lvl + 1), cell interfaces externes ajoutes ici */
-    bool getSplit() const;                                      /*!< Renvoie si oui ou non le cell interface est splitte */
-    int getLvl() const;                                         /*!< Renvoie le niveau du cell interface */
-    int getNumberCellInterfacesChildren() const;                          /*!< Renvoie le number de children cell interfaces de ce cell interface*/
-    CellInterface *getCellInterfaceChild(const int &numChild);          /*!< Renvoie le child cell interface correspondant au number */
-    CellInterface *getCellInterfaceChildBack();          /*!< Renvoie le child cell interface correspondant au number */
+    bool getSplit() const;                                             /*!< Renvoie si oui ou non le cell interface est splitte */
+    const int& getLvl() const { return m_lvl; };                       /*!< Renvoie le niveau du cell interface */
+    int getNumberCellInterfacesChildren() const;                       /*!< Renvoie le number de children cell interfaces de ce cell interface*/
+    CellInterface *getCellInterfaceChild(const int &numChild);         /*!< Renvoie le child cell interface correspondant au number */
+    CellInterface *getCellInterfaceChildBack();                        /*!< Renvoie le child cell interface correspondant au number */
     void updatePointersInternalCellInterfaces();
 
    protected:

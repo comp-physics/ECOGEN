@@ -47,34 +47,6 @@ Mesh::~Mesh() {}
 
 //***********************************************************************
 
-int Mesh::getNumberCells() const
-{
-  return m_numberCellsCalcul;
-}
-
-//***********************************************************************
-
-int Mesh::getNumberCellsTotal() const
-{
-  return m_numberCellsTotal;
-}
-
-//***********************************************************************
-
-int Mesh::getNumberFaces() const
-{
-  return m_numberFacesTotal;
-}
-
-//***********************************************************************
-
-int Mesh::getNumFichier() const
-{
-  return m_numFichier;
-}
-
-//***********************************************************************
-
 void Mesh::ecritSolutionGnuplot(std::vector<Cell *> *cellsLvl, std::ofstream &fileStream, GeometricObject *objet) const
 {
   for (unsigned int c = 0; c < cellsLvl[0].size(); c++) {

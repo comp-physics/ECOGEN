@@ -85,7 +85,7 @@ class Run
     void restartSimulation();
 
     //Accessors
-    int getNumberPhases() const;
+    const int& getNumberPhases() const { return m_numberPhases; };
 
   private:   
 

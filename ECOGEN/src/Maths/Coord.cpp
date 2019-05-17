@@ -72,28 +72,6 @@ void Coord::setY(const double &y){m_y = y;}
 
 void Coord::setZ(const double &z){m_z = z;}
 
-
-//*********************************************************************
-
-double Coord::getX() const
-{
-  return m_x;
-}
-
-//*********************************************************************
-
-double Coord::getY() const
-{
-  return m_y;
-}
-
-//*********************************************************************
-
-double Coord::getZ() const
-{
-  return m_z;
-}
-
 //*********************************************************************
 
 double Coord::norm() const

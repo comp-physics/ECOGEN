@@ -44,41 +44,6 @@ Element::~Element(){}
 
 //***********************************************************************
 
-void Element::setCellAssociee(const int &numCell)
-{
-  m_numCellAssociee = numCell;
-}
-
-//***********************************************************************
-
-Coord Element::getPosition() const
-{
-  return m_position;
-}
-
-//***********************************************************************
-
-double Element::getLCFL() const
-{
-  return m_lCFL;
-}
-
-//***********************************************************************
-
-double Element::getVolume() const
-{
-  return m_volume;
-}
-
-//***********************************************************************
-
-int Element::getNumCellAssociee() const
-{
-  return m_numCellAssociee;
-}
-
-//***********************************************************************
-
 void Element::ecritPos(std::ofstream &fileStream, Axe axe)
 {
   switch (axe) {

@@ -85,9 +85,7 @@ class APKSurfaceTension : public APKapila
     virtual bool reinitializationActivated() { return m_reinitializationActivated; };
 
     virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
-    virtual int getNumTransportAssociated() const { return m_numTransportAssociated; };
-    //KS//BD//
-    //virtual const int& getNumTransportAssociated() const { return m_numTransportAssociated; };
+    virtual const int& getNumTransportAssociated() const { return m_numTransportAssociated; };
 
   protected:
   

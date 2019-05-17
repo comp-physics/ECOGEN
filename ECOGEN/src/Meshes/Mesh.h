@@ -68,15 +68,15 @@ public:
 
   //Accessors
   //---------
-  int getGeometrie() const { return m_geometrie; };
-  int getNumberCells() const;
-  int getNumberCellsTotal() const;
-  int getNumberFaces() const;
-  int getNumFichier() const;
+  const int& getGeometrie() const { return m_geometrie; };
+  const int& getNumberCells() const { return m_numberCellsCalcul; };
+  const int& getNumberCellsTotal() const { return m_numberCellsTotal; };
+  const int& getNumberFaces() const { return m_numberFacesTotal; };
+  const int& getNumFichier() const { return m_numFichier; };
   virtual double getdX() const { return 0; };
   virtual double getdY() const { return 0; };
   virtual double getdZ() const { return 0; };
-  TypeM getType() const { return m_type; };
+  const TypeM& getType() const { return m_type; };
   virtual int getNumberCellsY() { return 0; };
   virtual int getNumberCellsZ() { return 0; };
   virtual int getLvlMax() const { return 0; };

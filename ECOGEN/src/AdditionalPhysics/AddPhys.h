@@ -119,9 +119,7 @@ class AddPhys
     virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl) { Errors::errorMessage("communicationsAddPhys not implemented for used additional physic"); };
     
     //! \brief     Return the associated number of the transport equation (only used for surface tension)
-    virtual int getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return 0; };
-    //KS//BD//
-    //virtual const int& getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return 0; };
+    virtual const int& getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return Errors::defaultInt; };
 
   protected:
     

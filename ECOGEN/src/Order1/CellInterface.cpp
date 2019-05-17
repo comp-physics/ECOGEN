@@ -147,16 +147,13 @@ void CellInterface::solveRiemann(const int &numberPhases, const int &numberTrans
 
 void CellInterface::addFlux(const int &numberPhases, const int &numberTransports, const double &coefAMR)
 {
-  double volume(m_cellRight->getElement()->getVolume());
-  double surface(m_face->getSurface());
-  double coefA(surface / volume); //pas de "pas de temps"
-  coefA = coefA*coefAMR;
+  //No "time step"
+  double coefA = m_face->getSurface() / m_cellRight->getElement()->getVolume() * coefAMR;
   m_cellRight->getCons()->addFlux(coefA, numberPhases);
   m_cellRight->getCons()->addNonCons(coefA, m_cellRight, numberPhases);
-  double sM(m_mod->getSM());
   for (int k = 0; k < numberTransports; k++) {
     m_cellRight->getConsTransport(k)->addFlux(coefA, k);
-    m_cellRight->getConsTransport(k)->addNonCons(coefA, m_cellRight->getTransport(k).getValue(), sM);
+    m_cellRight->getConsTransport(k)->addNonCons(coefA, m_cellRight->getTransport(k).getValue(), m_mod->getSM());
   }
 }
 
@@ -164,16 +161,13 @@ void CellInterface::addFlux(const int &numberPhases, const int &numberTransports
 
 void CellInterface::subtractFlux(const int &numberPhases, const int &numberTransports, const double &coefAMR)
 {
-  double volume(m_cellLeft->getElement()->getVolume());
-  double surface(m_face->getSurface());
-  double coefA(surface / volume); //pas de "pas de temps"
-  coefA = coefA*coefAMR;
+  //No "time step"
+  double coefA = m_face->getSurface() / m_cellLeft->getElement()->getVolume() * coefAMR;
   m_cellLeft->getCons()->subtractFlux(coefA, numberPhases);
   m_cellLeft->getCons()->subtractNonCons(coefA, m_cellLeft, numberPhases);
-  double sM(m_mod->getSM());
   for (int k = 0; k < numberTransports; k++) {
     m_cellLeft->getConsTransport(k)->subtractFlux(coefA, k);
-    m_cellLeft->getConsTransport(k)->subtractNonCons(coefA, m_cellLeft->getTransport(k).getValue(), sM);
+    m_cellLeft->getConsTransport(k)->subtractNonCons(coefA, m_cellLeft->getTransport(k).getValue(), m_mod->getSM());
   }
 }
 
@@ -1099,13 +1093,6 @@ bool CellInterface::getSplit() const
   bool split = false;
   if (m_cellInterfacesChildren.size() > 0) { split = true; }
   return split;
-}
-
-//***********************************************************************
-
-int CellInterface::getLvl() const
-{
-  return m_lvl;
 }
 
 //***********************************************************************

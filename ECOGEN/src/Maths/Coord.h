@@ -62,11 +62,11 @@ public:
   //! \param     z                    value of the z-direction coordinate
   void setZ(const double &z);
   //! \brief     Return the value in the x-direction of the Coord object
-  double getX() const;
+  const double& getX() const { return m_x; }
   //! \brief     Return the value in the y-direction of the Coord object
-  double getY() const;
+  const double& getY() const { return m_y; }
   //! \brief     Return the value in the z-direction of the Coord object
-  double getZ() const;
+  const double& getZ() const { return m_z; }
   //! \brief     Return the value of the norm of the Coord object
   double norm() const;
   //! \brief     Return the value of the squared norm of the Coord object

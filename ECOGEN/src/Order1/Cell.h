@@ -116,7 +116,7 @@ class Cell
         Coord computeGradient(Variable nameVariable, int num = -1);
         void computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nameVariables, std::vector<int> &numPhases);
        
-        QuantitiesAddPhys* getQPA(int &numQPA) const; //!< Allow to recover an additional physical quantity
+        const QuantitiesAddPhys* getQPA(int &numQPA) const { return m_vecQuantitiesAddPhys[numQPA]; }; //!< Allow to recover an additional physical quantity
 
         Coord getGradTk(int &numPhase, int &numAddPhys) const;
         void setGradTk(int &numPhase, int &numAddPhys, double *buffer, int &counter);
@@ -133,7 +133,7 @@ class Cell
         virtual Mixture* getMixture(Prim type = vecPhases) const;
         Flux* getCons() const;
         void setCons(Flux *cons);
-        Coord getPosition() const;
+        const Coord& getPosition() const { return m_element->getPosition(); }; //KS//BD//
         Coord getSize() const;
         double getSizeX() const;
         double getSizeY() const;
@@ -146,9 +146,8 @@ class Cell
         Transport* getConsTransport(const int &numTransport) const;
         void setConsTransport(double value, const int &numTransport);
         std::vector<QuantitiesAddPhys*>& getVecQuantitiesAddPhys();
-        int getNumberPhases() const;
-        int getNumberTransports() const;
-        double getXi() const { return m_xi; };
+        const int& getNumberPhases() const { return m_numberPhases; };
+        const int& getNumberTransports() const { return m_numberTransports; };
         double getDensityGradient();
         Model *getModel();
         Coord getVelocity();
@@ -205,9 +204,9 @@ class Cell
         bool lvlNeighborTooHigh();                                       /*!< Look for AMR level of neighboring cells if too high to unrefine*/
         bool lvlNeighborTooLow();                                        /*!< Look for AMR level of neighboring cells if too low to refine*/
         void buildLvlCellsAndLvlInternalCellInterfacesArrays(std::vector<Cell *> *cellsLvl, std::vector<CellInterface *> *cellInterfacesLvl);      /*!< Build new arrays of cells and cell interfaces for level (lvl+1), only internal cell interfaces are added here */
-        int getLvl();                                                    /*!< Get the cell AMR level in the AMR tree */
-        bool getSplit();                                                 /*!< Return true if the cells is plit, false otherwise */
-        double getXi();                                                  /*!< Return Xi cell value */
+        const int& getLvl() const { return m_lvl; };                     /*!< Get the cell AMR level in the AMR tree */
+        const bool& getSplit() const { return m_split; };                /*!< Return true if the cells is plit, false otherwise */
+        const double& getXi() const { return m_xi; };                    /*!< Return Xi cell value */
         void setXi(double value);                                        /*!< Set the Xi cell value */
         void addFluxXi(double value);                                    /*!< Add xi cell flux */
         void subtractFluxXi(double value);                               /*!< Substract xi cell flux */

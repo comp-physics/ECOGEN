@@ -53,11 +53,11 @@ public:
   virtual ~Face();
 
   //Accesseurs
-  Coord getNormal() const;
-  Coord getTangent() const;
-  Coord getBinormal() const;
-  double getSurface() const;
-  Coord getPos() const;
+  const Coord& getNormal() const { return m_normal; };
+  const Coord& getTangent() const { return m_tangent; };
+  const Coord& getBinormal() const { return m_binormal; };
+  const double& getSurface() const { return m_surface; };
+  const Coord& getPos() const { return m_position; };
 
   virtual void setSurface(const double &surface){ Errors::errorMessage("setSurface not available for requested face"); };
   virtual void initializeAutres(const double &surface, const Coord &normal, const Coord &tangent, const Coord &binormal){ Errors::errorMessage("initializeAutres not available for requested face"); }

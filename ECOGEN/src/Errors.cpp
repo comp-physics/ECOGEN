@@ -164,3 +164,8 @@ void Errors::arretCodeApresError(std::vector<Errors> &errors)
 }
 
 //***********************************************************************
+
+constexpr int Errors::defaultInt;
+constexpr double Errors::defaultDouble;
+
+//***********************************************************************
