@@ -98,7 +98,11 @@ class QuantitiesAddPhys
     private:
 };
 
-extern std::vector<std::string> m_variableNames;  //!< Variable names of the corresponding gradients
-extern std::vector<int> m_numPhases;              //!< Number of the phase (-1 for viscosity: works on mixture)
+extern std::vector<Variable> variableNameSurfTens;  //!< Variable name of the corresponding gradient
+extern std::vector<int> numPhaseSurfTens;           //!< Number of the phase (here transport)
+extern std::vector<Variable> variableNamesVisc;     //!< Variable names of the corresponding gradients
+extern std::vector<int> numPhasesVisc;              //!< Number of the phase (-1 for viscosity: works on mixture)
+extern std::vector<Variable> variableNamesCond;     //!< Variable names of the corresponding gradients
+extern std::vector<int> numPhasesCond;              //!< Number of the phase
 
 #endif // QUANTITIESADDPHYS_H

@@ -44,12 +44,12 @@ QAPConductivity::QAPConductivity(){}
 QAPConductivity::QAPConductivity(AddPhys* addPhys, const int &numberPhases) : QuantitiesAddPhys(addPhys),
 	m_gradTk(numberPhases)
 {
-  m_variableNames.resize(numberPhases);
-  m_numPhases.resize(numberPhases);
+  variableNamesCond.resize(numberPhases);
+  numPhasesCond.resize(numberPhases);
   for (int k = 0; k < numberPhases; ++k) {
     m_gradTk[k] = 0.;
-    m_variableNames[k] = "T";
-    m_numPhases[k] = k;
+    variableNamesCond[k] = temperature;
+    numPhasesCond[k] = k;
   }
 }
 
@@ -61,7 +61,7 @@ QAPConductivity::~QAPConductivity(){}
 
 void QAPConductivity::computeQuantities(Cell* cell)
 {
-  cell->computeGradient(m_gradTk, m_variableNames, m_numPhases);
+  cell->computeGradient(m_gradTk, variableNamesCond, numPhasesCond);
 }
 
 //***********************************************************************

@@ -41,6 +41,8 @@
 #include "../Maths/Coord.h"
 #include "../Transport/Transport.h"
 
+enum Variable { transport, pressure, density, alpha, velocityMag, velocityU, velocityV, velocityW, temperature, QPA };
+
 class Cell; //Predeclaration of class to include following .h
 
 #include "../Models/Mixture.h"
@@ -106,13 +108,13 @@ class Cell
         //For additional physics
         //----------------------
         void prepareAddPhys();
-        double selectScalar(std::string nameVariable, int num = 0) const;
-        void setScalar(std::string nameVariable, const double &value, int num = 0, int subscript = -1);
-        Coord selectVector(std::string nameVector, int num = 0, int subscript = -1) const;
-        void setVector(std::string nameVector, const Coord &value, int num = 0, int subscript = -1);
+        double selectScalar(Variable nameVariable, int num = 0) const;
+        void setScalar(Variable nameVariable, const double &value, int num = 0, int subscript = -1);
+        Coord selectVector(Variable nameVector, int num = 0, int subscript = -1) const;
+        void setVector(Variable nameVector, const Coord &value, int num = 0, int subscript = -1);
         
-        Coord computeGradient(std::string nameVariable, int num = -1);
-        void computeGradient(std::vector<Coord> &grads, std::vector<std::string> &nameVariables, std::vector<int> &numPhases);
+        Coord computeGradient(Variable nameVariable, int num = -1);
+        void computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nameVariables, std::vector<int> &numPhases);
        
         QuantitiesAddPhys* getQPA(int &numQPA) const; //!< Allow to recover an additional physical quantity
 
@@ -147,7 +149,7 @@ class Cell
         int getNumberPhases() const;
         int getNumberTransports() const;
         double getXi() const { return m_xi; };
-        double getGradient();
+        double getDensityGradient();
         Model *getModel();
         Coord getVelocity();
 
@@ -220,8 +222,8 @@ class Cell
         virtual void setRankOfNeighborCPU(int rank) {};                  /*!< Does nothing for non-ghost cells */
         void fillBufferPrimitives(double *buffer, int &counter, const int &lvl, const int &neighbour, Prim type = vecPhases) const;
         void getBufferPrimitives(double *buffer, int &counter, const int &lvl, Eos **eos, Prim type = vecPhases);
-        void fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num = 0, int index = -1) const;
-        void getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num = 0, int index = -1);
+        void fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, Variable nameVector, int num = 0, int index = -1) const;
+        void getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, Variable nameVector, int num = 0, int index = -1);
         void fillBufferTransports(double *buffer, int &counter, const int &lvl, const int &neighbour) const;
         void getBufferTransports(double *buffer, int &counter, const int &lvl);
         virtual void fillBufferSlopes(double *buffer, int &counter, const int &lvl, const int &neighbour) const {}; /*!< Does nothing for first order cells */

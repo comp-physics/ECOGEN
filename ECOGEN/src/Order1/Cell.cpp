@@ -445,82 +445,86 @@ void Cell::prepareAddPhys()
 
 //***********************************************************************
 
-double Cell::selectScalar(std::string nameVariable, int num) const
+double Cell::selectScalar(Variable nameVariable, int num) const
 {
   //Selection scalar
-  if (nameVariable == "TR") {
+  switch (nameVariable) {
+  case transport:
     return m_vecTransports[num].getValue();
     //double psi(0.), coeff(0.75);
     //psi = std::pow(m_vecTransports[num].getValue(), coeff) / (std::pow(m_vecTransports[num].getValue(), coeff) + std::pow((1 - m_vecTransports[num].getValue()), coeff));
     //return psi;
-  }
-  else if (nameVariable == "P") {
+    break;
+  case pressure:
     if (m_numberPhases > 1) {
       return m_mixture->getPressure();
     }
     else {
       return m_vecPhases[num]->getPressure();
     }
-  }
-  else if (nameVariable == "RHO") {
+    break;
+  case density:
     if (m_numberPhases > 1) {
       return m_mixture->getDensity();
     }
     else {
       return m_vecPhases[num]->getDensity();
     }
-  }
-  else if (nameVariable == "ALPHA") {
+    break;
+  case alpha:
     if (m_numberPhases > 1) {
       return m_vecPhases[num]->getAlpha();
     }
     else { return 1.; }
-  }
-  else if (nameVariable == "U") {
+    break;
+  case velocityMag:
     if (m_numberPhases > 1) {
       return m_mixture->getVelocity().norm();
     }
     else {
       return m_vecPhases[num]->getVelocity().norm();
     }
-  }
-  else if (nameVariable == "u") {
+    break;
+  case velocityU:
     if (m_numberPhases > 1) {
       return m_mixture->getVelocity().getX();
     }
     else {
       return m_vecPhases[num]->getU();
     }
-  }
-  else if (nameVariable == "v") {
+    break;
+  case velocityV:
     if (m_numberPhases > 1) {
       return m_mixture->getVelocity().getY();
     }
     else {
       return m_vecPhases[num]->getV();
     }
-  }
-  else if (nameVariable == "w") {
+    break;
+  case velocityW:
     if (m_numberPhases > 1) {
       return m_mixture->getVelocity().getZ();
     }
     else {
       return m_vecPhases[num]->getW();
     }
-  }
-  else if (nameVariable == "T") {
+    break;
+  case temperature:
     return m_vecPhases[num]->getTemperature();
-  }
+    break;
   //FP//TODO// faire QPA et Phases
-  else { Errors::errorMessage("nameVariable unknown in selectScalar (linked to QuantitiesAddPhys)"); return 0; }
+  default:
+    Errors::errorMessage("nameVariable unknown in selectScalar (linked to QuantitiesAddPhys)"); return 0;
+    break;
+  }
 }
 
 //***********************************************************************
 
-void Cell::setScalar(std::string nameVariable, const double &value, int num, int subscript)
+void Cell::setScalar(Variable nameVariable, const double &value, int num, int subscript)
 {
   //Selection scalar
-  if (nameVariable == "TR") { //transport
+  if (nameVariable == transport) {
     m_vecTransports[num].setValue(value);
   }
   //FP//TODO// faire QPA et Phases
@@ -529,10 +533,10 @@ void Cell::setScalar(std::string nameVariable, const double &value, int num, int
 
 //***********************************************************************
 
-Coord Cell::selectVector(std::string nameVector, int num, int subscript) const
+Coord Cell::selectVector(Variable nameVector, int num, int subscript) const
 {
   //Selection vector
-  if (nameVector == "QPA") { //additional physics
+  if (nameVector == QPA) { //additional physics
     return m_vecQuantitiesAddPhys[num]->getGrad(subscript);
   }
   //FP//TODO// faire vecteur pour les Phases
@@ -541,10 +545,10 @@ Coord Cell::selectVector(std::string nameVector, int num, int subscript) const
 
 //***********************************************************************
 
-void Cell::setVector(std::string nameVector, const Coord &value, int num, int subscript)
+void Cell::setVector(Variable nameVector, const Coord &value, int num, int subscript)
 {
   //Selection vector
-  if (nameVector == "QPA") { //additional physics
+  if (nameVector == QPA) { //additional physics
     m_vecQuantitiesAddPhys[num]->setGrad(value, subscript);
   }
   //FP//TODO// faire vecteur pour les Phases
@@ -553,7 +557,7 @@ void Cell::setVector(std::string nameVector, const Coord &value, int num, int su
 
 //***********************************************************************
 
-Coord Cell::computeGradient(std::string nameVariable, int numPhase)
+Coord Cell::computeGradient(Variable nameVariable, int numPhase)
 {
   int typeCellInterface(0);
   double cg(0.), cd(0.), gradCellInterface(0.);
@@ -595,7 +599,7 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
         sumDistanceY += distanceY;
         sumDistanceZ += distanceZ;
         
-        if (nameVariable == "u" || nameVariable == "v" || nameVariable == "w") {
+        if (nameVariable == velocityU || nameVariable == velocityV || nameVariable == velocityW) {
           // Extracting left variables values
           // and calculus of the gradient normal to the face
           distance = this->distance(m_cellInterfaces[b]);
@@ -604,9 +608,9 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
 
           if (typeCellInterface == 6) { //Cell Interface of type Symmetry
             // Multiplication of the gradient by the normal direction to guarantee symmetry
-            if (nameVariable == "u") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
-            if (nameVariable == "v") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
-            if (nameVariable == "w") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
+            if (nameVariable == velocityU) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
+            if (nameVariable == velocityV) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
+            if (nameVariable == velocityW) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
 
             // Projection in the absolute system of coordinate +
             grad.setXYZ(grad.getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
@@ -637,7 +641,7 @@ Coord Cell::computeGradient(std::string nameVariable, int numPhase)
 
 //***********************************************************************
 
-void Cell::computeGradient(std::vector<Coord> &grads, std::vector<std::string> &nameVariables, std::vector<int> &numPhases)
+void Cell::computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nameVariables, std::vector<int> &numPhases)
 {
   int typeCellInterface(0);
   double cg(0.), cd(0.), gradCellInterface(0.);
@@ -683,7 +687,7 @@ void Cell::computeGradient(std::vector<Coord> &grads, std::vector<std::string> &
         distance = this->distance(m_cellInterfaces[b]);
           
         for (unsigned int g = 0; g < grads.size(); g++) {
-          if (nameVariables[g] == "u" || nameVariables[g] == "v" || nameVariables[g] == "w") {
+          if (nameVariables[g] == velocityU || nameVariables[g] == velocityV || nameVariables[g] == velocityW) {
             // Extracting left variables values
             // and calculus of the gradient normal to the face
             cg = m_cellInterfaces[b]->getCellGauche()->selectScalar(nameVariables[g], numPhases[g]);
@@ -691,9 +695,9 @@ void Cell::computeGradient(std::vector<Coord> &grads, std::vector<std::string> &
 
             if (typeCellInterface == 6) { //Cell Interface of type Symmetry
               // Multiplication of the gradient by the normal direction to guarantee symmetry
-              if (nameVariables[g] == "u") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
-              if (nameVariables[g] == "v") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
-              if (nameVariables[g] == "w") { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
+              if (nameVariables[g] == velocityU) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getX(); }
+              if (nameVariables[g] == velocityV) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getY(); }
+              if (nameVariables[g] == velocityW) { gradCellInterface = gradCellInterface * m_cellInterfaces[b]->getFace()->getNormal().getZ(); }
 
               // Projection in the absolute system of coordinate +
               grads[g].setXYZ(grads[g].getX() + m_cellInterfaces[b]->getFace()->getNormal().getX()*gradCellInterface*distanceX,
@@ -917,13 +921,10 @@ int Cell::getNumberTransports() const
 
 //***********************************************************************
 
-double Cell::getGradient()
+double Cell::getDensityGradient()
 {
-  std::string nameVariable = "RHO";
-  Coord grad(0.);
   int var = 0; //only for single phase
-  grad = this->computeGradient(nameVariable, var);
-  return grad.norm();
+  return this->computeGradient(density, var).norm();
 }
 
 //***********************************************************************
@@ -1758,7 +1759,7 @@ void Cell::getBufferPrimitives(double *buffer, int &counter, const int &lvl, Eos
 
 //***********************************************************************
 
-void Cell::fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, std::string nameVector, int num, int index) const
+void Cell::fillBufferVector(double *buffer, int &counter, const int &lvl, const int &neighbour, const int &dim, Variable nameVector, int num, int index) const
 {
   if (m_lvl == lvl) {
     buffer[++counter] = this->selectVector(nameVector, num, index).getX();
@@ -1776,7 +1777,7 @@ void Cell::fillBufferVector(double *buffer, int &counter, const int &lvl, const 
 
 //***********************************************************************
 
-void Cell::getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, std::string nameVector, int num, int index)
+void Cell::getBufferVector(double *buffer, int &counter, const int &lvl, const int &dim, Variable nameVector, int num, int index)
 {
   if (m_lvl == lvl) {
     Coord temp;

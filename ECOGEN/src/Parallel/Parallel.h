@@ -80,7 +80,7 @@ public:
   //Methodes pour une variable vectorielle
   void initializePersistentCommunicationsVector(const int &dim);
   void finalizePersistentCommunicationsVector(const int &lvlMax);
-  void communicationsVector(std::string nameVector, const int &dim, int lvl, int num=0, int index=-1);
+  void communicationsVector(Variable nameVector, const int &dim, int lvl, int num=0, int index=-1);
 
   //Methodes pour toutes les variables primitives
   void initializePersistentCommunicationsTransports();

@@ -1719,7 +1719,7 @@ void MeshCartesian::recupereDonnees(TypeMeshContainer<Cell *> *cellsLvl, std::ve
             jeuDonnees.push_back(transport);
           }
           else if (phase == -3) { jeuDonnees.push_back(cellsLvl[0][numCell]->getXi()); }
-          else if (phase == -4) { jeuDonnees.push_back(cellsLvl[0][numCell]->getGradient()); }
+          else if (phase == -4) { jeuDonnees.push_back(cellsLvl[0][numCell]->getDensityGradient()); }
           else { Errors::errorMessage("MeshCartesian::recupereDonnees: unknown number of phase: ", phase); }
         }
         else { //On veut recuperer les donnees vectorielles

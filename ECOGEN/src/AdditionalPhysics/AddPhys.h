@@ -120,6 +120,8 @@ class AddPhys
     
     //! \brief     Return the associated number of the transport equation (only used for surface tension)
     virtual int getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return 0; };
+    //KS//BD//
+    //virtual const int& getNumTransportAssociated() const { Errors::errorMessage("getNumTransportAssociated not implemented for used additional physic"); return 0; };
 
   protected:
     

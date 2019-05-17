@@ -569,7 +569,7 @@ void Parallel::finalizePersistentCommunicationsVector(const int &lvlMax)
 
 //***********************************************************************
 
-void Parallel::communicationsVector(std::string nameVector, const int &dim, int lvl, int num, int index)
+void Parallel::communicationsVector(Variable nameVector, const int &dim, int lvl, int num, int index)
 {
   int count(0);
   MPI_Status status;

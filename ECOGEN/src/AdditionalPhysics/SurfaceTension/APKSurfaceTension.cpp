@@ -365,14 +365,7 @@ void APKSurfaceTension::reinitializeColorFunction(std::vector<Cell *> *cellsLvl,
 
 void APKSurfaceTension::communicationsAddPhys(int numberPhases, const int &dim, const int &lvl)
 {
-	parallel.communicationsVector("QPA", dim, lvl, m_numQPAGradC);
-}
-
-//***********************************************************************
-
-int APKSurfaceTension::getNumTransportAssociated() const
-{
-  return m_numTransportAssociated;
+	parallel.communicationsVector(QPA, dim, lvl, m_numQPAGradC);
 }
 
 //***********************************************************************

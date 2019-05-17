@@ -74,10 +74,8 @@ void AddPhys::computeFluxAddPhysBoundary(CellInterface *cellInterface, const int
 
 void AddPhys::addFluxAddPhys(CellInterface *cellInterface, const int &numberPhases, const double &coefAMR)
 {
-  double volume(cellInterface->getCellDroite()->getElement()->getVolume());
-  double surface(cellInterface->getFace()->getSurface());
-  double coefA(surface / volume); //no "time step"
-  coefA = coefA*coefAMR;
+  //No "time step"
+  double coefA = cellInterface->getFace()->getSurface() / cellInterface->getCellDroite()->getElement()->getVolume() * coefAMR;
   cellInterface->getCellDroite()->getCons()->addFlux(coefA, numberPhases);
 }
 
@@ -85,10 +83,8 @@ void AddPhys::addFluxAddPhys(CellInterface *cellInterface, const int &numberPhas
 
 void AddPhys::subtractFluxAddPhys(CellInterface *cellInterface, const int &numberPhases, const double &coefAMR)
 {
-  double volume(cellInterface->getCellGauche()->getElement()->getVolume());
-  double surface(cellInterface->getFace()->getSurface());
-  double coefA(surface / volume); //no "time step"
-  coefA = coefA*coefAMR;
+  //No "time step"
+  double coefA = cellInterface->getFace()->getSurface() / cellInterface->getCellGauche()->getElement()->getVolume() * coefAMR;
   cellInterface->getCellGauche()->getCons()->subtractFlux(coefA, numberPhases);
 }
 

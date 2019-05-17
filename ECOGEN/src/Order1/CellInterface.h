@@ -100,7 +100,7 @@ class CellInterface
 
     //Pour methode AMR
     virtual void computeXi(const double &criteriaVar, const bool &varRho, const bool &varP, const bool &varU, const bool &varAlpha);  /*!< Calcul de la variable Xi pour criteria de (de)raffinement a priori */
-    void computeCritereAMR(const double &criteriaVar, std::string nameVariable, int num = 0);                                          /*!< Calcul de xi via le criteria de variation */
+    void computeCritereAMR(const double &criteriaVar, Variable nameVariable, int num = 0);                                          /*!< Calcul de xi via le criteria de variation */
     virtual void computeFluxXi();                                 /*!< Calcul des flux de Xi (diffusion) pour smoothing */
     virtual void creerCellInterfaceChild();                                                                        /*!< Creer un child cell interface (non initialize) */
     virtual void creerCellInterfaceChildInterne(const int &lvl, std::vector<CellInterface*> *childrenInternalCellInterfaces); /*!< Creer un intern child cell interface (non initialize) */

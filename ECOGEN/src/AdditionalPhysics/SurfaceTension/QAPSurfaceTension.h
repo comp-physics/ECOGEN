@@ -53,7 +53,7 @@ class QAPSurfaceTension : public QuantitiesAddPhys
       virtual Coord getGrad(int num = -1) const;
 
     protected:
-    Coord m_gradC;           //!< Gradient of the transport function (vector w)
+    std::vector<Coord> m_gradC;           //!< Gradient of the transport function (vector w)
 
     private:
 };

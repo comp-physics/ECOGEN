@@ -35,8 +35,12 @@
 #include "QuantitiesAddPhys.h"
 #include <iostream>
 
-std::vector<std::string> m_variableNames;
-std::vector<int> m_numPhases;
+std::vector<Variable> variableNameSurfTens;
+std::vector<int> numPhaseSurfTens;
+std::vector<Variable> variableNamesVisc;
+std::vector<int> numPhasesVisc;
+std::vector<Variable> variableNamesCond;
+std::vector<int> numPhasesCond;
 
 //***********************************************************************
 

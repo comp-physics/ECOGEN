@@ -218,7 +218,7 @@ void APKConductivity::solveFluxConductivityOther(Coord &gradTkLeft, double &alph
 void APKConductivity::communicationsAddPhys(int numberPhases, const int &dim, const int &lvl)
 {
   for (int k = 0; k < numberPhases; k++) {
-		parallel.communicationsVector("QPA", dim, lvl, m_numQPA, k);
+		parallel.communicationsVector(QPA, dim, lvl, m_numQPA, k);
 	}
 }
 

@@ -232,21 +232,21 @@ Cell *CellInterface::getCellDroite() const
 
 void CellInterface::computeXi(const double &criteriaVar, const bool &varRho, const bool &varP, const bool &varU, const bool &varAlpha)
 {
-  if (varRho) { this->computeCritereAMR(criteriaVar, "RHO"); }
+  if (varRho) { this->computeCritereAMR(criteriaVar, density); }
   if (varP) {
-    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "P"); }
+    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, pressure); }
   }
   if (varU) {
-    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "U"); }
+    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, velocityMag); }
   }
   if (varAlpha) {
-    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, "ALPHA", 1); }
+    if (m_cellLeft->getXi() < 0.99 || m_cellRight->getXi() < 0.99) { this->computeCritereAMR(criteriaVar, alpha, 1); }
   }
 }
 
 //***********************************************************************
 
-void CellInterface::computeCritereAMR(const double &criteriaVar, std::string nameVariable, int num)
+void CellInterface::computeCritereAMR(const double &criteriaVar, Variable nameVariable, int num)
 {
   double valueMin, variation, cd, cg;
   // Recuperation des values de la variable en question a gauche et a droite
@@ -256,8 +256,8 @@ void CellInterface::computeCritereAMR(const double &criteriaVar, std::string nam
   // Valeur de la variation
   valueMin = std::min(std::fabs(cd), std::fabs(cg));
   if (valueMin < 1.e-2) { //Utile pour alpha (quasi-seulement) ou velocity
-    if (nameVariable == "U") { valueMin = 2.e-1; }
-    else {                     valueMin = 1.e-2; }
+    if (nameVariable == velocityMag) { valueMin = 2.e-1; }
+    else {                             valueMin = 1.e-2; }
   }
   variation = std::fabs(cd - cg) / valueMin;
 
