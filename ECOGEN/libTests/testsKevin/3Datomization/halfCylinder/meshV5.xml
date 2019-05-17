@@ -6,7 +6,7 @@
     <numberCells x="10" y ="10" z="10"/>
     <meshStretching>
       <XStretching>
-        <stretch startAt="0.e-4" endAt="2.e-4" factor="0.9803921" numberCells="39"/>
+        <stretch startAt="0.e-4" endAt="2.e-4" factor="0.9803921568627451" numberCells="39"/>
         <stretch startAt="2.e-4" endAt="7.4e-4" factor="1." numberCells="156"/>
         <stretch startAt="7.4e-4" endAt="12.4e-4" factor="1.02" numberCells="69"/>
       </XStretching>
