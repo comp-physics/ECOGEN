@@ -69,5 +69,6 @@
   <!-- <testCase>./libTests/testsKevin/3Datomization/Mach1_3/</testCase> -->
   <!-- <testCase>./libTests/testsKevin/3Datomization/Mach1_3_V2/</testCase> -->
   <!-- <testCase>./libTests/testsKevin/3Datomization/halfCylinder/</testCase> -->
-  <testCase>./libTests/testsKevin/viscosity/Blasius/</testCase>
+  <!-- <testCase>./libTests/testsKevin/viscosity/Blasius/</testCase> -->
+  <testCase>./libTests/testsKevin/2Datomization/Mach1_3_V2/</testCase>
 </ecogen>
