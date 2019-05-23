@@ -272,17 +272,10 @@ Coord Coord::operator* (const double &scalar) const
   return copie;
 }
 
-//*********************************************************************
-
-// const Coord& Coord::operator* (const double &scalar) //KS//BD//
-// {
-//   *this *= scalar;
-//   return *this;
-// }
 
 //*********************************************************************
 
-Coord Coord::operator/ (const double &scalar) const
+Coord Coord::operator/ (const double &scalar) const //KS//BD//
 {
   Coord copie(*this);
   copie /= scalar;
