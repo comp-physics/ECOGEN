@@ -53,7 +53,7 @@ Coord::~Coord(){}
 
 //*********************************************************************
 
-const Coord& Coord::coord()
+const Coord& Coord::coord() const
 {
     return defaultCoord;
 }
@@ -265,7 +265,7 @@ Coord& Coord::operator/= (const double &scalar)
 
 //*********************************************************************
 
-Coord Coord::operator* (const double &scalar)
+Coord Coord::operator* (const double &scalar) const
 {
   Coord copie(*this);
   copie *= scalar;
@@ -282,7 +282,7 @@ Coord Coord::operator* (const double &scalar)
 
 //*********************************************************************
 
-Coord Coord::operator/ (const double &scalar)
+Coord Coord::operator/ (const double &scalar) const
 {
   Coord copie(*this);
   copie /= scalar;

@@ -285,6 +285,7 @@ void Cell::printPhasesMixture(const int &numberPhases, const int &numberTranspor
   for (int k = 0; k < numberTransports; k++) { fileStream << m_vecTransports[k].getValue() << " "; }
 }
 
+
 //***********************************************************************
 
 void Cell::completeFulfillState(Prim type)
@@ -860,6 +861,13 @@ void Cell::setConsTransport(double value, const int &numTransport)
 {
   m_consTransports[numTransport].setValue(value);
 }
+//***********************************************************************
+
+Coord& Cell::getVelocity() { return m_model->getVelocity(this); }; //KS//BD//
+
+//***********************************************************************
+
+const Coord& Cell::getVelocity() const { return m_model->getVelocity(this); }; //KS//BD//
 
 //***********************************************************************
 
