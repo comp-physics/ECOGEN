@@ -138,7 +138,7 @@ public:
   Coord& operator*= (const double &scalar);
   Coord& operator/= (const double &scalar);
   Coord operator* (const double &scalar);
-  // const Coord& operator* (const double &scalar); //KS//BS//
+  const Coord& operator* (const double &scalar) const; //KS//BS//
   Coord operator/ (const double &scalar);
   Coord& operator+= (const Coord &a);
   Coord& operator-= (const Coord &a);

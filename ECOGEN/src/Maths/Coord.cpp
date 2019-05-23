@@ -274,11 +274,11 @@ Coord Coord::operator* (const double &scalar)
 
 //*********************************************************************
 
-// const Coord& Coord::operator* (const double &scalar) //KS//BD//
-// {
-//   *this *= scalar;
-//   return *this;
-// }
+const Coord& Coord::operator* (const double &scalar) const //KS//BD//
+{
+  *this *= scalar;
+  return *this;
+}
 
 //*********************************************************************
 
