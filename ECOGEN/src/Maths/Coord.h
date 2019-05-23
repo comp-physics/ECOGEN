@@ -49,10 +49,12 @@ public:
   ~Coord();
   //! \brief     Method for defaultCoord
   //! \details   Used for the defaultCoord object
-  const Coord& coord();
+  const Coord& coord() const; //KS//BD//
+  Coord& coord(); //KS//BD//
   //! \brief     Default Coord object
   //! \details   Used when returning a const Coord&
   static const Coord defaultCoord;
+  static Coord defaultCoordNonConst; //KS//BD//
   //! \brief     Set the values of the Coord object
   //! \param     x                    value of the x-direction coordinate
   //! \param     y                    value of the y-direction coordinate

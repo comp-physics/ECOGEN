@@ -162,8 +162,8 @@ class Model
     //! \brief     Return the fluid velocity of the corresponding cell
     //! \param     cell       pointer to corresponding cell
     //! \return    velocity
-    virtual const Coord& getVelocity(Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoord; };
-    //virtual Coord getVelocity(Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return 0.; }; //KS//BD//
+    virtual const Coord& getVelocity(const Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoord; };
+    virtual Coord& getVelocity(Cell *cell) { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoordNonConst; }; //KS//BD//
 
 	std::vector<Relaxation*> *getRelaxations() { return &m_relaxations; };
     

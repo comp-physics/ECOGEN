@@ -186,7 +186,7 @@ class Mixture
       virtual const double& getV() const { Errors::errorMessage("getV not available for required mixture"); return Errors::defaultDouble; };
       virtual const double& getW() const { Errors::errorMessage("getW not available for required mixture"); return Errors::defaultDouble; };
       virtual const Coord& getVelocity() const { Errors::errorMessage("getVelocity not available for required mixture"); return Coord::defaultCoord; };
-      //virtual Coord getVelocity() const { Errors::errorMessage("getVelocity not available for required mixture"); return 0.; }; //KS//BD//
+      virtual Coord& getVelocity() { Errors::errorMessage("getVelocity not available for required mixture"); return Coord::defaultCoordNonConst; }; //KS//BD//
       virtual const double& getEnergy() const { Errors::errorMessage("getEnergy not available for required mixture"); return Errors::defaultDouble; };
       virtual const double& getTotalEnergy() const { Errors::errorMessage("getTotalEnergy not available for required mixture"); return Errors::defaultDouble; };
       virtual const double& getFrozenSoundSpeed() const { Errors::errorMessage("getFrozenSoundSpeed not available for required mixture"); return Errors::defaultDouble; };

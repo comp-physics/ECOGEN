@@ -57,10 +57,15 @@ const Coord& Coord::coord()
 {
     return defaultCoord;
 }
+Coord& Coord::coord() //KS//BD//
+{
+    return defaultCoordNonConst;
+}
 
 //*********************************************************************
 
 const Coord Coord::defaultCoord = Coord();
+Coord Coord::defaultCoordNonConst = Coord(); //KS//BD//
 
 //*********************************************************************
 

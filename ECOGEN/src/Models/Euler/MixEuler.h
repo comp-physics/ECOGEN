@@ -98,7 +98,7 @@ class MixEuler : public Mixture
       virtual const double& getV() const { return Errors::defaultDouble; };
       virtual const double& getW() const { return Errors::defaultDouble; };
       virtual const Coord& getVelocity() const { return Coord::defaultCoord; };
-      //virtual Coord getVelocity() const { return 0.; }; //KS//BD//
+      virtual Coord& getVelocity() { return Coord::defaultCoordNonConst; }; //KS//BD//
       virtual const double& getEnergy() const { return Errors::defaultDouble; };
       virtual const double& getTotalEnergy() const { return Errors::defaultDouble; };
       virtual const double& getFrozenSoundSpeed() const { return Errors::defaultDouble; };

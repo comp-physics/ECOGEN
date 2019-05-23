@@ -120,7 +120,7 @@ class Phase
     virtual const double& getU() const { Errors::errorMessage("getU not available for requested phase type"); return Errors::defaultDouble; };
     virtual const double& getV() const { Errors::errorMessage("getV not available for requested phase type"); return Errors::defaultDouble; };
     virtual const double& getW() const { Errors::errorMessage("getW not available for requested phase type"); return Errors::defaultDouble; };
-    //virtual Coord getVelocity() const { Errors::errorMessage("getVelocity not available for requested phase type"); return 0; }; //KS//BD//
+    virtual Coord& getVelocity() { Errors::errorMessage("getVelocity not available for requested phase type"); return Coord::defaultCoordNonConst; }; //KS//BD//
     virtual const Coord& getVelocity() const { Errors::errorMessage("getVelocity not available for requested phase type"); return Coord::defaultCoord; }; //KS//BD//
     virtual Eos* getEos() const { Errors::errorMessage("EOS not available for requested phase type"); return 0; };
     virtual const double& getEnergy() const { Errors::errorMessage("getEnergy impossible avec type de phase demande"); return Errors::defaultDouble; };

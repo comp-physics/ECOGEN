@@ -69,8 +69,8 @@ class ModEulerHomogeneous : public Model
     //Accessors
     //---------
     virtual const double& getSM();
-    virtual const Coord& getVelocity(Cell *cell) const { return cell->getMixture()->getVelocity(); };
-    //virtual Coord getVelocity(Cell *cell) const { return cell->getMixture()->getVelocity(); }; //KS//BD//
+    virtual const Coord& getVelocity(const Cell *cell) const { return cell->getMixture()->getVelocity(); };
+    virtual Coord& getVelocity(Cell *cell) { return cell->getMixture()->getVelocity(); }; //KS//BD//
     int getLiq();
     int getVap();
     virtual const std::string& whoAmI() const { return m_name; };

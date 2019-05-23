@@ -113,7 +113,7 @@ public:
   virtual const double& getV() const { return m_velocity.getY(); };
   virtual const double& getW() const { return m_velocity.getZ(); };
   virtual const Coord& getVelocity() const { return m_velocity; };
-  //virtual Coord getVelocity() const { return m_velocity; }; //KS//BD//
+  virtual Coord& getVelocity() { return m_velocity; }; //KS//BD//
   virtual const double& getEnergy() const { return m_energie; };
   virtual const double& getTotalEnergy() const { return m_totalEnergy; };
   virtual const double& getMixSoundSpeed() const { return m_EqSoundSpeed; };
