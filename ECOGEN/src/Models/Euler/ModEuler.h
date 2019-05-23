@@ -71,7 +71,7 @@ class ModEuler : public Model
     //---------
     virtual const double& getSM();
     virtual const Coord& getVelocity(const Cell *cell) const { return cell->getPhase(0)->getVelocity(); };
-    virtual Coord& getVelocity(Cell *cell) { return cell->getPhase(0)->getVelocity(); }; //KS//BD//
+    virtual Coord& getVelocity(Cell *cell) { return cell->getPhase(0)->getVelocity(); };
 
     virtual const std::string& whoAmI() const { return m_name; };
   

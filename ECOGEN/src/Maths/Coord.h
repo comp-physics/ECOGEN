@@ -40,21 +40,25 @@
 class Coord
 {
 public:
-  Coord(); //KS//BD// constexpr
+  Coord();
   //! \brief     Coord constructor
   //! \param     x                    value of the x-direction coordinate
   //! \param     y                    value of the y-direction coordinate (if it is not assigned it is set to 0.)
   //! \param     z                    value of the z-direction coordinate (if it is not assigned it is set to 0.)
-  Coord(const double &x, const double &y = 0., const double&z = 0.); //KS//BD// constexpr
+  Coord(const double &x, const double &y = 0., const double&z = 0.);
   ~Coord();
-  //! \brief     Method for defaultCoord
+  //! \brief     Method for defaultCoord (const version)
   //! \details   Used for the defaultCoord object
-  const Coord& coord() const; //KS//BD//
-  Coord& coord(); //KS//BD//
-  //! \brief     Default Coord object
+  const Coord& coord() const;
+  //! \brief     Method for defaultCoord (non-const version)
+  //! \details   Used for the defaultCoord object
+  Coord& coord();
+  //! \brief     Default Coord object (const version)
   //! \details   Used when returning a const Coord&
   static const Coord defaultCoord;
-  static Coord defaultCoordNonConst; //KS//BD//
+  //! \brief     Default Coord object (non-const version)
+  //! \details   Used when returning a const Coord&
+  static Coord defaultCoordNonConst;
   //! \brief     Set the values of the Coord object
   //! \param     x                    value of the x-direction coordinate
   //! \param     y                    value of the y-direction coordinate

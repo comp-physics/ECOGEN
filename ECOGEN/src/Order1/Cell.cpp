@@ -863,11 +863,17 @@ void Cell::setConsTransport(double value, const int &numTransport)
 }
 //***********************************************************************
 
-Coord& Cell::getVelocity() { return m_model->getVelocity(this); }; //KS//BD//
+Coord& Cell::getVelocity()
+{
+  return m_model->getVelocity(this);
+}
 
 //***********************************************************************
 
-const Coord& Cell::getVelocity() const { return m_model->getVelocity(this); }; //KS//BD//
+const Coord& Cell::getVelocity() const
+{
+  return m_model->getVelocity(this);
+}
 
 //***********************************************************************
 

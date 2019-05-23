@@ -57,7 +57,10 @@ const Coord& Coord::coord() const
 {
     return defaultCoord;
 }
-Coord& Coord::coord() //KS//BD//
+
+//*********************************************************************
+
+Coord& Coord::coord()
 {
     return defaultCoordNonConst;
 }
@@ -65,7 +68,10 @@ Coord& Coord::coord() //KS//BD//
 //*********************************************************************
 
 const Coord Coord::defaultCoord = Coord();
-Coord Coord::defaultCoordNonConst = Coord(); //KS//BD//
+
+//*********************************************************************
+
+Coord Coord::defaultCoordNonConst = Coord();
 
 //*********************************************************************
 
@@ -275,7 +281,7 @@ Coord Coord::operator* (const double &scalar) const
 
 //*********************************************************************
 
-Coord Coord::operator/ (const double &scalar) const //KS//BD//
+Coord Coord::operator/ (const double &scalar) const
 {
   Coord copie(*this);
   copie /= scalar;

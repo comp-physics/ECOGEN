@@ -111,7 +111,7 @@ class PhaseKapila : public Phase
     virtual const double& getV() const { return Errors::defaultDouble; };
     virtual const double& getW() const { return Errors::defaultDouble; };
     virtual Coord& getVelocity() { return Coord::defaultCoordNonConst; };
-    virtual const Coord& getVelocity() const { return Coord::defaultCoord; }; //KS//BD//
+    virtual const Coord& getVelocity() const { return Coord::defaultCoord; };
     virtual Eos* getEos() const { return m_eos; };
     virtual const double& getEnergy() const { return m_energie; };
     virtual const double& getSoundSpeed() const { return m_soundSpeed; };

@@ -83,7 +83,7 @@ class ModMultiP : public Model
     //---------
     virtual const double& getSM();
     virtual const Coord& getVelocity(const Cell *cell) const { return cell->getMixture()->getVelocity(); };
-    virtual Coord& getVelocity(Cell *cell) { return cell->getMixture()->getVelocity(); }; //KS//BD//
+    virtual Coord& getVelocity(Cell *cell) { return cell->getMixture()->getVelocity(); };
 
     virtual const std::string& whoAmI() const { return m_name; };
 

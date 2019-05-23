@@ -50,8 +50,7 @@ class QAPSurfaceTension : public QuantitiesAddPhys
 
       //Accessors
       virtual void setGrad(const Coord &grad, int num = -1);
-      //virtual const Coord& getGrad(int num = -1) const { return m_gradC[0]; };
-      virtual Coord getGrad(int num = -1) const { return m_gradC[0]; }; //KS//BD//
+      virtual const Coord& getGrad(int num = -1) const { return m_gradC[0]; };
 
     protected:
     std::vector<Coord> m_gradC;           //!< Gradient of the transport function (vector w)

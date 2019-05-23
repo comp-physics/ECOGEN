@@ -64,8 +64,7 @@ class QuantitiesAddPhys
     virtual void setGrad(const Coord &grad, int num = -1) { Errors::errorMessage("setGrad not implemented for used quantities of additional physics"); };
     //! \brief     Get the additional-physic gradient
     //! \param     num                  number to determine the corresponding gradient
-    //virtual const Coord& getGrad(int num = -1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return Errors::defaultInt; };
-    virtual Coord getGrad(int num = -1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return 0; }; //KS//BD//
+    virtual const Coord& getGrad(int num = -1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return Coord::defaultCoord; };
 
     //! \brief     Set the gradient of the velocity along the x-direction with the transmitted values
     //! \param     grad                 transmitted gradient

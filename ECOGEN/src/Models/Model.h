@@ -163,7 +163,7 @@ class Model
     //! \param     cell       pointer to corresponding cell
     //! \return    velocity
     virtual const Coord& getVelocity(const Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoord; };
-    virtual Coord& getVelocity(Cell *cell) { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoordNonConst; }; //KS//BD//
+    virtual Coord& getVelocity(Cell *cell) { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoordNonConst; };
 
 	std::vector<Relaxation*> *getRelaxations() { return &m_relaxations; };
     

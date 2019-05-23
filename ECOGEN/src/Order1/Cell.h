@@ -150,8 +150,8 @@ class Cell
         const int& getNumberTransports() const { return m_numberTransports; };
         double getDensityGradient();
         Model *getModel();
-        Coord& getVelocity();//KS//BD//
-        const Coord& getVelocity() const;//KS//BD//
+        Coord& getVelocity();
+        const Coord& getVelocity() const;
 
         //Not used for first order cells
         //------------------------------

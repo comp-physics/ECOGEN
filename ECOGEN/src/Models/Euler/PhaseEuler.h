@@ -111,7 +111,7 @@ class PhaseEuler : public Phase
     virtual const double& getV() const { return m_velocity.getY(); };
     virtual const double& getW() const { return m_velocity.getZ(); };
     virtual Coord& getVelocity() { return m_velocity; };
-    virtual const Coord& getVelocity() const { return m_velocity; }; //KS//BD//
+    virtual const Coord& getVelocity() const { return m_velocity; };
     virtual Eos* getEos() const { return m_eos; };
     virtual const double& getEnergy() const { return m_energie; };
     virtual const double& getSoundSpeed() const { return m_soundSpeed; };
