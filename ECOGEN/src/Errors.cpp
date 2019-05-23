@@ -166,6 +166,8 @@ void Errors::arretCodeApresError(std::vector<Errors> &errors)
 //***********************************************************************
 
 constexpr int Errors::defaultInt;
+constexpr int Errors::defaultIntNeg;
 constexpr double Errors::defaultDouble;
+const std::string Errors::defaultString = "NA";
 
 //***********************************************************************

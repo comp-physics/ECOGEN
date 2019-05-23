@@ -118,7 +118,7 @@ class Cell
        
         const QuantitiesAddPhys* getQPA(int &numQPA) const { return m_vecQuantitiesAddPhys[numQPA]; }; //!< Allow to recover an additional physical quantity
 
-        Coord getGradTk(int &numPhase, int &numAddPhys) const;
+        const Coord& getGradTk(int &numPhase, int &numAddPhys) const;
         void setGradTk(int &numPhase, int &numAddPhys, double *buffer, int &counter);
         void addNonConsAddPhys(const int &numberPhases, AddPhys &addPhys, Symmetry *symmetry);
 
@@ -133,11 +133,11 @@ class Cell
         virtual Mixture* getMixture(Prim type = vecPhases) const;
         Flux* getCons() const;
         void setCons(Flux *cons);
-        const Coord& getPosition() const { return m_element->getPosition(); }; //KS//BD//
-        Coord getSize() const;
-        double getSizeX() const;
-        double getSizeY() const;
-        double getSizeZ() const;
+        const Coord& getPosition() const { return m_element->getPosition(); };
+        const Coord& getSize() const { return m_element->getSize(); };
+        const double& getSizeX() const { return m_element->getSizeX(); };
+        const double& getSizeY() const { return m_element->getSizeY(); };
+        const double& getSizeZ() const { return m_element->getSizeZ(); };
         void setElement(Element *element, const int &numCell);
         Element* getElement() const;
         virtual void setTransport(double value, int &numTransport, Prim type = vecPhases);
@@ -150,7 +150,8 @@ class Cell
         const int& getNumberTransports() const { return m_numberTransports; };
         double getDensityGradient();
         Model *getModel();
-        Coord getVelocity();
+        // Coord getVelocity() { return m_model->getVelocity(this); }; //KS//BD//
+        const Coord& getVelocity() { return m_model->getVelocity(this); }; //KS//BD//
 
         //Not used for first order cells
         //------------------------------

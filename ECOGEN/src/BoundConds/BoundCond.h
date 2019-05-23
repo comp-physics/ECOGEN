@@ -65,7 +65,7 @@ class BoundCond : public CellInterface
     virtual int whoAmI() const { Errors::errorMessage("whoAmI pas prevu pour la limite demandee"); return 0; };
     virtual void printInfo(){};
 
-    virtual int getNumPhys() const;
+    virtual const int& getNumPhys() const { return m_numPhysique; };
 
     //Pour methode AMR
     virtual void computeXi(const double &criteriaVar, const bool &varRho, const bool &varP, const bool &varU, const bool &varAlpha) {};

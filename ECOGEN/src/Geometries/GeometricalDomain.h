@@ -72,7 +72,7 @@ public:
   //! \param     numberTransports  Number of transport
   virtual void fillIn(Cell *cell, const int &numberPhases, const int &numberTransports) const;
 
-  std::string getName() { return m_name; };
+  const std::string& getName() { return m_name; };
 
 protected:
   std::string m_name;           //!< Geometrical domain name

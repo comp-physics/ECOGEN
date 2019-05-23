@@ -257,38 +257,6 @@ void PhaseThermalEq::verifyAndCorrectPhase()
 //**************************** DATA ACCESSORS ********************************
 //****************************************************************************
 
-double PhaseThermalEq::getAlpha() const { return m_alpha; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getDensity() const { return m_density; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getPressure() const { return m_pressure; }
-
-//***************************************************************************
-
-Eos* PhaseThermalEq::getEos() const { return m_eos; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getEnergy() const { return m_energie; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getSoundSpeed() const { return m_soundSpeed; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getTotalEnergy() const { return m_totalEnergy; }
-
-//***************************************************************************
-
-double PhaseThermalEq::getTemperature() const { return m_eos->computeTemperature(m_density, m_pressure); }
-
-//***************************************************************************
-
 void PhaseThermalEq::setAlpha(double alpha) { m_alpha = alpha; }
 
 //***************************************************************************

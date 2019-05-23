@@ -472,16 +472,9 @@ void ModEuler::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, cons
 
 //****************************************************************************
 
-double ModEuler::getSM()
+const double& ModEuler::getSM()
 {
   return fluxBufferEuler.m_sM;
-}
-
-//****************************************************************************
-
-Coord ModEuler::getVelocity(Cell *cell) const
-{
-  return cell->getPhase(0)->getVelocity();
 }
 
 //****************************************************************************
@@ -493,13 +486,6 @@ void ModEuler::reverseProjection(const Coord normal, const Coord tangent, const 
   fluxProjete.setY(normal.getY()*fluxBufferEuler.m_qdm.getX() + tangent.getY()*fluxBufferEuler.m_qdm.getY() + binormal.getY()*fluxBufferEuler.m_qdm.getZ());
   fluxProjete.setZ(normal.getZ()*fluxBufferEuler.m_qdm.getX() + tangent.getZ()*fluxBufferEuler.m_qdm.getY() + binormal.getZ()*fluxBufferEuler.m_qdm.getZ());
   fluxBufferEuler.m_qdm.setXYZ(fluxProjete.getX(), fluxProjete.getY(), fluxProjete.getZ());
-}
-
-//****************************************************************************
-
-std::string ModEuler::whoAmI() const
-{
-  return m_name;
 }
 
 //****************************************************************************

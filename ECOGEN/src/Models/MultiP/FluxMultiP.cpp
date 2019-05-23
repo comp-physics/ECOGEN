@@ -381,41 +381,6 @@ void FluxMultiP::integrateSourceTermsMRF(Cell *cell, const double &dt, const int
 
 //***********************************************************************
 
-double FluxMultiP::getAlpha(const int &numPhase) const
-{
-  return m_alpha[numPhase];
-}
-
-//***********************************************************************
-
-double FluxMultiP::getMasse(const int &numPhase) const
-{
-  return m_masse[numPhase];
-}
-
-//***********************************************************************
-
-double FluxMultiP::getEnergy(const int &numPhase) const
-{
-  return m_energ[numPhase];
-}
-
-//***********************************************************************
-
-Coord FluxMultiP::getQdm() const
-{
-  return m_qdm;
-}
-
-//***********************************************************************
-
-double FluxMultiP::getEnergyMix() const
-{
-	return m_energMixture;
-}
-
-//***********************************************************************
-
 void FluxMultiP::setCons(const Flux *cons, const int &numberPhases)
 {
   for (int k = 0; k < numberPhases; k++) {

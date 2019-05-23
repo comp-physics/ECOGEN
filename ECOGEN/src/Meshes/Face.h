@@ -73,10 +73,10 @@ public:
 
   virtual void printInfo() const{ Errors::errorMessage("AfficheInfos not available for requested face"); };
 
-  virtual double getSizeX() { Errors::errorMessage("getSizeX not available for requested face"); return 0; };
-  virtual double getSizeY() { Errors::errorMessage("getSizeY not available for requested face"); return 0; };
-  virtual double getSizeZ() { Errors::errorMessage("getSizeZ not available for requested face"); return 0; };
-  virtual Coord getSize() { Errors::errorMessage("getSize not available for requested face"); return 0; };
+  virtual const double& getSizeX() { Errors::errorMessage("getSizeX not available for requested face"); return Errors::defaultDouble; };
+  virtual const double& getSizeY() { Errors::errorMessage("getSizeY not available for requested face"); return Errors::defaultDouble; };
+  virtual const double& getSizeZ() { Errors::errorMessage("getSizeZ not available for requested face"); return Errors::defaultDouble; };
+  virtual const Coord& getSize() { Errors::errorMessage("getSize not available for requested face"); return Coord::defaultCoord; };
 
   //Pour methode AMR
   virtual Face* creerNouvelleFace() { Errors::errorMessage("creerNouvelleFace not available for requested face"); return 0; };

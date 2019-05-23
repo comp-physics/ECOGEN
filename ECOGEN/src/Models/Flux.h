@@ -117,12 +117,12 @@ class Flux
 
     // Accessors
     //----------
-    virtual double getAlpha(const int &numPhase) const { return 0.; };
-    virtual double getMasse(const int &numPhase) const { return 0.; };
-    virtual double getEnergy(const int &numPhase) const { return 0.; };
-    virtual Coord getQdm() const { return 0.; };
-    virtual double getMasseMix() const { return 0.; };
-    virtual double getEnergyMix() const { return 0.; };
+    virtual const double& getAlpha(const int &numPhase) const { return Errors::defaultDouble; };
+    virtual const double& getMasse(const int &numPhase) const { return Errors::defaultDouble; };
+    virtual const double& getEnergy(const int &numPhase) const { return Errors::defaultDouble; };
+    virtual const Coord& getQdm() const { return Coord::defaultCoord; };
+    virtual const double& getMasseMix() const { return Errors::defaultDouble; };
+    virtual const double& getEnergyMix() const { return Errors::defaultDouble; };
     virtual void setCons(const Flux *cons, const int &numberPhases) { Errors::errorMessage("setCons not available for required model"); };
 
   protected:

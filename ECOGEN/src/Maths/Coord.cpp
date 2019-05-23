@@ -53,6 +53,17 @@ Coord::~Coord(){}
 
 //*********************************************************************
 
+const Coord& Coord::coord()
+{
+    return defaultCoord;
+}
+
+//*********************************************************************
+
+const Coord Coord::defaultCoord = Coord();
+
+//*********************************************************************
+
 void Coord::setXYZ(const double &x, const double & y, const double &z)
 {
   m_x = x;
@@ -255,6 +266,14 @@ Coord Coord::operator* (const double &scalar)
   copie *= scalar;
   return copie;
 }
+
+//*********************************************************************
+
+// const Coord& Coord::operator* (const double &scalar) //KS//BD//
+// {
+//   *this *= scalar;
+//   return *this;
+// }
 
 //*********************************************************************
 

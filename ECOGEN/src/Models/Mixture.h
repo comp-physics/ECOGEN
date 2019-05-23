@@ -179,18 +179,19 @@ class Mixture
 
       //Accessors
       //---------
-      virtual double getDensity() const { Errors::errorMessage("getDensity not available for required mixture"); return 0.; };
-      virtual double getPressure() const { Errors::errorMessage("getPressure not available for required mixture"); return 0.; };
-      virtual double getTemperature() const { Errors::errorMessage("getTemperature not available for required mixture"); return 0.; };
-      virtual double getU() const { Errors::errorMessage("getU not available for required mixture"); return 0.; };
-      virtual double getV() const { Errors::errorMessage("getV not available for required mixture"); return 0.; };
-      virtual double getW() const { Errors::errorMessage("getW not available for required mixture"); return 0.; };
-      virtual Coord getVelocity() const { Errors::errorMessage("getVelocity not available for required mixture"); return 0; };
-      virtual double getEnergy() const { Errors::errorMessage("getEnergy not available for required mixture"); return 0.; };
-      virtual double getTotalEnergy() const { Errors::errorMessage("getTotalEnergy not available for required mixture"); return 0.; };
-      virtual double getFrozenSoundSpeed() const { Errors::errorMessage("getFrozenSoundSpeed not available for required mixture"); return 0.; };
-      virtual double getWoodSoundSpeed() const { Errors::errorMessage("getWoodSoundSpeed not available for required mixture"); return 0.; };
-      virtual double getMixSoundSpeed() const { Errors::errorMessage("getMixSoundSpeed not available for required mixture"); return 0.; };
+      virtual const double& getDensity() const { Errors::errorMessage("getDensity not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getPressure() const { Errors::errorMessage("getPressure not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getTemperature() const { Errors::errorMessage("getTemperature not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getU() const { Errors::errorMessage("getU not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getV() const { Errors::errorMessage("getV not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getW() const { Errors::errorMessage("getW not available for required mixture"); return Errors::defaultDouble; };
+      virtual const Coord& getVelocity() const { Errors::errorMessage("getVelocity not available for required mixture"); return Coord::defaultCoord; };
+      //virtual Coord getVelocity() const { Errors::errorMessage("getVelocity not available for required mixture"); return 0.; }; //KS//BD//
+      virtual const double& getEnergy() const { Errors::errorMessage("getEnergy not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getTotalEnergy() const { Errors::errorMessage("getTotalEnergy not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getFrozenSoundSpeed() const { Errors::errorMessage("getFrozenSoundSpeed not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getWoodSoundSpeed() const { Errors::errorMessage("getWoodSoundSpeed not available for required mixture"); return Errors::defaultDouble; };
+      virtual const double& getMixSoundSpeed() const { Errors::errorMessage("getMixSoundSpeed not available for required mixture"); return Errors::defaultDouble; };
 
       virtual void setPressure(const double &p) { Errors::errorMessage("setPressure non implemente pour mixture utilise"); };
       virtual void setTemperature(const double &T) { Errors::errorMessage("setTemperature non implemente pour mixture utilise"); }

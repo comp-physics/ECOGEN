@@ -71,7 +71,7 @@ class Run
 {
   public:
     Run(std::string nameCasTest, const int &number);
-    virtual ~Run();
+    ~Run();
 
     //! \brief    Initialization of the simulation
     void initialize(int argc, char* argv[]);

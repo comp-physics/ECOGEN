@@ -66,9 +66,9 @@ class FluxEuler : public Flux
 
     // Accessors
     //----------
-    virtual Coord getQdm() const;
-    virtual double getMasseMix() const; 
-    virtual double getEnergyMix() const;
+    virtual const Coord& getQdm() const { return m_qdm; };
+    virtual const double& getMasseMix() const { return m_masse; }; 
+    virtual const double& getEnergyMix() const { return m_energ; };
     virtual void setCons(const Flux *cons, const int &numberPhases);
 
   protected:

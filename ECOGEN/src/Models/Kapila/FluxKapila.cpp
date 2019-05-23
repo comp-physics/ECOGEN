@@ -408,41 +408,6 @@ void FluxKapila::integrateSourceTermsMRF(Cell *cell, const double &dt, const int
 
 //***********************************************************************
 
-double FluxKapila::getAlpha(const int &numPhase) const
-{
-  return m_alpha[numPhase];
-}
-
-//***********************************************************************
-
-double FluxKapila::getMasse(const int &numPhase) const
-{
-  return m_masse[numPhase];
-}
-
-//***********************************************************************
-
-double FluxKapila::getEnergy(const int &numPhase) const
-{
-  return m_energ[numPhase];
-}
-
-//***********************************************************************
-
-Coord FluxKapila::getQdm() const
-{
-  return m_qdm;
-}
-
-//***********************************************************************
-
-double FluxKapila::getEnergyMix() const
-{
-	return m_energMixture;
-}
-
-//***********************************************************************
-
 void FluxKapila::setCons(const Flux *cons, const int &numberPhases)
 {
   for (int k = 0; k < numberPhases; k++) {

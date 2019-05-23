@@ -170,16 +170,9 @@ void ModEulerHomogeneous::solveRiemannIntern(Cell &cellLeft, Cell &cellRight, co
 
 //****************************************************************************
 
-double ModEulerHomogeneous::getSM()
+const double& ModEulerHomogeneous::getSM()
 {
   return fluxBufferEulerHomogeneous.m_sM;
-}
-
-//****************************************************************************
-
-Coord ModEulerHomogeneous::getVelocity(Cell *cell) const
-{
-  return cell->getMixture()->getVelocity();
 }
 
 //****************************************************************************
@@ -205,13 +198,6 @@ int ModEulerHomogeneous::getLiq()
 int ModEulerHomogeneous::getVap()
 {
   return m_vap;
-}
-
-//****************************************************************************
-
-std::string ModEulerHomogeneous::whoAmI() const
-{
-  return m_name;
 }
 
 //****************************************************************************

@@ -407,16 +407,9 @@ void ModThermalEq::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, 
 
 //****************************************************************************
 
-double ModThermalEq::getSM()
+const double& ModThermalEq::getSM()
 {
   return fluxBufferThermalEq->m_sM;
-}
-
-//****************************************************************************
-
-Coord ModThermalEq::getVelocity(Cell *cell) const
-{
-  return cell->getMixture()->getVelocity();
 }
 
 //****************************************************************************
@@ -430,13 +423,6 @@ void ModThermalEq::reverseProjection(const Coord normal, const Coord tangent, co
   fluxProjete.setY(normal.getY()*fluxBufferThermalEq->m_qdm.getX() + tangent.getY()*fluxBufferThermalEq->m_qdm.getY() + binormal.getY()*fluxBufferThermalEq->m_qdm.getZ());
   fluxProjete.setZ(normal.getZ()*fluxBufferThermalEq->m_qdm.getX() + tangent.getZ()*fluxBufferThermalEq->m_qdm.getY() + binormal.getZ()*fluxBufferThermalEq->m_qdm.getZ());
   fluxBufferThermalEq->m_qdm.setXYZ(fluxProjete.getX(), fluxProjete.getY(), fluxProjete.getZ());
-}
-
-//****************************************************************************
-
-std::string ModThermalEq::whoAmI() const
-{
-  return m_name;
 }
 
 //****************************************************************************

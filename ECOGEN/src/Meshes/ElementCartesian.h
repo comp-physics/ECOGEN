@@ -53,10 +53,10 @@ public:
   virtual void setSize(const double &sizeX, const double &sizeY, const double &sizeZ);
   virtual void setSize(const Coord &size);
 
-  virtual double getSizeX();
-  virtual double getSizeY();
-  virtual double getSizeZ();
-  virtual Coord getSize();
+  virtual const double& getSizeX() { return m_size.getX(); };
+  virtual const double& getSizeY() { return m_size.getY(); };
+  virtual const double& getSizeZ() { return m_size.getZ(); };
+  virtual const Coord& getSize() { return m_size; };
 
   //Pour methode AMR
   virtual void creerElementChild();

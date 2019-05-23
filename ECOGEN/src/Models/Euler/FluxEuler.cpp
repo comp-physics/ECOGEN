@@ -194,27 +194,6 @@ void FluxEuler::integrateSourceTermsMRF(Cell *cell, const double &dt, const int 
 
 //***********************************************************************
 
-Coord FluxEuler::getQdm() const
-{
-  return m_qdm;
-}
-
-//***********************************************************************
-
-double FluxEuler::getMasseMix() const
-{
-  return m_masse;
-}
-
-//***********************************************************************
-
-double FluxEuler::getEnergyMix() const
-{
-  return m_energ;
-}
-
-//***********************************************************************
-
 void FluxEuler::setCons(const Flux *cons, const int &numberPhases)
 {
   m_masse = cons->getMasseMix();

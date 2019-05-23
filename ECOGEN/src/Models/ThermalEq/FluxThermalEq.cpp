@@ -193,27 +193,6 @@ void FluxThermalEq::integrateSourceTermsHeating(Cell *cell, const double &dt, co
 
 //***********************************************************************
 
-double FluxThermalEq::getMasse(const int &numPhase) const
-{
-  return m_masse[numPhase];
-}
-
-//***********************************************************************
-
-Coord FluxThermalEq::getQdm() const
-{
-  return m_qdm;
-}
-
-//***********************************************************************
-
-double FluxThermalEq::getEnergyMix() const
-{
-	return m_energMixture;
-}
-
-//***********************************************************************
-
 void FluxThermalEq::setCons(const Flux *cons, const int &numberPhases)
 {
   for (int k = 0; k < numberPhases; k++) {

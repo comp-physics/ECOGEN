@@ -72,11 +72,11 @@ class FluxMultiP : public Flux
 
     // Accessors
     //----------
-    virtual double getAlpha(const int &numPhase) const;
-    virtual double getMasse(const int &numPhase) const;
-    virtual double getEnergy(const int &numPhase) const;
-    virtual Coord getQdm() const;
-    virtual double getEnergyMix() const;
+    virtual const double& getAlpha(const int &numPhase) const { return m_alpha[numPhase]; };
+    virtual const double& getMasse(const int &numPhase) const { return m_masse[numPhase]; };
+    virtual const double& getEnergy(const int &numPhase) const { return m_energ[numPhase]; };
+    virtual const Coord& getQdm() const { return m_qdm; };
+    virtual const double& getEnergyMix() const { return m_energMixture; };
     virtual void setCons(const Flux *cons, const int &numberPhases);
 
 protected:

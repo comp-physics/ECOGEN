@@ -63,8 +63,8 @@ public:
   const double& getVolume() const { return m_volume; };
   const int& getNumCellAssociee() const { return m_numCellAssociee; };
 
-  virtual int getIndex() const { Errors::errorMessage("getIndex not available for requested element"); return 0; };
-  virtual int getAppartenancePhysique() const { return 0; }; //!< default
+  virtual const int& getIndex() const { Errors::errorMessage("getIndex not available for requested element"); return Errors::defaultInt; };
+  virtual const int& getAppartenancePhysique() const { return Errors::defaultInt; }; //!< default
   virtual void setVolume(const double &volume){ Errors::errorMessage("setVolume not available for requested element"); };
   virtual void setLCFL(const double &lCFL){ Errors::errorMessage("setlCFL not available for requested element"); };
   virtual void setPos(const double &X, const double &Y, const double &Z){ Errors::errorMessage("setPos not available for requested element"); };
@@ -91,10 +91,10 @@ public:
   double distanceY(const Face *f);    /*!< Calcul de la distance selon y entre center et center d une face */
   double distanceZ(const Face *f);    /*!< Calcul de la distance selon z entre center et center d une face */
 
-  virtual double getSizeX() { Errors::errorMessage("getSizeX not available for requested element"); return 0; };
-  virtual double getSizeY() { Errors::errorMessage("getSizeY not available for requested element"); return 0; };
-  virtual double getSizeZ() { Errors::errorMessage("getSizeZ not available for requested element"); return 0; };
-  virtual Coord getSize() { Errors::errorMessage("getSize not available for requested element"); return 0; };
+  virtual const double& getSizeX() { Errors::errorMessage("getSizeX not available for requested element"); return Errors::defaultDouble; };
+  virtual const double& getSizeY() { Errors::errorMessage("getSizeY not available for requested element"); return Errors::defaultDouble; };
+  virtual const double& getSizeZ() { Errors::errorMessage("getSizeZ not available for requested element"); return Errors::defaultDouble; };
+  virtual const Coord& getSize() { Errors::errorMessage("getSize not available for requested element"); return Coord::defaultCoord; };
 
   bool traverseObjet(const GeometricObject &objet) const;
 
@@ -106,7 +106,7 @@ public:
 
   //For parallel load balancing
   virtual void setKey(const decomposition::Key<3> &key);
-  virtual decomposition::Key<3> getKey()const;
+  virtual const decomposition::Key<3>& getKey() const { return m_key; };
 
 protected:
 

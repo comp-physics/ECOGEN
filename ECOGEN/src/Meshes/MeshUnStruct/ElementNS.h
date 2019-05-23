@@ -67,21 +67,21 @@ public:
   void setIsCommunicant(bool isCommunicant);
   void setAppartenanceCPU(const int *numCPU, const int &numberCPU);
 
-  virtual int getIndex() const;
-  int getNumberNoeuds() const;
-  int getNumberFaces() const;
-  int getTypeGmsh() const;
-  int getTypeVTK() const;
-  int getNumNoeud(int &noeud) const;
-  virtual int getAppartenancePhysique() const;
-  int getAppartenanceGeometrique() const;
-  int getCPU() const;
-  int getNumberAutresCPU() const;
-  int getAutreCPU(const int &autreCPU) const;
+  virtual const int& getIndex() const { return m_index; };
+  const int& getNumberNoeuds() const { return m_numberNoeuds; };
+  const int& getNumberFaces() const { return m_numberFaces; };
+  const int& getTypeGmsh() const { return m_typeGmsh; };
+  const int& getTypeVTK() const { return m_typeVTK; };
+  const int& getNumNoeud(int &noeud) const { return m_numNoeuds[noeud]; };
+  virtual const int& getAppartenancePhysique() const { return m_appartenancePhysique; };
+  const int& getAppartenanceGeometrique() const { return m_appartenanceGeometrique; };
+  const int& getCPU() const { return m_CPU; };
+  const int& getNumberAutresCPU() const { return m_numberautresCPU; };
+  const int& getAutreCPU(const int &autreCPU) const;
   void printInfo() const;
 
-  bool isFantome() const;
-  bool isCommunicant() const;
+  const bool& isFantome() const { return m_isFantome; };
+  const bool& isCommunicant() const { return m_isCommunicant; };
 
 protected:
   virtual void computeVolume(const Coord *noeuds){};

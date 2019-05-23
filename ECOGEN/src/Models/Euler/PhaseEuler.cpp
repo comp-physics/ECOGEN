@@ -378,44 +378,6 @@ void PhaseEuler::verifyAndCorrectPhase()
 //**************************** DATA ACCESSORS ********************************
 //****************************************************************************
 
-double PhaseEuler::getDensity() const { return m_density; }
-
-//***************************************************************************
-
-double PhaseEuler::getPressure() const { return m_pressure; }
-
-//***************************************************************************
-
-double PhaseEuler::getU() const { return m_velocity.getX(); }
-double PhaseEuler::getV() const { return m_velocity.getY(); }
-double PhaseEuler::getW() const { return m_velocity.getZ(); }
-
-//***************************************************************************
-
-Coord PhaseEuler::getVelocity() const { return m_velocity; }
-
-//***************************************************************************
-
-Eos* PhaseEuler::getEos() const { return m_eos; }
-
-//***************************************************************************
-
-double PhaseEuler::getEnergy() const { return m_energie; }
-
-//***************************************************************************
-
-double PhaseEuler::getSoundSpeed() const { return m_soundSpeed; }
-
-//***************************************************************************
-
-double PhaseEuler::getTotalEnergy() const { return m_totalEnergy; }
-
-//***************************************************************************
-
-double PhaseEuler::getTemperature() const { return m_eos->computeTemperature(m_density, m_pressure); }
-
-//***************************************************************************
-
 void PhaseEuler::setDensity(double density) { m_density = density; }
 
 //***************************************************************************

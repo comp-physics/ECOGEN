@@ -40,13 +40,19 @@
 class Coord
 {
 public:
-  Coord();
+  Coord(); //KS//BD// constexpr
   //! \brief     Coord constructor
   //! \param     x                    value of the x-direction coordinate
   //! \param     y                    value of the y-direction coordinate (if it is not assigned it is set to 0.)
   //! \param     z                    value of the z-direction coordinate (if it is not assigned it is set to 0.)
-  Coord(const double &x, const double &y = 0., const double&z = 0.);
-  virtual ~Coord();
+  Coord(const double &x, const double &y = 0., const double&z = 0.); //KS//BD// constexpr
+  ~Coord();
+  //! \brief     Method for defaultCoord
+  //! \details   Used for the defaultCoord object
+  const Coord& coord();
+  //! \brief     Default Coord object
+  //! \details   Used when returning a const Coord&
+  static const Coord defaultCoord;
   //! \brief     Set the values of the Coord object
   //! \param     x                    value of the x-direction coordinate
   //! \param     y                    value of the y-direction coordinate
@@ -130,6 +136,7 @@ public:
   Coord& operator*= (const double &scalar);
   Coord& operator/= (const double &scalar);
   Coord operator* (const double &scalar);
+  // const Coord& operator* (const double &scalar); //KS//BS//
   Coord operator/ (const double &scalar);
   Coord& operator+= (const Coord &a);
   Coord& operator-= (const Coord &a);

@@ -329,42 +329,6 @@ void PhaseMultiP::verifyAndCorrectPhase()
 //**************************** DATA ACCESSORS ********************************
 //****************************************************************************
 
-double PhaseMultiP::getAlpha() const { return m_alpha; }
-
-//***************************************************************************
-
-double PhaseMultiP::getDensity() const { return m_density; }
-
-//***************************************************************************
-
-double PhaseMultiP::getPressure() const { return m_pressure; }
-
-//***************************************************************************
-
-double PhaseMultiP::getY() const { return m_Y; }
-
-//***************************************************************************
-
-Eos* PhaseMultiP::getEos() const { return m_eos; }
-
-//***************************************************************************
-
-double PhaseMultiP::getEnergy() const { return m_energie; }
-
-//***************************************************************************
-
-double PhaseMultiP::getSoundSpeed() const { return m_soundSpeed; }
-
-//***************************************************************************
-
-double PhaseMultiP::getTotalEnergy() const { return m_totalEnergy; }
-
-//***************************************************************************
-
-double PhaseMultiP::getTemperature() const { return m_eos->computeTemperature(m_density, m_pressure); }
-
-//***************************************************************************
-
 void PhaseMultiP::setAlpha(double alpha) { m_alpha = alpha; }
 
 //***************************************************************************

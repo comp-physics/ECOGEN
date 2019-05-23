@@ -57,13 +57,13 @@ public:
   ElementNS *getElementDroite() const;
   void setEstLimite(const bool &estLimite);
   void setEstComm(const bool &estComm);
-  bool getEstComm() const;
-  int getSommeNumNoeuds() const;
+  const bool& getEstComm() const { return m_comm; };
+  const int& getSommeNumNoeuds() const { return m_sommeNumNoeuds; };
 
-  int getNumberNoeuds() const;
-  int getNumNoeud(const int &numNoeud) const;
+  const int& getNumberNoeuds() const { return m_numberNoeuds; };
+  const int& getNumNoeud(const int &numNoeud) const { return m_numNoeuds[numNoeud]; };
   void getInfoNoeuds(int *numNoeuds, int &sommeNumNoeuds) const;
-  bool getEstLimite() const;
+  const bool& getEstLimite() const { return m_limite; };
   void afficheNoeuds() const;
   virtual void printInfo() const;
   static int rechercheFace(int *face, int &sommeNoeuds, int **tableauFaces, int *tableauSommeNoeuds, int numberNoeuds, int &indexMaxFaces); // Recherche si face appartient au tableau tableauFaces : renvoi le number ou -1 si absence

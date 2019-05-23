@@ -43,7 +43,7 @@ class timeStats
 {
   public:
     timeStats();
-    virtual ~timeStats();
+    ~timeStats();
 
     void initialize();
     void updateComputationTime();

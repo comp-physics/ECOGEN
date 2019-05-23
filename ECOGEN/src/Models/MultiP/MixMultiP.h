@@ -99,16 +99,17 @@ class MixMultiP : public Mixture
       virtual void getBufferSlopes(double *buffer, int &counter);
 
       //Accessors
-      virtual double getDensity() const;
-      virtual double getPressure() const;
-      virtual double getU() const;
-      virtual double getV() const;
-      virtual double getW() const;
-      virtual Coord getVelocity() const;
-      virtual double getEnergy() const;
-      virtual double getTotalEnergy() const;
-      virtual double getFrozenSoundSpeed() const;
-      virtual double getWoodSoundSpeed() const;
+      virtual const double& getDensity() const { return m_density; };
+      virtual const double& getPressure() const { return m_pressure; };
+      virtual const double& getU() const { return m_velocity.getX(); };
+      virtual const double& getV() const { return m_velocity.getY(); };
+      virtual const double& getW() const { return m_velocity.getZ(); };
+      virtual const Coord& getVelocity() const { return m_velocity; };
+      //virtual Coord getVelocity() const { return m_velocity; }; //KS//BD//
+      virtual const double& getEnergy() const { return m_energie; };
+      virtual const double& getTotalEnergy() const { return m_totalEnergy; };
+      virtual const double& getFrozenSoundSpeed() const { return m_frozenSoundSpeed; };
+      virtual const double& getWoodSoundSpeed() const { return m_woodSoundSpeed; };
 
       virtual void setPressure(const double &p);
       virtual void setVelocity(const double &u, const double &v, const double &w);

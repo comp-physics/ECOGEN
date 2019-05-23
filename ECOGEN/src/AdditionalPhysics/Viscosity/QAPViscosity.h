@@ -49,8 +49,9 @@ class QAPViscosity : public QuantitiesAddPhys
     virtual void computeQuantities(Cell* cell);
 
     //Accessors
-    virtual void setGrad(const Coord &grad, int num = -1); //1:U, 2:V, 3:W
-    virtual Coord getGrad(int num = -1) const;             //1:U, 2:V, 3:W
+    virtual void setGrad(const Coord &grad, int num = -1);                       //1:U, 2:V, 3:W
+    //virtual const Coord& getGrad(int num = -1) const { return m_grads[num-1]; }; //1:U, 2:V, 3:W
+    virtual Coord getGrad(int num = -1) const { return m_grads[num-1]; }; //1:U, 2:V, 3:W //KS//BD//
 
     protected:
     std::vector<Coord> m_grads;                   //!< Gradient vectors of the velocities of the cell in x-, y- and z-directions       

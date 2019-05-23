@@ -404,61 +404,6 @@ void MixMultiP::getBufferSlopes(double *buffer, int &counter)
 //******************************* ACCESSORS **********************************
 //****************************************************************************
 
-double MixMultiP::getDensity() const
-{
-  return m_density;
-}
-
-//***************************************************************************
-
-double MixMultiP::getPressure() const
-{
-  return m_pressure;
-}
-
-//***************************************************************************
-
-double MixMultiP::getU() const { return m_velocity.getX(); }
-double MixMultiP::getV() const { return m_velocity.getY(); }
-double MixMultiP::getW() const { return m_velocity.getZ(); }
-
-//***************************************************************************
-
-Coord MixMultiP::getVelocity() const
-{
-  return m_velocity;
-}
-
-//***************************************************************************
-
-double MixMultiP::getEnergy() const
-{
-  return m_energie;
-}
-
-//***************************************************************************
-
-double MixMultiP::getTotalEnergy() const
-{
-  return m_totalEnergy;
-}
-
-//***************************************************************************
-
-double MixMultiP::getFrozenSoundSpeed() const
-{
-  return m_frozenSoundSpeed;
-}
-
-//***************************************************************************
-
-double MixMultiP::getWoodSoundSpeed() const
-{
-  return m_woodSoundSpeed;
-}
-
-//***************************************************************************
-
 void MixMultiP::setPressure(const double &p) { m_pressure = p; }
 
 //***************************************************************************

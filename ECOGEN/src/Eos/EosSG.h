@@ -203,19 +203,19 @@ class EosSG : public Eos
         //Get
 		//! \brief  get the adiabatic exponent of the fluid 
 		//!return  m_gamma :  \f$ \gamma \f$
-        virtual double getGamma() const;
+        virtual const double& getGamma() const { return m_gamma; };
 		//! \brief  get the constant pressure 
 		//!return  m_pInf :  \f$ p_{\infty} \f$
-        virtual double getPInf() const;
+        virtual const double& getPInf() const { return m_pInf; };
 		//! \brief  get the volume calorific energy of the fluid
 		//!return     \f$ c_v \f$
-        virtual double getCv() const;
+        virtual const double& getCv() const { return m_cv; };
 		//! \brief  get the energy of reference of the fluid
 		//!return     \f$ \epsilon_{ref} \f$
-        virtual double getERef() const;
+        virtual const double& getERef() const { return m_eRef; };
 		//! \brief  get the entropy of reference of the fluid
 		//!return     \f$ \ s_{ref} \f$
-        virtual double getSRef() const;
+        virtual const double& getSRef() const { return m_sRef; };
 		//! \brief  get the type that is to say the  reduced name of the EOS in ECOGEN :
 		//!return     \f$ \ "SG" \f$
         virtual std::string getType() const { return "SG"; };

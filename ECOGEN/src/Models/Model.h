@@ -158,16 +158,17 @@ class Model
     //---------
     //! \brief     Return the local fluid velocity
     //! \return    the velocity solution of the local Riemann problem
-    virtual double getSM() { Errors::errorMessage("getSM not available for required model"); return 0; };
+    virtual const double& getSM() { Errors::errorMessage("getSM not available for required model"); return Errors::defaultDouble; };
     //! \brief     Return the fluid velocity of the corresponding cell
     //! \param     cell       pointer to corresponding cell
     //! \return    velocity
-    virtual Coord getVelocity(Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return 0; };
+    virtual const Coord& getVelocity(Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return Coord::defaultCoord; };
+    //virtual Coord getVelocity(Cell *cell) const { Errors::errorMessage("getVelocity not available for required model"); return 0.; }; //KS//BD//
 
 	std::vector<Relaxation*> *getRelaxations() { return &m_relaxations; };
     
     void printInfo() const;
-    virtual std::string whoAmI() const { return 0; };
+    virtual const std::string& whoAmI() const { return Errors::defaultString; };
 
   protected:
     std::string m_name;                        //!< Name of the required model

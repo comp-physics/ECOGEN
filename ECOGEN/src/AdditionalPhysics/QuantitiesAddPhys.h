@@ -61,10 +61,11 @@ class QuantitiesAddPhys
     //! \brief     Set the additional-physic gradient with the transmitted values
     //! \param     grad                 transmitted gradient
     //! \param     num                  number to determine the corresponding gradient
-    virtual void setGrad(const Coord &grad, int num=-1) { Errors::errorMessage("setGrad not implemented for used quantities of additional physics"); };
+    virtual void setGrad(const Coord &grad, int num = -1) { Errors::errorMessage("setGrad not implemented for used quantities of additional physics"); };
     //! \brief     Get the additional-physic gradient
     //! \param     num                  number to determine the corresponding gradient
-    virtual Coord getGrad(int num=-1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return 0; };
+    //virtual const Coord& getGrad(int num = -1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return Errors::defaultInt; };
+    virtual Coord getGrad(int num = -1) const { Errors::errorMessage("getGrad not implemented for used quantities of additional physics"); return 0; }; //KS//BD//
 
     //! \brief     Set the gradient of the velocity along the x-direction with the transmitted values
     //! \param     grad                 transmitted gradient
@@ -87,7 +88,7 @@ class QuantitiesAddPhys
     virtual Coord getGradW() const { return 0; };
     //! \brief     Return the gradient of the phase temperature
     //! \param     phaseNum             number of the corresponding phase
-    virtual Coord getGradTk(int &phaseNum) const { return 0; };
+    virtual const Coord& getGradTk(int &phaseNum) const { return Coord::defaultCoord; };
 
     //! \brief     Return the corresponding additional-physic class of this quantities class
     AddPhys* getAddPhys() { return m_addPhys; };

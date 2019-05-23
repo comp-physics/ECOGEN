@@ -16,6 +16,6 @@
         <stretch startAt="5.75e-3" endAt="7.e-3" factor="1.02" numberCells="28"/>
       </YStretching>
     </meshStretching>
-    <AMR lvlMax="2" criteriaVar="0.04" varRho="true" varP="true" varU="false" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>
+    <AMR lvlMax="1" criteriaVar="0.04" varRho="true" varP="true" varU="true" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>
   </cartesianMesh>
 </mesh>

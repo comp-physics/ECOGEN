@@ -62,7 +62,7 @@ class Tools
     //! \brief     Generic model constructor
     //! \param     numberPhases         number of phases
     Tools(const int &numberPhases);
-    virtual ~Tools();
+    ~Tools();
 
     //! \brief     Modify the string of characters to uppercase it
     //! \param     string               string of characters

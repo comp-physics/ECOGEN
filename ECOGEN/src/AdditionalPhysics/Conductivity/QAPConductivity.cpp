@@ -72,10 +72,3 @@ void QAPConductivity::setGrad(const Coord &grad, int num)
 }
 
 //***********************************************************************
-
-Coord QAPConductivity::getGrad(int num) const
-{
-  return m_gradTk[num];
-}
-
-//***********************************************************************

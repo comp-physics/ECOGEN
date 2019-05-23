@@ -68,10 +68,11 @@ class ModThermalEq : public Model
 
     //Accessors
     //---------
-    virtual double getSM();
-    virtual Coord getVelocity(Cell *cell) const;
+    virtual const double& getSM();
+    virtual const Coord& getVelocity(Cell *cell) const { return cell->getMixture()->getVelocity(); };
+    //virtual Coord getVelocity(Cell *cell) const { return cell->getMixture()->getVelocity(); }; //KS//BD//
 
-    virtual std::string whoAmI() const;
+    virtual const std::string& whoAmI() const { return m_name; };
 
   protected:
   

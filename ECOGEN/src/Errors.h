@@ -83,7 +83,9 @@ public:
   int getEtat();
 
   static constexpr int defaultInt = 0;
+  static constexpr int defaultIntNeg = -1;
   static constexpr double defaultDouble = 0.;
+  static const std::string defaultString;
 
 private:
   std::string m_message;

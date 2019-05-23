@@ -328,38 +328,6 @@ void PhaseKapila::verifyAndCorrectPhase()
 //**************************** DATA ACCESSORS ********************************
 //****************************************************************************
 
-double PhaseKapila::getAlpha() const { return m_alpha; }
-
-//***************************************************************************
-
-double PhaseKapila::getDensity() const { return m_density; }
-
-//***************************************************************************
-
-double PhaseKapila::getPressure() const { return m_pressure; }
-
-//***************************************************************************
-
-double PhaseKapila::getY() const { return m_Y; }
-
-//***************************************************************************
-
-Eos* PhaseKapila::getEos() const { return m_eos; }
-
-//***************************************************************************
-
-double PhaseKapila::getEnergy() const { return m_energie; }
-
-//***************************************************************************
-
-double PhaseKapila::getSoundSpeed() const { return m_soundSpeed; }
-
-//***************************************************************************
-
-double PhaseKapila::getTemperature() const { return m_eos->computeTemperature(m_density, m_pressure); }
-
-//***************************************************************************
-
 void PhaseKapila::setAlpha(double alpha) { m_alpha = alpha; }
 
 //***************************************************************************

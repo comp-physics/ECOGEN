@@ -95,7 +95,7 @@ class CellInterface
     Model *getMod() const;
     Cell *getCellGauche() const;
     Cell *getCellDroite() const;
-    virtual int getNumPhys() const { return -1; };
+    virtual const int& getNumPhys() const { return Errors::defaultIntNeg; };
     //virtual double getDebit(int numPhase) const { Errors::errorMessage("getDebits non prevu pour CellInterface"); return 0.; }
 
     //Pour methode AMR

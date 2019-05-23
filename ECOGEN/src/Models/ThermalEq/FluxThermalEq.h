@@ -67,9 +67,9 @@ class FluxThermalEq : public Flux
 
     // Accessors
     //----------
-    virtual double getMasse(const int &numPhase) const;
-    virtual Coord getQdm() const;
-    virtual double getEnergyMix() const;
+    virtual const double& getMasse(const int &numPhase) const { return m_masse[numPhase]; };
+    virtual const Coord& getQdm() const { return m_qdm; };
+    virtual const double& getEnergyMix() const { return m_energMixture; };
     virtual void setCons(const Flux *cons, const int &numberPhases);
 
 protected:

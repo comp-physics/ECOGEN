@@ -50,7 +50,8 @@ class QAPConductivity : public QuantitiesAddPhys
 
     //Accessors
     virtual void setGrad(const Coord &grad, int num = -1);
-    virtual Coord getGrad(int num = -1) const;
+    //virtual const Coord& getGrad(int num = -1) const { return m_gradTk[num]; };
+    virtual Coord getGrad(int num = -1) const { return m_gradTk[num]; }; //KS//BD//
 
     protected:
     std::vector<Coord> m_gradTk;                  //!< Vector of the temperature gradient of each phase of the cell

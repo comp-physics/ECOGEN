@@ -73,10 +73,3 @@ void QAPViscosity::setGrad(const Coord &grad, int num)
 }
 
 //***********************************************************************
-
-Coord QAPViscosity::getGrad(int num) const
-{
-  return m_grads[num-1];
-}
-
-//***********************************************************************

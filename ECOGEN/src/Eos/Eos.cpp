@@ -80,32 +80,10 @@ void Eos::display() const
 
 //***********************************************************************
 
-std::string Eos::getName() const
-{
-  return m_name;
-}
-
-//***********************************************************************
-
-int Eos::getNumber() const
-{
-  return m_number;
-}
-
-//***********************************************************************
-
 double Eos::computeTotalEnthalpy(const double &density, const double &pressure, const double &velocity) const
 {
   return this->computeEnergy(density, pressure) + pressure / density + 0.5*velocity*velocity;
 }
-
-//***********************************************************************
-
-double Eos::getMu() const { return m_mu; }
-
-//***********************************************************************
-
-double Eos::getLambda() const { return m_lambda; }
 
 //***********************************************************************
 

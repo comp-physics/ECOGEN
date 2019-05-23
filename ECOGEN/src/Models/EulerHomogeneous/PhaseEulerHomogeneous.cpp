@@ -283,42 +283,6 @@ void PhaseEulerHomogeneous::verifyAndCorrectPhase()
 //**************************** DATA ACCESSORS ********************************
 //****************************************************************************
 
-double PhaseEulerHomogeneous::getAlpha() const { return m_alpha; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getDensity() const { return m_density; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getPressure() const { return m_pressure; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getY() const { return m_Y; }
-
-//***************************************************************************
-
-Eos* PhaseEulerHomogeneous::getEos() const { return m_eos; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getEnergy() const { return m_energie; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getSoundSpeed() const { return m_soundSpeed; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getTotalEnergy() const { return m_totalEnergy; }
-
-//***************************************************************************
-
-double PhaseEulerHomogeneous::getTemperature() const { return m_eos->computeTemperature(m_density, m_pressure); }
-
-//***************************************************************************
-
 void PhaseEulerHomogeneous::setAlpha(double alpha) { m_alpha = alpha; }
 
 //***************************************************************************

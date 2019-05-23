@@ -188,27 +188,6 @@ void FluxEulerHomogeneous::subtractTuyere1D(const Coord normal, const double sur
 
 //***********************************************************************
 
-Coord FluxEulerHomogeneous::getQdm() const
-{
-  return m_qdm;
-}
-
-//***********************************************************************
-
-double FluxEulerHomogeneous::getMasseMix() const
-{
-  return m_masse;
-}
-
-//***********************************************************************
-
-double FluxEulerHomogeneous::getEnergyMix() const
-{
-  return m_energ;
-}
-
-//***********************************************************************
-
 void FluxEulerHomogeneous::setCons(const Flux *cons, const int &numberPhases)
 {
   m_masse = cons->getMasseMix();

@@ -71,10 +71,3 @@ void QAPSurfaceTension::setGrad(const Coord &grad, int num)
 
 //***********************************************************************
 
-Coord QAPSurfaceTension::getGrad(int num) const
-{
-  return m_gradC[0];
-}
-
-//***********************************************************************
-

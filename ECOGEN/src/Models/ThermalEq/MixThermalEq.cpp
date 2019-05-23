@@ -575,62 +575,6 @@ void MixThermalEq::getBufferSlopes(double *buffer, int &counter)
 //******************************* ACCESSORS **********************************
 //****************************************************************************
 
-double MixThermalEq::getDensity() const
-{
-  return m_density;
-}
-
-//***************************************************************************
-
-double MixThermalEq::getPressure() const
-{
-  return m_pressure;
-}
-
-//***************************************************************************
-
-double MixThermalEq::getTemperature() const
-{
-  return m_temperature;
-}
-
-
-//***************************************************************************
-
-double MixThermalEq::getU() const { return m_velocity.getX(); }
-double MixThermalEq::getV() const { return m_velocity.getY(); }
-double MixThermalEq::getW() const { return m_velocity.getZ(); }
-
-//***************************************************************************
-
-Coord MixThermalEq::getVelocity() const
-{
-  return m_velocity;
-}
-
-//***************************************************************************
-
-double MixThermalEq::getEnergy() const
-{
-  return m_energie;
-}
-
-//***************************************************************************
-
-double MixThermalEq::getTotalEnergy() const
-{
-  return m_totalEnergy;
-}
-
-//***************************************************************************
-
-double MixThermalEq::getMixSoundSpeed() const
-{
-  return m_thermalEqSoundSpeed;
-}
-
-//***************************************************************************
-
 void MixThermalEq::setPressure(const double &p) { m_pressure = p; }
 
 //***************************************************************************

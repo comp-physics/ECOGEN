@@ -160,8 +160,3 @@ void Element::setKey(const decomposition::Key<3> &key)
 }
 
 //***********************************************************************
-
-decomposition::Key<3> Element::getKey() const 
-{
-  return m_key;
-}

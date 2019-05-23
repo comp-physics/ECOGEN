@@ -193,97 +193,13 @@ void ElementNS::enleveCPUAutres(std::vector<int> &numCPU)
 
 //***********************************************************************
 
-int ElementNS::getIndex() const
-{
-  return m_index;
-}
-
-//***********************************************************************
-
-int ElementNS::getNumberNoeuds() const
-{
-  return m_numberNoeuds;
-}
-
-//***********************************************************************
-
-int ElementNS::getNumberFaces() const
-{
-  return m_numberFaces;
-}
-
-//***********************************************************************
-
-int ElementNS::getTypeGmsh() const
-{
-  return m_typeGmsh;
-}
-
-//***********************************************************************
-
-int ElementNS::getTypeVTK() const
-{
-  return m_typeVTK;
-}
-
-//***********************************************************************
-
-int ElementNS::getNumNoeud(int &noeud) const
-{
-  return m_numNoeuds[noeud];
-}
-
-//***********************************************************************
-
-int ElementNS::getAppartenancePhysique() const
-{
-  return m_appartenancePhysique;
-}
-
-//***********************************************************************
-
-int ElementNS::getAppartenanceGeometrique() const
-{
-  return m_appartenanceGeometrique;
-}
-
-//***********************************************************************
-
-int ElementNS::getCPU() const
-{
-  return m_CPU;
-}
-
-//***********************************************************************
-
-int ElementNS::getNumberAutresCPU() const
-{
-  return m_numberautresCPU;
-}
-
-//***********************************************************************
-
-int ElementNS::getAutreCPU(const int &autreCPU) const
+const int& ElementNS::getAutreCPU(const int &autreCPU) const
 {
   if (sizeof(m_autresCPU) <= autreCPU)
   {
     Errors::errorMessage("probleme de dimension dans m_autresCPU");
   }
   return m_autresCPU[autreCPU];
-}
-
-//***********************************************************************
-
-bool ElementNS::isFantome() const
-{
-  return m_isFantome;
-}
-
-//***********************************************************************
-
-bool ElementNS::isCommunicant() const
-{
-  return m_isCommunicant;
 }
 
 //***********************************************************************

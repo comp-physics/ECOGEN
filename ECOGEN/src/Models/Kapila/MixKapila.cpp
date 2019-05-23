@@ -415,61 +415,6 @@ void MixKapila::getBufferSlopes(double *buffer, int &counter)
 //******************************* ACCESSORS **********************************
 //****************************************************************************
 
-double MixKapila::getDensity() const
-{
-  return m_density;
-}
-
-//***************************************************************************
-
-double MixKapila::getPressure() const
-{
-  return m_pressure;
-}
-
-//***************************************************************************
-
-double MixKapila::getU() const { return m_velocity.getX(); }
-double MixKapila::getV() const { return m_velocity.getY(); }
-double MixKapila::getW() const { return m_velocity.getZ(); }
-
-//***************************************************************************
-
-Coord MixKapila::getVelocity() const
-{
-  return m_velocity;
-}
-
-//***************************************************************************
-
-double MixKapila::getEnergy() const
-{
-  return m_energie;
-}
-
-//***************************************************************************
-
-double MixKapila::getTotalEnergy() const
-{
-  return m_totalEnergy;
-}
-
-//***************************************************************************
-
-double MixKapila::getFrozenSoundSpeed() const
-{
-  return m_frozenSoundSpeed;
-}
-
-//***************************************************************************
-
-double MixKapila::getWoodSoundSpeed() const
-{
-  return m_woodSoundSpeed;
-}
-
-//***************************************************************************
-
 void MixKapila::setPressure(const double &p) { m_pressure = p; }
 
 //***************************************************************************

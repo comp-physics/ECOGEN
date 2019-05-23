@@ -44,7 +44,7 @@ class Parallel
 {
 public:
   Parallel();
-  virtual ~Parallel();
+  ~Parallel();
 
   void initialization(int &argc, char *argv[]);
   void setNeighbour(const int neighbour);

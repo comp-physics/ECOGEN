@@ -461,54 +461,6 @@ void MixEulerHomogeneous::getBufferSlopes(double *buffer, int &counter)
 //****************************** ACCESSORS  **********************************
 //****************************************************************************
 
-double MixEulerHomogeneous::getDensity() const
-{
-  return m_density;
-}
-
-//***************************************************************************
-
-double MixEulerHomogeneous::getPressure() const
-{
-  return m_pressure;
-}
-
-//***************************************************************************
-
-double MixEulerHomogeneous::getU() const { return m_velocity.getX(); }
-double MixEulerHomogeneous::getV() const { return m_velocity.getY(); }
-double MixEulerHomogeneous::getW() const { return m_velocity.getZ(); }
-
-//***************************************************************************
-
-Coord MixEulerHomogeneous::getVelocity() const
-{
-  return m_velocity;
-}
-
-//***************************************************************************
-
-double MixEulerHomogeneous::getEnergy() const
-{
-  return m_energie;
-}
-
-//***************************************************************************
-
-double MixEulerHomogeneous::getTotalEnergy() const
-{
-  return m_totalEnergy;
-}
-
-//***************************************************************************
-
-double MixEulerHomogeneous::getMixSoundSpeed() const
-{
-  return m_EqSoundSpeed;
-}
-
-//***************************************************************************
-
 void MixEulerHomogeneous::setPressure(const double &p) { m_pressure = p; }
 
 //***************************************************************************

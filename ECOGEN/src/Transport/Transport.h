@@ -45,7 +45,7 @@ class Transport
 {
   public:
     Transport();
-    virtual ~Transport();
+    ~Transport();
 
     //! \brief     Set the value of the corresponding transport variable
     //! \param     value                  value of the transport variable

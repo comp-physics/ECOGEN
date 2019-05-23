@@ -583,16 +583,9 @@ void ModMultiP::solveRiemannTransportOutflow(Cell &cellLeft, const int &numberTr
 
 //****************************************************************************
 
-double ModMultiP::getSM()
+const double& ModMultiP::getSM()
 {
   return fluxBufferMultiP->m_sM;
-}
-
-//****************************************************************************
-
-Coord ModMultiP::getVelocity(Cell *cell) const
-{
-  return cell->getMixture()->getVelocity();
 }
 
 //****************************************************************************
@@ -606,13 +599,6 @@ void ModMultiP::reverseProjection(const Coord normal, const Coord tangent, const
   fluxProjete.setY(normal.getY()*fluxBufferMultiP->m_qdm.getX() + tangent.getY()*fluxBufferMultiP->m_qdm.getY() + binormal.getY()*fluxBufferMultiP->m_qdm.getZ());
   fluxProjete.setZ(normal.getZ()*fluxBufferMultiP->m_qdm.getX() + tangent.getZ()*fluxBufferMultiP->m_qdm.getY() + binormal.getZ()*fluxBufferMultiP->m_qdm.getZ());
   fluxBufferMultiP->m_qdm.setXYZ(fluxProjete.getX(), fluxProjete.getY(), fluxProjete.getZ());
-}
-
-//****************************************************************************
-
-std::string ModMultiP::whoAmI() const
-{
-  return m_name;
 }
 
 //****************************************************************************

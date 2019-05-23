@@ -161,27 +161,6 @@ void FaceNS::setEstComm(const bool &estComm)
 
 //***********************************************************************
 
-bool FaceNS::getEstComm() const
-{
-  return m_comm;
-}
-
-//***********************************************************************
-
-int FaceNS::getNumberNoeuds() const
-{
-  return m_numberNoeuds;
-}
-
-//***********************************************************************
-
-int FaceNS::getNumNoeud(const int &numNoeud) const
-{
-  return m_numNoeuds[numNoeud];
-}
-
-//***********************************************************************
-
 void FaceNS::getInfoNoeuds(int *numNoeuds, int &sommeNumNoeuds) const
 {
   for(int i=0; i<m_numberNoeuds; i++)
@@ -189,21 +168,6 @@ void FaceNS::getInfoNoeuds(int *numNoeuds, int &sommeNumNoeuds) const
     numNoeuds[i] = m_numNoeuds[i];
   }
   sommeNumNoeuds = m_sommeNumNoeuds;
-}
-
-
-//***********************************************************************
-
-bool FaceNS::getEstLimite() const
-{
-  return m_limite;
-}
-
-//***********************************************************************
-
-int FaceNS::getSommeNumNoeuds() const
-{
-  return m_sommeNumNoeuds;
 }
 
 //***********************************************************************

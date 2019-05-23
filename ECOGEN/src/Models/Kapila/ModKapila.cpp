@@ -591,16 +591,9 @@ void ModKapila::solveRiemannTransportOutflow(Cell &cellLeft, const int &numberTr
 
 //****************************************************************************
 
-double ModKapila::getSM()
+const double& ModKapila::getSM()
 {
   return fluxBufferKapila->m_sM;
-}
-
-//****************************************************************************
-
-Coord ModKapila::getVelocity(Cell *cell) const
-{
-  return cell->getMixture()->getVelocity();
 }
 
 //****************************************************************************
@@ -614,13 +607,6 @@ void ModKapila::reverseProjection(const Coord normal, const Coord tangent, const
   fluxProjete.setY(normal.getY()*fluxBufferKapila->m_qdm.getX() + tangent.getY()*fluxBufferKapila->m_qdm.getY() + binormal.getY()*fluxBufferKapila->m_qdm.getZ());
   fluxProjete.setZ(normal.getZ()*fluxBufferKapila->m_qdm.getX() + tangent.getZ()*fluxBufferKapila->m_qdm.getY() + binormal.getZ()*fluxBufferKapila->m_qdm.getZ());
   fluxBufferKapila->m_qdm.setXYZ(fluxProjete.getX(), fluxProjete.getY(), fluxProjete.getZ());
-}
-
-//****************************************************************************
-
-std::string ModKapila::whoAmI() const
-{
-  return m_name;
 }
 
 //****************************************************************************

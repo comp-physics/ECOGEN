@@ -729,7 +729,7 @@ void Cell::computeGradient(std::vector<Coord> &grads, std::vector<Variable> &nam
 
 //***********************************************************************
 
-Coord Cell::getGradTk(int &numPhase, int &numAddPhys) const
+const Coord& Cell::getGradTk(int &numPhase, int &numAddPhys) const
 {
   return m_vecQuantitiesAddPhys[numAddPhys]->getGradTk(numPhase);
 }
@@ -813,34 +813,6 @@ void Cell::setCons(Flux *cons)
 
 //***********************************************************************
 
-Coord Cell::getSize() const
-{
-  return m_element->getSize();
-}
-
-//***********************************************************************
-
-double Cell::getSizeX() const
-{
-  return m_element->getSizeX();
-}
-
-//***********************************************************************
-
-double Cell::getSizeY() const
-{
-  return m_element->getSizeY();
-}
-
-//***********************************************************************
-
-double Cell::getSizeZ() const
-{
-  return m_element->getSizeZ();
-}
-
-//***********************************************************************
-
 void Cell::setElement(Element *element, const int &numCell)
 {
   m_element = element;
@@ -902,13 +874,6 @@ double Cell::getDensityGradient()
 Model* Cell::getModel()
 {
   return m_model;
-}
-
-//***********************************************************************
-
-Coord Cell::getVelocity()
-{
-  return m_model->getVelocity(this);
 }
 
 //***********************************************************************

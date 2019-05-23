@@ -250,7 +250,7 @@ void CellInterface::computeCritereAMR(const double &criteriaVar, Variable nameVa
   // Valeur de la variation
   valueMin = std::min(std::fabs(cd), std::fabs(cg));
   if (valueMin < 1.e-2) { //Utile pour alpha (quasi-seulement) ou velocity
-    if (nameVariable == velocityMag) { valueMin = 1.; }
+    if (nameVariable == velocityMag) { valueMin = 0.1; }
     else {                             valueMin = 1.e-2; }
   }
   variation = std::fabs(cd - cg) / valueMin;
