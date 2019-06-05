@@ -29,8 +29,8 @@
 
 //! \file      FluxEuler.cpp
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      December 22 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include "FluxEuler.h"

@@ -31,9 +31,9 @@
 #define MESH_H
 
 //! \file      Mesh.h
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      February 13 2019
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <ctime>
 #include <fstream>

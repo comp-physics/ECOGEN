@@ -29,8 +29,8 @@
 
 //! \file      EosIG.cpp
 //! \author    F. Petitpas, K. Schmidmayer, E. Daniel
-//! \version   1.0
-//! \date      May 14 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include <algorithm>

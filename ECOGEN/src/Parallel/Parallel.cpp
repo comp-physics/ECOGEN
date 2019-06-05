@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      Parallel.cpp
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      February 13 2019
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "Parallel.h"
 #include "../Eos/Eos.h"
@@ -250,6 +250,14 @@ void Parallel::computePMax(double &pMax, double &pMaxWall)
   double pMax_temp(pMax), pMaxWall_temp(pMaxWall);
   MPI_Allreduce(&pMax_temp, &pMax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
   MPI_Allreduce(&pMaxWall_temp, &pMaxWall, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+}
+
+//***********************************************************************
+
+void Parallel::computeMassTotal(double &mass)
+{
+  double mass_temp(mass);
+  MPI_Allreduce(&mass_temp, &mass, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 }
 
 //***********************************************************************

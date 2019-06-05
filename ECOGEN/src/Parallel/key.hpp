@@ -31,9 +31,9 @@
 #define INCLUDED_KEY_HPP
 
 //! \file      key.hpp
-//! \author    B. Dorschner
-//! \version   1.0
-//! \date      May 3 2019
+//! \author    B. Dorschner, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <array>
 #include <iomanip>

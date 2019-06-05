@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      ModThermalEq.cpp
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      May 04 2018
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include <algorithm>
@@ -399,7 +399,7 @@ void ModThermalEq::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, 
   //Contact discontinuity velocity
   fluxBufferThermalEq->m_sM = uStar;
 
-  //Specific mass flow rate output (kg/s/m²)
+  //Specific mass flow rate output (kg/s/mï¿½)
   for (int k = 0; k < numberPhases; k++) {
     debitSurf[k] = fluxBufferThermalEq->m_masse[k];
   }

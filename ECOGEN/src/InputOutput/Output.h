@@ -32,8 +32,8 @@
 
 //! \file      Output.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      February 13 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 //Macro pour les interactions systeme (creation/destruction repertoires)
 #ifdef WIN32
@@ -127,7 +127,7 @@ class Output
     std::string m_endianMode;
     
     //Utile pour print des donnees de cells
-    Cell m_cellRef;                                     //!<cell de reference pour recupérer les names des variables
+    Cell m_cellRef;                                     //!<cell de reference pour recupï¿½rer les names des variables
 };
 
 #endif //OUTPUT_H

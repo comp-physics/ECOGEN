@@ -29,8 +29,8 @@
 
 //! \file      Run.cpp
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      February 13 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "Run.h"
 
@@ -158,6 +158,12 @@ void Run::initialize(int argc, char* argv[])
       //m_pMaxWall[0] = 0.;
       //for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->lookForPmax(m_pMax, m_pMaxWall); }
       //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
+      // m_massWanted = 0.; //Initial mass
+      // m_alphaWanted = -1.;
+      // for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->computeMass(m_massWanted, m_alphaWanted); }
+      // if (Ncpu > 1) { parallel.computeMassTotal(m_massWanted); }
+      // m_massWanted = 0.9*m_massWanted; //Percentage of the initial mass we want
+      // m_alphaWanted = 0.;
       //-----
       m_outPut->prepareOutputInfos();
       if (rankCpu == 0) m_outPut->ecritInfos();
@@ -282,6 +288,15 @@ void Run::solver()
       //if (Ncpu > 1) { parallel.computePMax(m_pMax[0], m_pMaxWall[0]); }
       //m_pMax[0] = 0.;
       //m_pMaxWall[0] = 0.;
+      // m_alphaWanted = 1.; //Volume fraction corresponding to the wanted mass
+      // double mass(0.);
+      // do {
+      //   m_alphaWanted -= 0.01;
+      //   mass = 0.;
+      //   for (unsigned int c = 0; c < m_cellsLvl[0].size(); c++) { m_cellsLvl[0][c]->computeMass(mass, m_alphaWanted); }
+      //   if (Ncpu > 1) { parallel.computeMassTotal(mass); }
+      // } while (mass < 0.999*m_massWanted && m_alphaWanted > 0.001);
+      // if (m_alphaWanted < 1.e-10) m_alphaWanted = 0.;
       //-----
       if (rankCpu == 0) m_outPut->ecritInfos();
       m_outPut->saveInfosMailles();

@@ -29,8 +29,8 @@
 
 //! \file      MixKapila.cpp
 //! \author    K. Schmidmayer, F. Petitpas
-//! \version   1.0
-//! \date      December 19 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include "MixKapila.h"

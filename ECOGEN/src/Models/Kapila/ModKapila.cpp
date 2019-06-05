@@ -29,8 +29,8 @@
 
 //! \file      ModKapila.cpp
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      December 20 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include <algorithm>
@@ -536,7 +536,7 @@ void ModKapila::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, con
   //Contact discontinuity velocity
   fluxBufferKapila->m_sM = uStar;
 
-  //Specific mass flow rate output (kg/s/m²)
+  //Specific mass flow rate output (kg/s/mï¿½)
   for (int k = 0; k < numberPhases; k++) {
     debitSurf[k] = fluxBufferKapila->m_masse[k];
   }

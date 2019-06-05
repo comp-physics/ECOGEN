@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      Cell.cpp
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      July 30 2018
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "Cell.h"
 
@@ -1569,6 +1569,22 @@ void Cell::computeIntegration(double &integration)
   else {
     for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
       m_childrenCells[i]->computeIntegration(integration);
+    }
+  }
+}
+
+//***********************************************************************
+
+void Cell::computeMass(double &mass, double &alphaRef)
+{
+  if (!m_split) {
+    if (m_vecPhases[1]->getAlpha() >= alphaRef) {
+      mass += m_element->getVolume()*m_vecPhases[1]->getAlpha()*m_vecPhases[1]->getDensity();
+    }
+  }
+  else {
+    for (unsigned int i = 0; i < m_childrenCells.size(); i++) {
+      m_childrenCells[i]->computeMass(mass, alphaRef);
     }
   }
 }

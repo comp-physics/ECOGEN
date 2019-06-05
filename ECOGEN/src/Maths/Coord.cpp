@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      Coord.cpp
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      January 5 2018
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <algorithm>
 #include <cmath>

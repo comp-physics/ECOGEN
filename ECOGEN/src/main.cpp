@@ -29,8 +29,8 @@
 
 //! \file      main.cpp
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      December 7 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "Run.h"
 #include "Errors.h"

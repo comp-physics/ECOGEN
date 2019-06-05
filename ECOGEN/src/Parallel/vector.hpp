@@ -32,8 +32,8 @@
 
 //! \file      vector.hpp
 //! \author    B. Dorschner
-//! \version   1.0
-//! \date      February 15 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <type_traits>
 #include <array>

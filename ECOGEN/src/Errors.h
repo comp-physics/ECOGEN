@@ -31,9 +31,9 @@
 #define ERRORS_H
 
 //! \file      Errors.h
-//! \author    F. Petitpas, S. Le Martelot
-//! \version   1.0
-//! \date      December 20 2017
+//! \author    F. Petitpas, S. Le Martelot, K. Schmidmayer, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 //Definitions de classes d'Errors tout type
 //Error de base

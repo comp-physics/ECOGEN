@@ -29,8 +29,8 @@
 
 //! \file      Output.cpp
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      July 20 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "Output.h"
 #include "../Run.h"
@@ -416,6 +416,7 @@ void Output::saveInfos() const
     // // fileStream << " " << m_run->m_pMaxWall[0] << " " << m_run->m_pMaxWall[1] << " " << m_run->m_pMaxWall[2] << " " << m_run->m_pMaxWall[3];
     // // fileStream << " " << m_run->m_pMax[0];
     // // fileStream << " " << m_run->m_pMaxWall[0];
+    // fileStream << " " << m_run->m_alphaWanted;
     //-----
 
     fileStream << std::endl;

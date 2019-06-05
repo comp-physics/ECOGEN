@@ -29,8 +29,8 @@
 
 //! \file      GDEntireDomainWithParticularities.cpp
 //! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      January 3 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "GDEntireDomainWithParticularities.h"
 

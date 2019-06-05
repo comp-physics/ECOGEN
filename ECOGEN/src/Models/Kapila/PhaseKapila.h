@@ -32,8 +32,8 @@
 
 //! \file      PhaseKapila.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      December 21 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "../Phase.h"
 #include "../../Eos/Eos.h"
@@ -64,7 +64,7 @@ class PhaseKapila : public Phase
     //Specific methods for data printing
     //----------------------------------
     //virtual int getNumberScalars() const { return 4; }; //For complete output
-    virtual int getNumberScalars() const { return 2; }; //For reduced output
+    virtual int getNumberScalars() const { return 2; };   //For reduced output
     virtual int getNumberVectors() const { return 0; };
     virtual double returnScalar(const int &numVar) const;
     virtual Coord returnVector(const int &numVar) const { return 0; };

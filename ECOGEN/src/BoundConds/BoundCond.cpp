@@ -29,8 +29,8 @@
 
 //! \file      BoundCond.cpp
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      February 13 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "BoundCond.h"
 #include <iostream>

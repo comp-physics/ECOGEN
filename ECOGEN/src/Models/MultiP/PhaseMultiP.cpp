@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      PhaseMultiP.cpp
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      June 5 2017
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "PhaseMultiP.h"
 #include "../../Eos/Eos.h"

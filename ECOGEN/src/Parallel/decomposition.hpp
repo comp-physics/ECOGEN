@@ -31,9 +31,9 @@
 #define INCLUDED_DECOMP_HPP
 
 //! \file      decomposition.hpp
-//! \author    B. Dorschner
-//! \version   1.0
-//! \date      February 15 2019
+//! \author    B. Dorschner, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <algorithm>
 #include <numeric>

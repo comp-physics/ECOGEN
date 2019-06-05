@@ -32,8 +32,8 @@
 
 //! \file      GeometricalDomain.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      December 19 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <string>
 #include <vector>

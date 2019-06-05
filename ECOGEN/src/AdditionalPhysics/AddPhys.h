@@ -32,8 +32,8 @@
 
 //! \file      AddPhys.h
 //! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      February 13 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 class AddPhys; //Predeclaration of the AddPhys class to include Cell.h and CellInterface.h
 
@@ -113,7 +113,7 @@ class AddPhys
     virtual bool reinitializationActivated() { return false; };
 
     //! \brief     Communication of the additional physics quantities for parallel purposes with Adaptive Mesh Refinement
-    //! \param     cells                cells vector
+    //! \param     numberPhases         number of phases
     //! \param     dim                  dimension
     //! \param     lvl                  level
     virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl) { Errors::errorMessage("communicationsAddPhys not implemented for used additional physic"); };

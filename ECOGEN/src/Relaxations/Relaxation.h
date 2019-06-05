@@ -31,9 +31,9 @@
 #define RELAXATION_H
 
 //! \file      Relaxation.h
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      October 15 2018
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 class Relaxation; //Predeclaration of class Relaxation to include Cell.h
 

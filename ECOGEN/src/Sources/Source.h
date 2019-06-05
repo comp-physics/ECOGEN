@@ -32,8 +32,8 @@
 
 //! \file      Source.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      January 10 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <string>
 #include "../libTierces/tinyxml2.h"

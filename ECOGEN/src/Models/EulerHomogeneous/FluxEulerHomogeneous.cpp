@@ -29,8 +29,8 @@
 
 //! \file      FluxEulerHomogeneous.cpp
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      December 22 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include "FluxEulerHomogeneous.h"

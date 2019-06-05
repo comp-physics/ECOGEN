@@ -31,9 +31,9 @@
 #define CELLO2_H
 
 //! \file      CellO2.h
-//! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      July 30 2018
+//! \author    F. Petitpas, K. Schmidmayer, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "../Order1/Cell.h"
 #include "CellInterfaceO2.h"

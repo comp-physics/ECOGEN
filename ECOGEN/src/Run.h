@@ -32,8 +32,8 @@
 
 //! \file      Run.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      February 13 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 class Run;
 
@@ -154,7 +154,8 @@ class Run
     std::vector<Output *> m_cuts;              //!<Vector of output objects for cuts
     std::vector<Output *> m_probes;            //!<Vector of output objects for probes
     timeStats m_stat;                          //!<Object linked to computational time statistics
-    double *m_pMax, *m_pMaxWall;               //!<Maximal pressure found between each written output and its corresponding coordinate (only for few test case)
+    double *m_pMax, *m_pMaxWall;               //!<Maximal pressure found between each written output and its corresponding coordinate (only for few test cases)
+    double m_massWanted, m_alphaWanted;        //!<Mass and corresponding volume fraction for special output (only for few test cases)
 
     friend class Input;
     friend class Output;

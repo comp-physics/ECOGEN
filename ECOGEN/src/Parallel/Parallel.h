@@ -31,9 +31,9 @@
 #define PARALLEL_H
 
 //! \file      Parallel.h
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      February 13 2019
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <mpi.h>
 #include "../Tools.h"
@@ -59,6 +59,7 @@ public:
   void initializePersistentCommunications(const int &numberPrimitiveVariables, const int &numberSlopeVariables, const int &numberTransportVariables, const int &dim);
   void computeDt(double &dt);
   void computePMax(double &pMax, double &pMaxWall);
+  void computeMassTotal(double &mass);
   void finalize(const int &lvlMax);
   void stopRun();
   void verifyStateCPUs();

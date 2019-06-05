@@ -31,9 +31,9 @@
 #define CELL_H
 
 //! \file      Cell.h
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      July 30 2018
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <vector>
 #include <fstream>
@@ -188,6 +188,7 @@ class Cell
         //--------
         bool printGnuplotAMR(std::ofstream &fileStream, const int &dim, GeometricObject *objet = 0);
         void computeIntegration(double &integration);
+        void computeMass(double &mass, double &alphaRef);
         void lookForPmax(double *pMax, double *pMaxWall);
 
         //Specific for AMR method

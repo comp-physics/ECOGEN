@@ -31,9 +31,9 @@
 #define CELLO2GHOST_H
 
 //! \file      CellO2Ghost.h
-//! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      July 30 2018
+//! \author    F. Petitpas, K. Schmidmayer, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "CellO2.h"
 

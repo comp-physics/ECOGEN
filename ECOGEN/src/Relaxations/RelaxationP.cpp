@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      RelaxationP.cpp
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      October 15 2018
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "RelaxationP.h"
 

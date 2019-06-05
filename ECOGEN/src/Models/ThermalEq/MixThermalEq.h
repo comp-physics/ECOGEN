@@ -31,9 +31,9 @@
 #define MIXTHERMALEQ_H
 
 //! \file      MixThermalEq.h
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      May 04 2018
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <vector>
 #include "../Mixture.h"

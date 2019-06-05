@@ -32,8 +32,8 @@
 
 //! \file      Phase.h
 //! \author    F. Petitpas, K. Schmidmayer
-//! \version   1.0
-//! \date      December 21 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <fstream>
 #include "../Errors.h"

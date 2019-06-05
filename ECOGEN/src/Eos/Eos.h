@@ -32,8 +32,8 @@
 
 //! \file      Eos.h
 //! \author    F. Petitpas, K. Schmidmayer, E. Daniel
-//! \version   1.0
-//! \date      May 14 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <string>
 #include <vector>
@@ -140,7 +140,7 @@ class Eos
 
       //Mod
       //! \brief See derived classes 
-      virtual void sendInfo(double *&data) const = 0;//ED//FP//Q// Devrait etre enlevée d'après d'autres commentaires
+      virtual void sendInfo(double *&data) const = 0;//ED//FP//Q// Devrait etre enlevï¿½e d'aprï¿½s d'autres commentaires
 
       //Get
       //! \brief See derived classes 

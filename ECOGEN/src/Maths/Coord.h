@@ -31,9 +31,9 @@
 #define COORD_H
 
 //! \file      Coord.h
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      January 5 2018
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 //! \class     Coord
 //! \brief     Class for a coordinate system object such as coordinates of the vertex or a vector

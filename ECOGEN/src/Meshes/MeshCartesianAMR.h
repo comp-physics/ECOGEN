@@ -32,8 +32,8 @@
 
 //! \file      MeshCartesian.h
 //! \author    K. Schmidmayer, F. Petitpas, B. Dorschner
-//! \version   1.0
-//! \date      February 19 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "MeshCartesian.h"
 

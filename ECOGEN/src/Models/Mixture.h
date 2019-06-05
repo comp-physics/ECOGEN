@@ -32,8 +32,8 @@
 
 //! \file      Mixture.h
 //! \author    K. Schmidmayer, F. Petitpas
-//! \version   1.0
-//! \date      May 04 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <vector>
 

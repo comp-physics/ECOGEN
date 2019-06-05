@@ -29,8 +29,8 @@
 
 //! \file      QAPSurfaceTension.cpp
 //! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      December 20 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "QAPSurfaceTension.h"
 #include <iostream>

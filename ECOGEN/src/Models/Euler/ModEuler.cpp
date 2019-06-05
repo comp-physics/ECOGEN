@@ -29,8 +29,8 @@
 
 //! \file      ModEuler.cpp
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      December 20 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include <algorithm>
@@ -466,7 +466,7 @@ void ModEuler::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, cons
   //Contact discontinuity velocity
   fluxBufferEuler.m_sM = uStar;
 
-  //Specific mass flow rate output (kg/s/m²)
+  //Specific mass flow rate output (kg/s/mï¿½)
   debitSurf[0] = fluxBufferEuler.m_masse;
 }
 

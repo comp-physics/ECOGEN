@@ -32,8 +32,8 @@
 
 //! \file      Transport.h
 //! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      January 3 2018
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "../libTierces/tinyxml2.h"
 #include <fstream>

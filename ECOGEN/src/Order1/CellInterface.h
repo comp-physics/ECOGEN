@@ -31,9 +31,9 @@
 #define CELLINTERFACE_H
 
 //! \file      CellInterface.h
-//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      December 20 2017
+//! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 class CellInterface; //Predeclaration de la classe CellInterface pour pouvoir inclure Cell.h
 

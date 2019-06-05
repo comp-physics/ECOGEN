@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      ModMultiP.cpp
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      June 5 2017
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <cmath>
 #include <algorithm>
@@ -528,7 +528,7 @@ void ModMultiP::solveRiemannOutflow(Cell &cellLeft, const int &numberPhases, con
   //Contact discontinuity velocity
   fluxBufferMultiP->m_sM = uStar;
 
-  //Specific mass flow rate output (kg/s/m²)
+  //Specific mass flow rate output (kg/s/mï¿½)
   for (int k = 0; k < numberPhases; k++) {
     debitSurf[k] = fluxBufferMultiP->m_masse[k];
   }

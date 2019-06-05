@@ -29,8 +29,8 @@
 
 //! \file      GDEllipsoid.cpp
 //! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      April 18 2019
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "GDEllipsoid.h"
 

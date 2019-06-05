@@ -31,9 +31,9 @@
 #define MIXMULTIP_H
 
 //! \file      MixMultiP.h
-//! \author    F. Petitpas
-//! \version   1.0
-//! \date      June 5 2017
+//! \author    F. Petitpas, K. Schmidmayer
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <vector>
 #include "../Mixture.h"

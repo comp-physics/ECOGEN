@@ -32,8 +32,8 @@
 
 //! \file      Model.h
 //! \author    F. Petitpas, K. Schmidmayer, S. Le Martelot
-//! \version   1.0
-//! \date      December 20 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 class Model; //Predeclaration of class Model to include Flux.h
 
@@ -96,7 +96,7 @@ class Model
     //! \param     numberPhases      number of phases
     //! \param     dxLeft            left characteristic lenght
     //! \param     dtMax             maximum explicit time step
-    //! \param     m0                specific mass flow rate (kg/s/m²)
+    //! \param     m0                specific mass flow rate (kg/s/mï¿½)
     //! \param     ak0               volume fraction array of injected fluids
     //! \param     rhok0             density array of injected fluids
     //! \param     pk0               pressure array of injected fluids

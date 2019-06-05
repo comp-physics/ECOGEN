@@ -32,8 +32,8 @@
 
 //! \file      MixKapila.h
 //! \author    K. Schmidmayer, F. Petitpas
-//! \version   1.0
-//! \date      December 19 2017
+//! \version   1.1
+//! \date      June 5 2019
 
 #include <vector>
 #include "../Mixture.h"
@@ -69,7 +69,7 @@ class MixKapila : public Mixture
       virtual void reverseProjection(const Coord &normal, const Coord &tangent, const Coord &binormal);
 
       //Data printing
-      virtual int getNumberScalars() const { return 2; }; //For reduced output
+      virtual int getNumberScalars() const { return 2; };   //For reduced output
       //virtual int getNumberScalars() const { return 3; }; //For complete output
       virtual int getNumberVectors() const { return 1; };
       virtual double returnScalar(const int &numVar) const;

@@ -28,9 +28,9 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 
 //! \file      CellGhost.cpp
-//! \author    K. Schmidmayer
-//! \version   1.0
-//! \date      February 27 2019
+//! \author    K. Schmidmayer, B. Dorschner
+//! \version   1.1
+//! \date      June 5 2019
 
 #include "CellGhost.h"
 
