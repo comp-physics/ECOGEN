@@ -4,4 +4,7 @@
 	<EOS name="IG_air.xml"/>
 	<EOS name="IG_air2.xml"/>
 	<additionalPhysic type="viscosity"/>
+	<!-- <symmetryTerm type="cylindrical">
+		<dataSymCyl radialAxe="Y"/>
+	</symmetryTerm> -->
 </model>

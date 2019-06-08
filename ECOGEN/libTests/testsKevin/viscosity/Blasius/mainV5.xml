@@ -4,7 +4,7 @@
 	<outputMode format="XML" binary="false" precision="16"/>
 	<timeControlMode iterations="false">
 		<iterations number="100" iterFreq="10"/>
-		<physicalTime totalTime="3.e-4" timeFreq="3.e-7"/>
+		<physicalTime totalTime="2.5e-4" timeFreq="1.25e-6"/>
 	</timeControlMode>
 	<computationControl CFL="0.6"/>
 	<secondOrder>

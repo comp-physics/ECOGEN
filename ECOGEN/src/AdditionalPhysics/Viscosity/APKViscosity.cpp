@@ -221,7 +221,7 @@ void APKViscosity::solveFluxViscosityInner(Coord &velocityLeft, Coord &velocityR
   fluxBufferKapila->m_qdm.setX(-muMel / 3. * (4.*dudx - 2.*(dvdy + dwdz)));
   fluxBufferKapila->m_qdm.setY(-muMel * (dvdx + dudy));
   fluxBufferKapila->m_qdm.setZ(-muMel * (dwdx + dudz));
-  fluxBufferKapila->m_energMixture = -muMel * (4. / 3.*dudx*u + (dvdx + dudy)*v + (dwdx + dudz)*w - 2. / 3.*(dvdy + dwdz)*u);
+  fluxBufferKapila->m_energMixture = -muMel * (4./3.*dudx*u + (dvdx + dudy)*v + (dwdx + dudz)*w - 2./3.*(dvdy + dwdz)*u);
 }
 
 //***********************************************************************
@@ -284,8 +284,7 @@ void APKViscosity::addNonCons(Cell *cell, const int &numberPhases)
   double dwdz = cell->getQPA(m_numQPA)->getGrad(3).getZ();
   double termeNonCons = - 2./3.*(dudx + dvdy + dwdz)*(dudx + dvdy + dwdz)
                         + 2.*(dudx*dudx + dvdy*dvdy + dwdz*dwdz)
-                        + dvdx*dvdx + dwdx*dwdx + dudy*dudy + dwdy*dwdy + dudz*dudz + dvdz*dvdz
-                        + 2.*(dudy*dvdx + dudz*dwdx + dvdz*dwdy);
+                        + (dudy+dvdx)*(dudy+dvdx) + (dudz+dwdx)*(dudz+dwdx) + (dvdz+dwdy)*(dvdz+dwdy);
 
   for (int k = 0; k<numberPhases; k++) {
     fluxBufferKapila->m_alpha[k] = 0.;
@@ -295,6 +294,66 @@ void APKViscosity::addNonCons(Cell *cell, const int &numberPhases)
   fluxBufferKapila->m_qdm = 0.;
   fluxBufferKapila->m_energMixture = 0.;
 
+  cell->getCons()->addFlux(1., numberPhases);
+}
+
+//***********************************************************************
+
+void APKViscosity::addSymmetricTermsRadialAxeOnX(Cell *cell, const int &numberPhases)
+{
+  //Extraction of data
+  double r = cell->getPosition().getX();
+  double dudx = cell->getQPA(m_numQPA)->getGrad(1).getX();
+  double dudy = cell->getQPA(m_numQPA)->getGrad(1).getY();
+  double dvdx = cell->getQPA(m_numQPA)->getGrad(2).getX();
+  double dvdy = cell->getQPA(m_numQPA)->getGrad(2).getY();
+
+  //Compute the mixture mu
+  double muMix(0.);
+  for (int k = 0; k < numberPhases; k++) {
+    muMix += cell->getPhase(k)->getAlpha()*m_muk[k];
+  }
+
+  //Writing of symmetrical viscous terms on each equation of fluxBufferKapila
+  for (int k = 0; k<numberPhases; k++) {
+    fluxBufferKapila->m_alpha[k] = 0.;
+    fluxBufferKapila->m_masse[k] = 0.;
+    fluxBufferKapila->m_energ[k] = 0.;
+  }
+  fluxBufferKapila->m_qdm.setX(muMix * 2. * dudx / r);
+  fluxBufferKapila->m_qdm.setY(muMix * (dvdx + dudy) / r);
+  fluxBufferKapila->m_energMixture = muMix * (1./3.*(4.*dudx - 2.*dvdy)*cell->getMixture()->getU() + (dudy+dvdx)*cell->getMixture()->getV()) / r;
+
+  cell->getCons()->addFlux(1., numberPhases);
+}
+
+//***********************************************************************
+
+void APKViscosity::addSymmetricTermsRadialAxeOnY(Cell *cell, const int &numberPhases)
+{
+  //Extraction of data
+  double r = cell->getPosition().getY();
+  double dudx = cell->getQPA(m_numQPA)->getGrad(1).getX();
+  double dudy = cell->getQPA(m_numQPA)->getGrad(1).getY();
+  double dvdx = cell->getQPA(m_numQPA)->getGrad(2).getX();
+  double dvdy = cell->getQPA(m_numQPA)->getGrad(2).getY();
+
+  //Compute the mixture mu
+  double muMix(0.);
+  for (int k = 0; k < numberPhases; k++) {
+    muMix += cell->getPhase(k)->getAlpha()*m_muk[k];
+  }
+
+  //Writing of symmetrical viscous terms on each equation of fluxBufferKapila
+  for (int k = 0; k<numberPhases; k++) {
+    fluxBufferKapila->m_alpha[k] = 0.;
+    fluxBufferKapila->m_masse[k] = 0.;
+    fluxBufferKapila->m_energ[k] = 0.;
+  }
+  fluxBufferKapila->m_qdm.setX(muMix * (dvdx + dudy) / r);
+  fluxBufferKapila->m_qdm.setY(muMix * 2. * dvdy / r);
+  fluxBufferKapila->m_energMixture = muMix * (1./3.*(4.*dvdy - 2.*dudx)*cell->getMixture()->getV() + (dudy+dvdx)*cell->getMixture()->getU()) / r;
+  
   cell->getCons()->addFlux(1., numberPhases);
 }
 

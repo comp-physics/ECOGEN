@@ -88,6 +88,8 @@ class APKViscosity : public APKapila
     //! \param     numberPhases         number of phases
     void solveFluxViscosityOther(Coord &velocityLeft, Coord &gradULeft, Coord &gradVLeft, Coord &gradWLeft, double &muMixLeft, int numberPhases) const;
     virtual void addNonCons(Cell *cell, const int &numberPhases);
+    virtual void addSymmetricTermsRadialAxeOnX(Cell *cell, const int &numberPhases);
+    virtual void addSymmetricTermsRadialAxeOnY(Cell *cell, const int &numberPhases);
 
     virtual void communicationsAddPhys(int numberPhases, const int &dim, const int &lvl);
 

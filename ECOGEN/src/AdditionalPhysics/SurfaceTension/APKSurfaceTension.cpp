@@ -283,7 +283,7 @@ void APKSurfaceTension::addSymmetricTermsRadialAxeOnX(Cell *cell, const int &num
 {
   //Extraction of data
   double r, w1, w2, normW;
-  r = cell->getPosition().getY();
+  r = cell->getPosition().getX();
   w1 = cell->getQPA(m_numQPAGradC)->getGrad().getX();
   w2 = cell->getQPA(m_numQPAGradC)->getGrad().getY();
   normW = cell->getQPA(m_numQPAGradC)->getGrad().norm();
