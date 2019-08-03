@@ -62,6 +62,12 @@ GDHalfSpace::GDHalfSpace(std::string name, std::vector<Phase*> vecPhases, Mixtur
   if      (direction == "POSITIVE"){ m_direction = 1; }
   else if (direction == "NEGATIVE"){ m_direction = -1; }
   else { throw ErrorXMLAttribut("direction", fileName, __FILE__, __LINE__); }
+
+
+  //inialize random number generator 
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  srand(rank);
 }
 
 //***************************************************************
@@ -117,11 +123,11 @@ void GDHalfSpace::fillIn(Cell *cell, const int &numberPhases, const int &numberT
     //To uncomment only for special test cases
     //4. Random velocity perturbations: O(1e−4 u_s)
     //---------------------------------------------
-    // Coord perturbedVelocity(cell->getMixture()->getVelocity());
-    // perturbedVelocity.setX(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getX());
-    // perturbedVelocity.setY(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getY());
-    // perturbedVelocity.setZ(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getZ());
-    // cell->getMixture()->setVelocity(perturbedVelocity);
+    Coord perturbedVelocity(cell->getMixture()->getVelocity());
+    perturbedVelocity.setX(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getX());
+    perturbedVelocity.setY(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getY());
+    perturbedVelocity.setZ(static_cast<double>(rand() % 2001 - 1000)/1.e3 * 1.e-3*151.821433232719 + perturbedVelocity.getZ());
+    cell->getMixture()->setVelocity(perturbedVelocity);
   }
 }
 

@@ -4,11 +4,11 @@
     <physicalDomains> 
         <domain name="base" state="air" type="entireDomain"/>
         <domain name="shock"  state="shockedState" type="halfSpace">
-            <dataHalfSpace axe="x" origin="2.5e-3" direction="negative"/>
+            <dataHalfSpace axe="x" origin="0.005148188448004" direction="negative"/>
         </domain>
         <domain name="droplet"  state="waterDroplet" type="sphere">
-            <dataSphere radius="0.8044e-3">
-                <center x="3.5e-3" y="3.5e-3" z="3.5e-3"/>
+            <dataSphere radius="4.022022225003423e-04">
+                <center x="5.630831115005e-03" y="2.413213335002e-03" z="2.413213335002e-03"/>
             </dataSphere>
         </domain>
         <!-- <domain name="droplet"  state="waterDroplet" type="ellipse">

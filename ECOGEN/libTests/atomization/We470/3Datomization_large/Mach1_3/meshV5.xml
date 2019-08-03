@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding = "UTF-8" standalone = "yes"?>
+<mesh>
+  <type structure="cartesian"/>
+  <cartesianMesh>
+    <dimensions x="1.769689779002e-02" y="4.826426670004e-03" z="4.826426670004e-03"/>
+    <numberCells x="10" y ="10" z="10"/>
+    <meshStretching>
+      <XStretching>
+        <stretch startAt="0.000000000000e+00" endAt="4.826426670004e-03" factor="9.708737864078e-01" numberCells="68"/>
+        <stretch startAt="4.826426670004e-03" endAt="9.652853340008e-03" factor="1.000000000000e+00" numberCells="210"/>
+        <stretch startAt="9.652853340008e-03" endAt="1.769689779002e-02" factor="1.030000000000e+00" numberCells="83"/>
+      </XStretching>
+      <YStretching>
+        <stretch startAt="0.000000000000e+00" endAt="1.206606667501e-03" factor="9.708737864078e-01" numberCells="32"/>
+        <stretch startAt="1.206606667501e-03" endAt="3.619820002503e-03" factor="1.000000000000e+00" numberCells="105"/>
+        <stretch startAt="3.619820002503e-03" endAt="4.826426670004e-03" factor="1.030000000000e+00" numberCells="32"/>
+      </YStretching>
+      <ZStretching>
+        <stretch startAt="0.000000000000e+00" endAt="1.206606667501e-03" factor="9.708737864078e-01" numberCells="32"/>
+        <stretch startAt="1.206606667501e-03" endAt="3.619820002503e-03" factor="1.000000000000e+00" numberCells="105"/>
+        <stretch startAt="3.619820002503e-03" endAt="4.826426670004e-03" factor="1.030000000000e+00" numberCells="32"/>
+      </ZStretching>
+    </meshStretching>
+    <AMR lvlMax="2" criteriaVar="0.04" varRho="true" varP="true" varU="true" varAlpha="true" xiSplit="0.11" xiJoin="0.11"/>
+  </cartesianMesh>
+</mesh>

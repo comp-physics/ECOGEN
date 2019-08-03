@@ -4,27 +4,27 @@
     <physicalDomains> 
         <domain name="base" state="air" type="entireDomain"/>
         <domain name="shock"  state="shockedState" type="halfSpace">
-            <dataHalfSpace axe="x" origin="2.5e-3" direction="negative"/>
+            <dataHalfSpace axe="x" origin="5.e-3" direction="negative"/>
         </domain>
-        <domain name="droplet"  state="waterDroplet" type="sphere">
-            <dataSphere radius="0.8044e-3">
-                <center x="3.5e-3" y="3.5e-3" z="3.5e-3"/>
+        <!-- <domain name="droplet"  state="waterDroplet" type="sphere">
+            <dataSphere radius="1.1210e-3">
+                <center x="7.1e-3" y="0." z="0."/>
             </dataSphere>
-        </domain>
-        <!-- <domain name="droplet"  state="waterDroplet" type="ellipse">
-            <dataEllipse axe1="x" axe2="y" radius1="0.6533e-3" radius2="0.5605e-3">
-                <center x="3.2e-3" y="3.5e-3" z="3.5e-3"/>
-            </dataEllipse> 
         </domain> -->
+        <domain name="droplet"  state="waterDroplet" type="ellipsoid">
+            <dataEllipsoid axe1="x" axe2="y" axe3="z" radius1="1.3066e-3" radius2="1.1210e-3" radius3="1.1210e-3">
+                <center x="6.4e-3" y="0." z="0."/>
+            </dataEllipsoid>
+        </domain>
     </physicalDomains>
 
     <!-- LISTE DES CONDITIONS AUX LIMITES -->
     <boundaryConditions>
         <boundCond name="CLXm" type="abs" number="1"/>
         <boundCond name="CLXp" type="abs" number="2"/>
-        <boundCond name="CLYm" type="abs" number="3"/>
+        <boundCond name="CLYm" type="symmetry" number="3"/>
         <boundCond name="CLYp" type="abs" number="4"/>
-        <boundCond name="CLZm" type="abs" number="5"/>
+        <boundCond name="CLZm" type="symmetry" number="5"/>
         <boundCond name="CLZp" type="abs" number="6"/>
     </boundaryConditions>
     
@@ -65,7 +65,7 @@
             <dataFluid alpha="1." density="1000.0"/>
         </material>
         <mixture>
-            <dataMix pressure = "1.01453e5"/>
+            <dataMix pressure = "1.01397e5"/>
             <velocity x="0." y="0." z="0."/>
         </mixture>
         <transport name="color" value="1."/>

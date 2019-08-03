@@ -6,16 +6,16 @@
         <domain name="shock"  state="shockedState" type="halfSpace">
             <dataHalfSpace axe="x" origin="2.5e-3" direction="negative"/>
         </domain>
-        <domain name="droplet"  state="waterDroplet" type="sphere">
-            <dataSphere radius="0.8044e-3">
-                <center x="3.5e-3" y="3.5e-3" z="3.5e-3"/>
+        <!-- <domain name="droplet"  state="waterDroplet" type="sphere">
+            <dataSphere radius="0.5605e-3">
+                <center x="3.2e-3" y="0." z="0."/>
             </dataSphere>
-        </domain>
-        <!-- <domain name="droplet"  state="waterDroplet" type="ellipse">
-            <dataEllipse axe1="x" axe2="y" radius1="0.6533e-3" radius2="0.5605e-3">
-                <center x="3.2e-3" y="3.5e-3" z="3.5e-3"/>
-            </dataEllipse> 
         </domain> -->
+        <domain name="droplet"  state="waterDroplet" type="ellipsoid">
+            <dataEllipsoid axe1="x" axe2="y" axe3="z" radius1="0.6533e-3" radius2="0.5605e-3" radius3="0.5605e-3">
+                <center x="3.2e-3" y="3.5e-3" z="3.5e-3"/>
+            </dataEllipsoid>
+        </domain>
     </physicalDomains>
 
     <!-- LISTE DES CONDITIONS AUX LIMITES -->
